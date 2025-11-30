@@ -1,5 +1,3 @@
-package com.example;
-
 public class FileManager {
     public static String FileReader(){
 
