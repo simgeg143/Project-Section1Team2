@@ -1,15 +1,17 @@
+package com.example;
+
 import java.awt.*;
 
 public class GUI {
 
-    MenuBar manubar=new MenuBar();
+    MenuBar manubar = new MenuBar();
 
-    Menu help=new MenuItem("Help");
-    Menu file=new MenuItem("File");
+    Menu help = new MenuItem("Help");
+    Menu file = new MenuItem("File");
 
-    MenuItem about=new MenuItem("about");
+    MenuItem about = new MenuItem("about");
 
-    MenuItem importedinfo=new MenuItem("all info");
+    MenuItem importedinfo = new MenuItem("all info");
 
 
 
