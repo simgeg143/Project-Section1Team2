@@ -7,7 +7,7 @@ public class Main {
     ArrayList<Classroom> classrooms = new ArrayList<>();
 
 
-    public static void Calculate(ArrayList<Classroom>  classrooms,ArrayList<Course>  courses,ArrayList<Student>  students){
+    public static void calculate(ArrayList<Classroom>  classrooms,ArrayList<Course>  courses,ArrayList<Student>  students){
 
     }
 

@@ -30,7 +30,7 @@ public class GUI {
 
     }
 
-    public static void DeleteCours(){
+    public static void DeleteCourse(){
 
     }
 
