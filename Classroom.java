@@ -1,12 +1,17 @@
+import java.util.ArrayList;
+
 public class Classroom {
     int name;
     int capacity;
-    int[] hours;
+    ArrayList<Integer> hours;
 
-    public Classroom(int name, int capacity, int[] hours) {
+    public Classroom(int name, int capacity, ArrayList<Integer> hours) {
         this.name = name;
         this.capacity = capacity;
-        this.hours = new int[24];
+        this.hours = new ArrayList<>();
+        for(int i = 0; i < hours.size(); i++){
+            this.hours.add(0);
+        }
     }
 
     public int getName() {
@@ -25,11 +30,11 @@ public class Classroom {
         this.capacity = capacity;
     }
 
-    public int[] getHours() {
+    public ArrayList<Integer> getHours() {
         return hours;
     }
 
-    public void setHours(int[] hours) {
+    public void setHours(ArrayList<Integer> hours) {
         this.hours = hours;
     }
 }

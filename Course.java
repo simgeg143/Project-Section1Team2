@@ -2,11 +2,13 @@ public class Course {
     int code;
     Student[] attendees;
     Classroom[] examClass;
+    int examDuration;
 
-    public Course(int code, Student[] attendees, Classroom[] examClass) {
+    public Course(int code, Student[] attendees, Classroom[] examClass, int examDuration) {
         this.code = code;
         this.attendees = attendees;
         this.examClass = examClass;
+        this.examDuration = examDuration;
     }
 
     public int getCode() {
@@ -31,5 +33,13 @@ public class Course {
 
     public void setExamClass(Classroom[] examClass) {
         this.examClass = examClass;
+    }
+
+    public int getExamDuration() {
+        return examDuration;
+    }
+
+    public void setExamDuration(int examDuration) {
+        this.examDuration = examDuration;
     }
 }
