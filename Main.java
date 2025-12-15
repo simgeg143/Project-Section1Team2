@@ -21,7 +21,7 @@ public class Main {
         /*
             Schedules the chosen blocks of the given classroom's time schedule.
         */
-        for(int i = 0; i <= blockSize; i++){
+        for(int i = 0; i < blockSize; i++){
             classroom.getHours().set(startBlock+i,1); // block is marked as occupied
         }
     }
@@ -30,7 +30,7 @@ public class Main {
         /*
             Checks whether the targeted block(s) is/are available to be assigned to an exam.
         */
-        for (int i = 0; i <= blockSize; i++) {
+        for (int i = 0; i < blockSize; i++) {
             if (room.getHours().get(startBlock + i) == 1){
                 return false; // can not schedule
             }
@@ -82,7 +82,7 @@ public class Main {
         int chosenCapacity = classrooms.get(0).getCapacity();
         int chosenIndex = 0;
         for(int i = 0; i < classrooms.size(); i++){
-            if(classrooms.get(i).getCapacity() > course.getAttendees().length && classrooms.get(i).getCapacity() < chosenCapacity){
+            if(classrooms.get(i).getCapacity() >= course.getAttendees().length && classrooms.get(i).getCapacity() < chosenCapacity){
                 chosenCapacity = classrooms.get(i).getCapacity();
                 chosenIndex = i;
             }
