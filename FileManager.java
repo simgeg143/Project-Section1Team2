@@ -20,10 +20,15 @@ public class FileManager {
         }
         try(BufferedReader br = new BufferedReader(new FileReader(filePath))){
             String line;
+            boolean isFirstLine = true;
             while((line =br.readLine() ) != null){
                 line =clean(line);
                 if (line.isEmpty()) {
 
+                    continue;
+                }
+                if (isFirstLine) {
+                    isFirstLine = false;
                     continue;
                 }
                 rows.add(line.split(","));
@@ -33,6 +38,45 @@ public class FileManager {
             System.out.println("File read error: " + e.getMessage());
         }
         return  rows;
+    }
+    public static List<String[]>  readAttendance(String filePath){
+        List<String[]> result = new ArrayList<>();
+        if(filePath==null || filePath.trim().isEmpty() || !Files.exists(Path.of(filePath))){
+            return result;
+        }
+        try(BufferedReader br = new BufferedReader(new FileReader(filePath))){
+            String line;
+            while((line = br.readLine() ) != null){
+                line = clean(line);
+                if (line.isEmpty()) {
+                    continue;
+                }
+                if (!line.startsWith("CourseCode")) {
+                    continue;
+                }
+                String courseCode = line;
+                String student = br.readLine();
+                if (student == null) {
+                    break;
+                }
+                student = clean(student);
+
+                student = student
+                        .replace("[", "")
+                        .replace("]", "")
+                        .replace("'", "")
+                        .trim();
+                if (student.isEmpty()) {
+                    continue;
+                }
+                String[] attendance = student.split("\\s*,\\s*");
+                result.add(new String[]{courseCode, String.valueOf(attendance.length)});
+            }
+
+        } catch (IOException e){
+            System.out.println("Attendance File read error: " + e.getMessage());
+        }
+        return  result;
     }
 
     public static void FileWriter(String filePath, List<String[]> data) {
