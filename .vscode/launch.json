@@ -1,0 +1,20 @@
+{
+    // VS Code Java launcher for JavaFX. Uses the bundled SDK in javafx-sdk-25.0.1.
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Run GUI (JavaFX)",
+            "request": "launch",
+            "mainClass": "com.example.GUI",
+            "cwd": "${workspaceFolder}\\demo",
+            "classPaths": [
+                "${workspaceFolder}\\demo\\target\\classes"
+            ],
+            "modulePaths": [
+                "${workspaceFolder}\\javafx-sdk-25.0.1\\lib"
+            ],
+            "vmArgs": "--module-path \"${workspaceFolder}\\javafx-sdk-25.0.1\\lib\" --add-modules javafx.controls"
+        }
+    ]
+}
