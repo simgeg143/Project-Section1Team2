@@ -30,7 +30,6 @@ public class GUI extends Application {
 
     private Label statusLabel;
     private VBox contentArea;
-    private Label tableTitle;
     private TableView<Object> dataTable;
     private TabPane dataTabs;
 
@@ -58,7 +57,7 @@ public class GUI extends Application {
         root.setCenter(contentArea);
         root.setBottom(statusBar);
 
-        Scene scene = new Scene(root, 900, 600);
+        Scene scene = new Scene(root, 900, 800);
         stage.setScene(scene);
         stage.show();
 
@@ -115,13 +114,16 @@ public class GUI extends Application {
     }
 
     private VBox buildContentArea() {
-        VBox box = new VBox(8);
-        box.setPadding(new Insets(18));
-
-        tableTitle = new Label("Select a tab to load data.");
+        VBox box = new VBox();
+        box.setSpacing(0);
+        box.setPadding(new Insets(12, 12, 12, 12));
 
         dataTabs = new TabPane();
         dataTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+        dataTabs.setStyle("-fx-background-color: white;"
+                + "-fx-border-color: #b3b3b3 #b3b3b3 white #b3b3b3;"
+                + "-fx-border-width: 1 1 0 1;"
+                + "-fx-padding: 4 8 0 8;");
         Tab coursesTab = new Tab("Courses");
         Tab classroomsTab = new Tab("Classrooms");
         Tab studentsTab = new Tab("Students");
@@ -138,10 +140,13 @@ public class GUI extends Application {
 
         dataTable = new TableView<>();
         dataTable.setPlaceholder(new Label("No data to display yet."));
-        dataTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        dataTable.setTableMenuButtonVisible(false);
+        dataTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
         dataTable.setPrefHeight(520);
+        dataTable.setStyle("-fx-border-color: #b3b3b3; -fx-border-width: 1; -fx-background-insets: 0;");
 
-        box.getChildren().addAll(tableTitle, dataTabs, dataTable);
+        box.setStyle("-fx-background-color: white; -fx-border-color: #b3b3b3; -fx-border-width: 1;");
+        box.getChildren().addAll(dataTabs, dataTable);
         return box;
     }
 
@@ -167,8 +172,8 @@ public class GUI extends Application {
                         .collect(Collectors.joining(", ")))
         );
         dataTable.getItems().setAll(courses);
-        tableTitle.setText("Courses");
         statusLabel.setText("Showing courses (" + courses.size() + ")");
+        fitColumns(4);
     }
 
     private void showClassrooms() {
@@ -182,8 +187,8 @@ public class GUI extends Application {
                         .count()))
         );
         dataTable.getItems().setAll(classrooms);
-        tableTitle.setText("Classrooms");
         statusLabel.setText("Showing classrooms (" + classrooms.size() + ")");
+        fitColumns(4);
     }
 
     private void showStudents() {
@@ -196,8 +201,8 @@ public class GUI extends Application {
                         .count()))
         );
         dataTable.getItems().setAll(students);
-        tableTitle.setText("Students");
         statusLabel.setText("Showing students (" + students.size() + ")");
+        fitColumns(2);
     }
 
     private TableColumn<Object, String> column(String title, Function<Object, String> mapper) {
@@ -237,13 +242,21 @@ public class GUI extends Application {
             case CLASSROOMS -> "classrooms";
             case STUDENTS -> "students";
         };
-        statusLabel.setText(action + " " + target + " (not added yet)");
+        statusLabel.setText(action + " " + target + " (not wired yet)");
     }
 
     private enum View {
         COURSES,
         CLASSROOMS,
         STUDENTS
+    }
+
+    private void fitColumns(int count) {
+        double padding = 20; // scroll bar wiggle room
+        dataTable.getColumns().forEach(col -> {
+            col.prefWidthProperty().unbind();
+            col.prefWidthProperty().bind(dataTable.widthProperty().subtract(padding).divide(count));
+        });
     }
 
     // placeholders kept for future logic wiring
