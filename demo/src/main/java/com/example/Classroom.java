@@ -1,20 +1,26 @@
-package com.example;
+package demo.src.main.java.com.example;
 
-import java.util.ArrayList;
 
 public class Classroom {
     int name;
     int capacity;
-    ArrayList<Integer> hours;
+    Course blocks[];
+    int availability = 24;
+    boolean allBlocksFilled = false;
 
-    public Classroom(int name, int capacity, ArrayList<Integer> hours) {
+
+    public Classroom(int name, int capacity) {
         this.name = name;
         this.capacity = capacity;
-        this.hours = new ArrayList<>();
-        for(int i = 0; i < hours.size(); i++){
-            this.hours.add(0);
+        this.blocks =  new Course[availability]; 
+                // an array with a fixed 24 index length, each representing the block hours. 
+                // To determine which course each block is taken by, we hold a course object in each index.
+                // a "null" value means unallocated block (empty).
+        for(int i = 0; i < blocks.length; i++){
+            this.blocks[i] = null;
         }
     }
+    
 
     public int getName() {
         return name;
@@ -32,11 +38,16 @@ public class Classroom {
         this.capacity = capacity;
     }
 
-    public ArrayList<Integer> getHours() {
-        return hours;
+    public Course[] getBlocks() {
+        return blocks;
     }
 
-    public void setHours(ArrayList<Integer> hours) {
-        this.hours = hours;
+    public void setHours(Course[] blocks) {
+        this.blocks = blocks;
+    }
+
+    public void decreaseAvailability(int blocksTaken){
+        this.availability -= blocksTaken;
+        if(this.availability == 0) allBlocksFilled = true;
     }
 }
