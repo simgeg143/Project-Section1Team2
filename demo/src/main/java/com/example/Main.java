@@ -7,7 +7,9 @@ public class Main {
     ArrayList<Student> students = new ArrayList<>();
     ArrayList<Course> courses = new ArrayList<>();
     ArrayList<Classroom> classrooms = new ArrayList<>();
-
+    public static void main(String[] args) {
+        GUI.main(args);
+    }
 
     public static int calculateBlock(int durationMinutes) {
         /*

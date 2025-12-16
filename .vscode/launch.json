@@ -4,9 +4,16 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "com.example.Main",
+            "projectName": "Project-Section1Team2_57e304cf"
+        },
+        {
+            "type": "java",
             "name": "Run GUI (JavaFX)",
             "request": "launch",
-            "mainClass": "com.example.GUI",
+            "mainClass": "com.example.Main",
             "cwd": "${workspaceFolder}\\demo",
             "classPaths": [
                 "${workspaceFolder}\\demo\\target\\classes"
