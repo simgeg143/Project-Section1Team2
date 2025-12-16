@@ -1,4 +1,4 @@
-package com.example;
+package demo.src.main.java.com.example;
 
 
 import javafx.application.Application;
@@ -182,8 +182,8 @@ public class GUI extends Application {
         dataTable.getColumns().setAll(
                 column("Room", value -> String.valueOf(((Classroom) value).getName())),
                 column("Capacity", value -> String.valueOf(((Classroom) value).getCapacity())),
-                column("Time Blocks", value -> String.valueOf(((Classroom) value).getHours().size())),
-                column("Booked", value -> String.valueOf(((Classroom) value).getHours().stream()
+                column("Time Blocks", value -> String.valueOf(((Classroom) value).getBlocks().length)),
+                column("Booked", value -> String.valueOf(((Classroom) value).getBlocks().stream()
                         .filter(slot -> slot != null && slot == 1)
                         .count()))
         );
@@ -218,9 +218,9 @@ public class GUI extends Application {
         Student charlie = new Student(1003);
         students.setAll(alice, bob, charlie);
 
-        Classroom roomA = new Classroom(101, 40, defaultHours());
-        Classroom roomB = new Classroom(202, 25, defaultHours());
-        Classroom roomC = new Classroom(303, 30, defaultHours());
+        Classroom roomA = new Classroom(101, 40);
+        Classroom roomB = new Classroom(202, 25);
+        Classroom roomC = new Classroom(303, 30);
         classrooms.setAll(roomA, roomB, roomC);
 
         Course math = new Course(501, new Student[]{alice, bob}, new Classroom[]{roomA}, 90);
@@ -229,13 +229,13 @@ public class GUI extends Application {
         courses.setAll(math, cs, physics);
     }
 
-    private ArrayList<Integer> defaultHours() {
-        ArrayList<Integer> hours = new ArrayList<>();
-        for (int i = 0; i < 24; i++) {
-            hours.add(0);
-        }
-        return hours;
-    }
+    // private ArrayList<Integer> defaultHours() {
+    //     ArrayList<Integer> hours = new ArrayList<>();
+    //     for (int i = 0; i < 24; i++) {
+    //         hours.add(0);
+    //     }
+    //     return hours;
+    // }
 
     private void handleAction(String action) {
         String target = switch (currentView) {
