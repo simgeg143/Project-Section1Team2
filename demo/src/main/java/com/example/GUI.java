@@ -167,7 +167,7 @@ public class GUI extends Application {
                         .map(Student::getID)
                         .map(String::valueOf)
                         .collect(Collectors.joining(", "))),
-                column("Classrooms", value -> Arrays.stream(((Course) value).getExamClass())
+                column("Classrooms", value -> Arrays.stream(((Course) value).getExamClass()) // NEEDS FIXING
                         .map(Classroom::getName)
                         .map(String::valueOf)
                         .collect(Collectors.joining(", ")))
@@ -183,7 +183,7 @@ public class GUI extends Application {
                 column("Room", value -> String.valueOf(((Classroom) value).getName())),
                 column("Capacity", value -> String.valueOf(((Classroom) value).getCapacity())),
                 column("Time Blocks", value -> String.valueOf(((Classroom) value).getBlocks().length)),
-                column("Booked", value -> String.valueOf(((Classroom) value).getBlocks().stream()
+                column("Booked", value -> String.valueOf(((Classroom) value).getBlocks().stream() // NEEDS FIXING
                         .filter(slot -> slot != null && slot == 1)
                         .count()))
         );

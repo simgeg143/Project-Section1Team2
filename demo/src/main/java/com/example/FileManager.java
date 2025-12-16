@@ -117,7 +117,7 @@ public class FileManager {
             for (Course c : courses) {
                 if (c == null) continue;
 
-                Classroom[] rooms = c.getExamClass();
+                ArrayList<Classroom> rooms = c.getExamClass();
                 if (rooms == null) continue;
 
                 for (Classroom room : rooms) {

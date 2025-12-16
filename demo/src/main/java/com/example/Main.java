@@ -105,7 +105,7 @@ public class Main {
 
     public static int findAvailableBlocks(Course course, ArrayList<Classroom> classrooms){
         boolean match;
-        int blockSize = calculateBlock(course.getExamDuration())
+        int blockSize = calculateBlock(course.getExamDuration());
         for(int i = 0; i < 24; i++){
             match = true;
             for(Classroom classroom: classrooms){
