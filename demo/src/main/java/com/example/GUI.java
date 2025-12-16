@@ -213,20 +213,20 @@ public class GUI extends Application {
     }
 
     private void seedSampleData() {                              //we will use this method to get the data into the tables in the furute when importing is working
-        Student alice = new Student(1001);
-        Student bob = new Student(1002);
-        Student charlie = new Student(1003);
-        students.setAll(alice, bob, charlie);
+        // Student alice = new Student(1001);
+        // Student bob = new Student(1002);
+        // Student charlie = new Student(1003);
+        // students.setAll(alice, bob, charlie);
 
-        Classroom roomA = new Classroom(101, 40);
-        Classroom roomB = new Classroom(202, 25);
-        Classroom roomC = new Classroom(303, 30);
-        classrooms.setAll(roomA, roomB, roomC);
+        // Classroom roomA = new Classroom(101, 40);
+        // Classroom roomB = new Classroom(202, 25);
+        // Classroom roomC = new Classroom(303, 30);
+        // classrooms.setAll(roomA, roomB, roomC);
 
-        Course math = new Course(501, new Student[]{alice, bob}, new Classroom[]{roomA}, 90);
-        Course cs = new Course(502, new Student[]{charlie}, new Classroom[]{roomB}, 60);
-        Course physics = new Course(503, new Student[]{alice, charlie}, new Classroom[]{roomA, roomC}, 120);
-        courses.setAll(math, cs, physics);
+        // Course math = new Course(501, new Student[]{alice, bob}, new Classroom[]{roomA}, 90);
+        // Course cs = new Course(502, new Student[]{charlie}, new Classroom[]{roomB}, 60);
+        // Course physics = new Course(503, new Student[]{alice, charlie}, new Classroom[]{roomA, roomC}, 120);
+        // courses.setAll(math, cs, physics);
     }
 
     // private ArrayList<Integer> defaultHours() {
