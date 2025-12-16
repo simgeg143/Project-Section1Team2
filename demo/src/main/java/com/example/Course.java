@@ -1,12 +1,15 @@
-package com.example;
+package demo.src.main.java.com.example;
+
+import java.util.ArrayList;
 
 public class Course {
     int code;
+    public boolean alreadyScheduled = false;
     Student[] attendees;
-    Classroom[] examClass;
+    ArrayList<Classroom> examClass;
     int examDuration;
 
-    public Course(int code, Student[] attendees, Classroom[] examClass, int examDuration) {
+    public Course(int code, Student[] attendees, ArrayList<Classroom> examClass, int examDuration) {
         this.code = code;
         this.attendees = attendees;
         this.examClass = examClass;
@@ -29,12 +32,13 @@ public class Course {
         this.attendees = attendees;
     }
 
-    public Classroom[] getExamClass() {
+    public ArrayList<Classroom> getExamClass() {
         return examClass;
     }
 
-    public void setExamClass(Classroom[] examClass) {
+    public void setExamClass(ArrayList<Classroom> examClass) {
         this.examClass = examClass;
+        alreadyScheduled = true;
     }
 
     public int getExamDuration() {
