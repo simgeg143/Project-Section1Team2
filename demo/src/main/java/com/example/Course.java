@@ -1,5 +1,4 @@
-package demo.src.main.java.com.example;
-
+package com.example;
 
 public class Course {
     int code;

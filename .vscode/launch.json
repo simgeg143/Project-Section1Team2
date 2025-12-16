@@ -6,14 +6,14 @@
             "type": "java",
             "name": "Main",
             "request": "launch",
-            "mainClass": "demo.src.main.java.com.example.Main",
+            "mainClass": "com.example.Main",
             "projectName": "Project-Section1Team2_7759d35"
         },
         {
             "type": "java",
             "name": "GUI",
             "request": "launch",
-            "mainClass": "demo.src.main.java.com.example.GUI",
+            "mainClass": "com.example.GUI",
             "projectName": "Project-Section1Team2_7759d35"
         },
         {
