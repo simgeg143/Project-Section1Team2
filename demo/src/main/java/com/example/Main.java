@@ -196,12 +196,13 @@ public class Main {
         /*
             This method is used to reset all the classes's occupation, preparing it for the next day's exam calculation.
         */
-        // MUST RESET CLASSROOMS HOUR BLOCKS AND ALSO REMOVE OR DISABLE THE ALREADY DONE EXAMS.
+        // MUST RESET CLASSROOMS HOUR BLOCKS AND ALSO REMOVE OR DISABLE THE ALREADY DONE EXAMS (using the "alreadyScheduled" flag in each course object)
     }
 
     // TODO
     public static boolean allClassHoursFilled(){
         // MUST LOOP OVER ALL CLASSES'S HOURS TO MAKE SURE ALL CLASSES ARE FULLY UTILIZED (SOME SMALL BLOCKS (1-2) CAN BE FREE)
+        // this method will be used to make sure all classes are filled for the day so it can move onto the next one in the main loop.
         return false;
     }
 
@@ -213,16 +214,21 @@ public class Main {
 
         boolean allClassesFilled = false;
         ArrayList<ArrayList<Course>> days = new ArrayList<ArrayList<Course>>(); // a list of courses in a list of days
-        while(!allClassesFilled){ // while classes are available
-            ArrayList<Course> dayCourses = new ArrayList<>();
-            for(Course course : courses){
-                if(findClassForExam(course, classrooms)){
-                    dayCourses.add(course);
+
+        // MAINLOOP (NEEDS TO BE FIXED)
+        for(int i = 0; i < 7; i++){ // LOOPING FOR EACH DAY
+            while(!allClassesFilled){ // while classes are available
+                ArrayList<Course> dayCourses = new ArrayList<>();
+                for(Course course : courses){
+                    if(findClassForExam(course, classrooms)){
+                        dayCourses.add(course);
+                    }
                 }
+                days.add(dayCourses);
             }
-            days.add(dayCourses);
             nextDay();
         }
+        
         
         
 
