@@ -1,4 +1,5 @@
-package com.example;
+package demo.src.main.java.com.example;
+
 
 import javafx.application.Application;
 import javafx.application.Platform;
