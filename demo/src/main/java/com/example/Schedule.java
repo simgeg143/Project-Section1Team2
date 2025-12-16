@@ -1,4 +1,4 @@
-package com.example;
+package demo.src.main.java.com.example;
 
 public class Schedule {
     Student student;
