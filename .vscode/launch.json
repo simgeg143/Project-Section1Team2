@@ -4,6 +4,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "GUI",
+            "request": "launch",
+            "mainClass": "main.java.com.example.GUI",
+            "projectName": "Project-Section1Team2_b9300dd6"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "main.java.com.example.Main",
+            "projectName": "Project-Section1Team2_b9300dd6"
+        },
+        {
+            "type": "java",
             "name": "Main",
             "request": "launch",
             "mainClass": "com.example.Main",

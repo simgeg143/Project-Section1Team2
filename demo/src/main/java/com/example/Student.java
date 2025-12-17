@@ -1,4 +1,4 @@
-package demo.src.main.java.com.example;
+package main.java.com.example;
 
 
 public class Student {
