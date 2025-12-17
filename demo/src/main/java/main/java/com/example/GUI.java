@@ -22,12 +22,15 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.stage.FileChooser;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import java.io.File;
 
 public class GUI extends Application {
 
@@ -69,11 +72,16 @@ public class GUI extends Application {
 
     private MenuBar buildMenuBar() {
         Menu fileMenu = new Menu("File");
-        MenuItem importData = new MenuItem("Import data");
+        MenuItem importStudents = new MenuItem("Import students");
+        MenuItem importClassrooms = new MenuItem("Import classrooms");
+        MenuItem importCourses = new MenuItem("Import courses");
         MenuItem exportSchedule = new MenuItem("Export schedule");
         MenuItem exit = new MenuItem("Exit");
         exit.setOnAction(event -> Platform.exit());
-        fileMenu.getItems().addAll(importData, exportSchedule, new SeparatorMenuItem(), exit);
+        importStudents.setOnAction(event -> importStudents());
+        importClassrooms.setOnAction(event -> importClassrooms());
+        importCourses.setOnAction(event -> importCourses());
+        fileMenu.getItems().addAll(importStudents, importClassrooms, importCourses, exportSchedule, new SeparatorMenuItem(), exit);
 
         Menu manageMenu = new Menu("Manage");
         MenuItem editCourses = new MenuItem("Courses");
@@ -223,6 +231,56 @@ public class GUI extends Application {
         dataTable.getItems().setAll(students);
         statusLabel.setText("Showing students (" + students.size() + ")");
         fitColumns(2);
+    }
+
+    private File chooseCsvFile(String title) {
+        Stage stage = (Stage) statusLabel.getScene().getWindow();
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle(title);
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
+
+        File dataDir = new File("data");
+        if (dataDir.exists() && dataDir.isDirectory()) {
+            chooser.setInitialDirectory(dataDir);
+        }
+
+        return chooser.showOpenDialog(stage);
+    }
+
+    private void importStudents() {
+        File file = chooseCsvFile("Import students");
+        if (file == null) return;
+        try {
+            students.setAll(FileManager.readStudents(file.getAbsolutePath()));
+            showStudents();
+            statusLabel.setText("Imported students from " + file.getName());
+        } catch (Exception e) {
+            statusLabel.setText("Import failed: ");
+        }
+    }
+
+    private void importClassrooms() {
+        File file = chooseCsvFile("Import classrooms");
+        if (file == null) return;
+        try {
+            classrooms.setAll(FileManager.readClassrooms(file.getAbsolutePath()));
+            showClassrooms();
+            statusLabel.setText("Imported classrooms from " + file.getName());
+        } catch (Exception e) {
+            statusLabel.setText("Import failed: ");
+        }
+    }
+
+    private void importCourses() {
+        File file = chooseCsvFile("Import courses");
+        if (file == null) return;
+        try {
+            courses.setAll(FileManager.readCourses(file.getAbsolutePath(), new ArrayList<>(students), new ArrayList<>(classrooms)));
+            showCourses();
+            statusLabel.setText("Imported courses from " + file.getName());
+        } catch (Exception e) {
+            statusLabel.setText("Import failed: ");
+        }
     }
 
     private TableColumn<Object, String> column(String title, Function<Object, String> mapper) {

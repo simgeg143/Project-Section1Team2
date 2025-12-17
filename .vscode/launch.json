@@ -6,6 +6,34 @@
             "type": "java",
             "name": "GUI",
             "request": "launch",
+            "mainClass": "main.java.com.example.GUI",
+            "projectName": "Project-Section1Team2_57e304cf"
+        },
+        {
+            "type": "java",
+            "name": "GUI",
+            "request": "launch",
+            "mainClass": "main.java.com.example.Main",
+            "projectName": "Project-Section1Team2_57e304cf"
+        },
+        {
+            "type": "java",
+            "name": "GUI",
+            "request": "launch",
+            "mainClass": "main.java.com.example.Main",
+            "projectName": "Project-Section1Team2_57e304cf"
+        },
+        {
+            "type": "java",
+            "name": "GUI",
+            "request": "launch",
+            "mainClass": "main.java.com.example.Main",
+            "projectName": "Project-Section1Team2_57e304cf"
+        },
+        {
+            "type": "java",
+            "name": "GUI",
+            "request": "launch",
             "mainClass": "main.java.com.example.Main",
             "projectName": "Project-Section1Team2_57e304cf",
             "modulePaths": [
@@ -50,7 +78,7 @@
             "type": "java",
             "name": "GUI",
             "request": "launch",
-            "mainClass": "main.java.com.example.GUI",
+            "mainClass": "main.java.com.example.Main",
             "projectName": "Project-Section1Team2_7759d35",
             "modulePaths": [
                 "${workspaceFolder}\\javafx-sdk-25.0.1\\lib"
