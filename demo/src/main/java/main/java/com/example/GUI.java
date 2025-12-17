@@ -22,10 +22,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import java.util.ArrayList;
+
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class GUI extends Application {
 
@@ -167,10 +169,27 @@ public class GUI extends Application {
                         .map(Student::getID)
                         .map(String::valueOf)
                         .collect(Collectors.joining(", "))),
-                column("Classrooms", value -> Arrays.stream(((Course) value).getExamClass()) // NEEDS FIXING
-                        .map(Classroom::getName)
-                        .map(String::valueOf)
-                        .collect(Collectors.joining(", ")))
+                column("Classrooms", value -> {
+                    Object examClassrooms = ((Course) value).getExamClass();
+                    if (examClassrooms == null) {
+                        return "";
+                    }
+                    if (examClassrooms instanceof Classroom[] rooms) {
+                        return Arrays.stream(rooms)
+                                .map(Classroom::getName)
+                                .map(String::valueOf)
+                                .collect(Collectors.joining(", "));
+                    }
+                    if (examClassrooms instanceof Iterable<?> iterable) {
+                        return StreamSupport.stream(iterable.spliterator(), false)
+                                .filter(Objects::nonNull)
+                                .map(room -> (Classroom) room)
+                                .map(Classroom::getName)
+                                .map(String::valueOf)
+                                .collect(Collectors.joining(", "));
+                    }
+                    return "";
+                })
         );
         dataTable.getItems().setAll(courses);
         statusLabel.setText("Showing courses (" + courses.size() + ")");
@@ -183,8 +202,8 @@ public class GUI extends Application {
                 column("Room", value -> String.valueOf(((Classroom) value).getName())),
                 column("Capacity", value -> String.valueOf(((Classroom) value).getCapacity())),
                 column("Time Blocks", value -> String.valueOf(((Classroom) value).getBlocks().length)),
-                column("Booked", value -> String.valueOf(((Classroom) value).getBlocks().stream() // NEEDS FIXING
-                        .filter(slot -> slot != null && slot == 1)
+                column("Booked", value -> String.valueOf(Arrays.stream(((Classroom) value).getBlocks())
+                        .filter(Objects::nonNull)
                         .count()))
         );
         dataTable.getItems().setAll(classrooms);

@@ -6,42 +6,73 @@
             "type": "java",
             "name": "GUI",
             "request": "launch",
-            "mainClass": "main.java.com.example.GUI",
-            "projectName": "Project-Section1Team2_b9300dd6"
+            "mainClass": "main.java.com.example.Main",
+            "projectName": "Project-Section1Team2_57e304cf",
+            "modulePaths": [
+                "${workspaceFolder}\\javafx-sdk-25.0.1\\lib"
+            ],
+            "vmArgs": "--module-path \"${workspaceFolder}\\javafx-sdk-25.0.1\\lib\" --add-modules javafx.controls,javafx.fxml"
+        },
+        {
+            "type": "java",
+            "name": "GUI",
+            "request": "launch",
+            "mainClass": "main.java.com.example.Main",
+            "projectName": "Project-Section1Team2_b9300dd6",
+            "modulePaths": [
+                "${workspaceFolder}\\javafx-sdk-25.0.1\\lib"
+            ],
+            "vmArgs": "--module-path \"${workspaceFolder}\\javafx-sdk-25.0.1\\lib\" --add-modules javafx.controls,javafx.fxml"
         },
         {
             "type": "java",
             "name": "Main",
             "request": "launch",
             "mainClass": "main.java.com.example.Main",
-            "projectName": "Project-Section1Team2_b9300dd6"
+            "projectName": "Project-Section1Team2_b9300dd6",
+            "modulePaths": [
+                "${workspaceFolder}\\javafx-sdk-25.0.1\\lib"
+            ],
+            "vmArgs": "--module-path \"${workspaceFolder}\\javafx-sdk-25.0.1\\lib\" --add-modules javafx.controls,javafx.fxml"
         },
         {
             "type": "java",
             "name": "Main",
             "request": "launch",
-            "mainClass": "com.example.Main",
-            "projectName": "Project-Section1Team2_7759d35"
+            "mainClass": "main.java.com.example.Main",
+            "projectName": "Project-Section1Team2_7759d35",
+            "modulePaths": [
+                "${workspaceFolder}\\javafx-sdk-25.0.1\\lib"
+            ],
+            "vmArgs": "--module-path \"${workspaceFolder}\\javafx-sdk-25.0.1\\lib\" --add-modules javafx.controls,javafx.fxml"
         },
         {
             "type": "java",
             "name": "GUI",
             "request": "launch",
-            "mainClass": "com.example.GUI",
-            "projectName": "Project-Section1Team2_7759d35"
+            "mainClass": "main.java.com.example.GUI",
+            "projectName": "Project-Section1Team2_7759d35",
+            "modulePaths": [
+                "${workspaceFolder}\\javafx-sdk-25.0.1\\lib"
+            ],
+            "vmArgs": "--module-path \"${workspaceFolder}\\javafx-sdk-25.0.1\\lib\" --add-modules javafx.controls,javafx.fxml"
         },
         {
             "type": "java",
             "name": "Main",
             "request": "launch",
-            "mainClass": "com.example.Main",
-            "projectName": "Project-Section1Team2_57e304cf"
+            "mainClass": "main.java.com.example.Main",
+            "projectName": "Project-Section1Team2_57e304cf",
+            "modulePaths": [
+                "${workspaceFolder}\\javafx-sdk-25.0.1\\lib"
+            ],
+            "vmArgs": "--module-path \"${workspaceFolder}\\javafx-sdk-25.0.1\\lib\" --add-modules javafx.controls,javafx.fxml"
         },
         {
             "type": "java",
             "name": "Run GUI (JavaFX)",
             "request": "launch",
-            "mainClass": "com.example.Main",
+            "mainClass": "main.java.com.example.Main",
             "cwd": "${workspaceFolder}\\demo",
             "classPaths": [
                 "${workspaceFolder}\\demo\\target\\classes"
@@ -49,7 +80,7 @@
             "modulePaths": [
                 "${workspaceFolder}\\javafx-sdk-25.0.1\\lib"
             ],
-            "vmArgs": "--module-path \"${workspaceFolder}\\javafx-sdk-25.0.1\\lib\" --add-modules javafx.controls"
+            "vmArgs": "--module-path \"${workspaceFolder}\\javafx-sdk-25.0.1\\lib\" --add-modules javafx.controls,javafx.fxml"
         }
     ]
 }
