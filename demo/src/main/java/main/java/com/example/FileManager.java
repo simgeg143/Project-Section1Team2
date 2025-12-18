@@ -106,48 +106,91 @@ public class FileManager {
 
         ArrayList<Course> courses = new ArrayList<>();
         List<String[]> rows = FileReader(filePath);
+for (String[] row : rows) {
+            if (row.length == 0) continue;
 
-        for (String[] row : rows) {
-            int code = Integer.parseInt(row[0]);
-            int duration = Integer.parseInt(row[1]);
+            // Structured CSV: code,duration,studentIds,roomIds
+            if (row.length >= 4) {
+                String codeDigits = row[0].replaceAll("\\D+", "");
+                String durationDigits = row[1].replaceAll("\\D+", "");
+                if (codeDigits.isEmpty()) continue;
 
-            String[] studentIds = row[2].split("\\|");
-            ArrayList<Student> attendeeList = new ArrayList<>();
-
-            for (String idStr : studentIds) {
-                int id = Integer.parseInt(idStr);
-                for (Student s : students) {
-                    if (s.getID() == id) {
-                        attendeeList.add(s);
-                        break;
+                int code;
+                int duration = 90;
+                try {
+                    code = Integer.parseInt(codeDigits);
+                } catch (NumberFormatException e) {
+                    continue;
+                }
+                if (!durationDigits.isEmpty()) {
+                    try {
+                        duration = Integer.parseInt(durationDigits);
+                    } catch (NumberFormatException ignored) {
                     }
                 }
-            }
+                if (duration <= 0) duration = 90;
 
-            String[] roomNames = row[3].split("\\|");
-            ArrayList<Classroom> roomList = new ArrayList<>();
-
-            for (String roomStr : roomNames) {
-                int roomName = Integer.parseInt(roomStr);
-                for (Classroom c : classrooms) {
-                    if (c.getName() == roomName) {
-                        roomList.add(c);
-                        break;
+                String[] studentIds = row[2].split("\\|");
+                ArrayList<Student> attendeeList = new ArrayList<>();
+                for (String idStr : studentIds) {
+                    String digits = idStr.replaceAll("\\D+", "");
+                    if (digits.isEmpty()) continue;
+                    int id;
+                    try {
+                        id = Integer.parseInt(digits);
+                    } catch (NumberFormatException e) {
+                        continue;
+                    }
+                    for (Student s : students) {
+                        if (s.getID() == id) {
+                            attendeeList.add(s);
+                            break;
+                        }
                     }
                 }
+
+                String[] roomNames = row[3].split("\\|");
+                ArrayList<Classroom> roomList = new ArrayList<>();
+                for (String roomStr : roomNames) {
+                    String digits = roomStr.replaceAll("\\D+", "");
+                    if (digits.isEmpty()) continue;
+                    int roomName;
+                    try {
+                        roomName = Integer.parseInt(digits);
+                    } catch (NumberFormatException e) {
+                        continue;
+                    }
+                    for (Classroom c : classrooms) {
+                        if (c.getName() == roomName) {
+                            roomList.add(c);
+                            break;
+                        }
+                    }
+                }
+
+                courses.add(
+                        new Course(
+                                code,
+                                attendeeList.toArray(new Student[0]),
+                                roomList,
+                                duration > 0 ? duration : 90
+                        )
+                );
+                continue;
             }
 
-            courses.add(
-                new Course(
-                    code,
-                    attendeeList.toArray(new Student[0]),
-                    roomList,
-                    duration
-                )
-            );
+            // Simple file containing only course codes (e.g., sampleData_AllCourses.csv)
+            String digits = row[0].replaceAll("\\D+", "");
+            if (digits.isEmpty()) continue;
+            try {
+                int code = Integer.parseInt(digits);
+                courses.add(new Course(code, new Student[0], new ArrayList<>(), 90));
+            } catch (NumberFormatException ignored) {
+            }
         }
 
         return courses;
+        
     }
 
     public static void FileWriter(String filePath, List<String[]> data) {
