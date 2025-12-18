@@ -200,10 +200,22 @@ public class Main {
     }
 
     // TODO
-    public static boolean allClassHoursFilled(){
+    public static boolean allClassHoursFilled(ArrayList<Classroom> classrooms){
         // MUST LOOP OVER ALL CLASSES'S HOURS TO MAKE SURE ALL CLASSES ARE FULLY UTILIZED (SOME SMALL BLOCKS (1-2) CAN BE FREE)
         // this method will be used to make sure all classes are filled for the day so it can move onto the next one in the main loop.
-        return false;
+         for(Classroom classroom : classrooms){
+        int freeBlocks = 0;
+        for(int i = 0; i < 24; i++){
+            if(classroom.getBlocks()[i] == null){
+                freeBlocks++;
+            }
+        }
+        if(freeBlocks > 2){
+            return false; // not filed enough yet
+        }
+    }
+    return true; 
+        
     }
 
 
@@ -217,6 +229,7 @@ public class Main {
 
         // MAINLOOP (NEEDS TO BE FIXED)
         for(int i = 0; i < 7; i++){ // LOOPING FOR EACH DAY
+            allClassesFilled = false; // reset for new day
             while(!allClassesFilled){ // while classes are available
                 ArrayList<Course> dayCourses = new ArrayList<>();
                 for(Course course : courses){
@@ -225,6 +238,7 @@ public class Main {
                     }
                 }
                 days.add(dayCourses);
+                allClassesFilled = allClassHoursFilled(classrooms);
             }
             nextDay();
         }
