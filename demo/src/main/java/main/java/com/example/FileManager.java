@@ -9,19 +9,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Arrays;
-
 
 public class FileManager {
 
     private static String clean(String text) {
-        if (text == null) return "";
+        if (text == null)
+            return "";
         return text.replace("\uFEFF", "").trim();
     }
 
     public static List<String[]> FileReader(String filePath) {
         System.out.println("Trying to read: " + filePath);
-System.out.println("Exists? " + Files.exists(Path.of(filePath)));
+        System.out.println("Exists? " + Files.exists(Path.of(filePath)));
 
         List<String[]> rows = new ArrayList<>();
 
@@ -35,7 +34,8 @@ System.out.println("Exists? " + Files.exists(Path.of(filePath)));
 
             while ((line = br.readLine()) != null) {
                 line = clean(line);
-                if (line.isEmpty()) continue;
+                if (line.isEmpty())
+                    continue;
 
                 // skip header
                 if (isFirstLine) {
@@ -52,121 +52,183 @@ System.out.println("Exists? " + Files.exists(Path.of(filePath)));
         return rows;
     }
 
-
     public static ArrayList<Student> readStudents(String filePath) {
-    ArrayList<Student> students = new ArrayList<>();
+        ArrayList<Student> students = new ArrayList<>();
 
-    try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-        String line;
-        boolean skipHeader = true;
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            boolean skipHeader = true;
 
-        while ((line = br.readLine()) != null) {
-            line = line.trim();
-            if (line.isEmpty()) continue;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty())
+                    continue;
 
-            if (skipHeader) { // ALL OF THE STUDENTS IN THE SYSTEM
-                skipHeader = false;
-                continue;
+                if (skipHeader) { // ALL OF THE STUDENTS IN THE SYSTEM
+                    skipHeader = false;
+                    continue;
+                }
+
+                String digits = line.replaceAll("\\D+", "");
+                if (digits.isEmpty())
+                    continue;
+
+                students.add(new Student(Integer.parseInt(digits)));
             }
 
-            String digits = line.replaceAll("\\D+", "");
-            if (digits.isEmpty()) continue;
-
-            students.add(new Student(Integer.parseInt(digits)));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-    } catch (IOException e) {
-        e.printStackTrace();
+        return students;
     }
-
-    return students;
-}
-
-    
 
     public static ArrayList<Classroom> readClassrooms(String filePath) {
-    ArrayList<Classroom> classrooms = new ArrayList<>();
+        ArrayList<Classroom> classrooms = new ArrayList<>();
 
-    try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-        String line;
-        boolean skipHeader = true;
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            boolean skipHeader = true;
 
-        while ((line = br.readLine()) != null) {
-            line = line.trim();
-            if (line.isEmpty()) continue;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty())
+                    continue;
 
-            if (skipHeader) { // ALL OF THE CLASSROOMS...
-                skipHeader = false;
-                continue;
+                if (skipHeader) { // ALL OF THE CLASSROOMS...
+                    skipHeader = false;
+                    continue;
+                }
+
+                String[] parts = line.split(";");
+                if (parts.length != 2)
+                    continue;
+
+                int room = Integer.parseInt(parts[0].replaceAll("\\D+", ""));
+                int cap = Integer.parseInt(parts[1].replaceAll("\\D+", ""));
+
+                classrooms.add(new Classroom(room, cap));
             }
 
-            String[] parts = line.split(";");
-            if (parts.length != 2) continue;
-
-            int room = Integer.parseInt(parts[0].replaceAll("\\D+", ""));
-            int cap  = Integer.parseInt(parts[1].replaceAll("\\D+", ""));
-
-            classrooms.add(new Classroom(room, cap));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-    } catch (IOException e) {
-        e.printStackTrace();
+        return classrooms;
     }
 
-    return classrooms;
-}
+    public static ArrayList<Course> readCourses(
+            String filePath,
+            ArrayList<Student> students,
+            ArrayList<Classroom> classrooms) {
 
+        ArrayList<Course> courses = new ArrayList<>();
 
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            boolean skipHeader = true;
 
-public static ArrayList<Course> readCourses(
-        String filePath,
-        ArrayList<Student> students,
-        ArrayList<Classroom> classrooms) {
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty())
+                    continue;
 
-    ArrayList<Course> courses = new ArrayList<>();
+                if (skipHeader) {
+                    skipHeader = false;
+                    continue;
+                }
 
-    try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-        String line;
-        boolean skipHeader = true;
+                String digits = line.replaceAll("\\D+", "");
+                if (digits.isEmpty())
+                    continue;
 
-        while ((line = br.readLine()) != null) {
-            line = line.trim();
-            if (line.isEmpty()) continue;
+                int code = Integer.parseInt(digits);
 
-            if (skipHeader) {
-                skipHeader = false;
-                continue;
+                courses.add(
+                        new Course(
+                                code,
+                                new Student[0],
+                                new ArrayList<>(),
+                                90));
             }
 
-
-            String digits = line.replaceAll("\\D+", "");
-            if (digits.isEmpty()) continue;
-
-            int code = Integer.parseInt(digits);
-
-            courses.add(
-                new Course(
-                    code,
-                    new Student[0],          
-                    new ArrayList<>(),       
-                    90                       
-                )
-            );
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-    } catch (IOException e) {
-        e.printStackTrace();
+        System.out.println("COURSES LOADED = " + courses.size());
+        return courses;
     }
 
-    System.out.println("COURSES LOADED = " + courses.size());
-    return courses;
-}
+    public static void readAttendance(
+            String filePath,
+            ArrayList<Student> students,
+            ArrayList<Course> courses) {
 
+        int totalAssigned = 0;
 
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            Course currentCourse = null;
 
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty())
+                    continue;
+
+                if (line.startsWith("CourseCode_")) {
+                    String digits = line.replaceAll("\\D+", "");
+                    int courseCode = Integer.parseInt(digits);
+
+                    currentCourse = courses.stream()
+                            .filter(c -> c.getCode() == courseCode)
+                            .findFirst()
+                            .orElse(null);
+
+                    continue;
+                }
+
+                if (line.startsWith("[")) {
+                    if (currentCourse == null)
+                        continue;
+                    line = line.replace("[", "")
+                            .replace("]", "")
+                            .replace("'", "")
+                            .replace("\"", "");
+                    String[] i = line.split(",");
+
+                    ArrayList<Student> list = new ArrayList<>();
+
+                    for (String id : i) {
+                        id = id.trim();
+                        if (id.isEmpty())
+                            continue;
+                        String digits = id.replaceAll("\\D+", "");
+                        if (digits.isEmpty())
+                            continue;
+                        int si = Integer.parseInt(digits);
+                        Student s = students.stream()
+                                .filter(st -> st.getID() == si)
+                                .findFirst()
+                                .orElse(null);
+                        if (s != null) {
+                            list.add(s);
+                            totalAssigned++;
+                        }
+                    }
+                    currentCourse.setAttendees(list.toArray(new Student[0]));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("ATTENDANCE LOADED = " + totalAssigned);
+    }
 
     public static void FileWriter(String filePath, List<String[]> data) {
-        if (filePath == null || data == null) return;
+        if (filePath == null || data == null)
+            return;
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
             for (String[] row : data) {
@@ -180,7 +242,8 @@ public static ArrayList<Course> readCourses(
 
     public static void ExportSchedule(Schedule[] schedules, String filePath) {
 
-        if (schedules == null || filePath == null) return;
+        if (schedules == null || filePath == null)
+            return;
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
 
@@ -188,25 +251,28 @@ public static ArrayList<Course> readCourses(
             bw.newLine();
 
             for (Schedule schedule : schedules) {
-                if (schedule == null) continue;
+                if (schedule == null)
+                    continue;
 
                 int studentId = schedule.getStudent().getID();
                 Course[] courses = schedule.getCourses();
-                if (courses == null) continue;
+                if (courses == null)
+                    continue;
 
                 for (Course c : courses) {
-                    if (c == null) continue;
+                    if (c == null)
+                        continue;
 
                     ArrayList<Classroom> rooms = c.getExamClass();
-                    if (rooms == null) continue;
+                    if (rooms == null)
+                        continue;
 
                     for (Classroom room : rooms) {
                         bw.write(
-                            studentId + "," +
-                            c.getCode() + "," +
-                            room.getName() + "," +
-                            c.getExamDuration()
-                        );
+                                studentId + "," +
+                                        c.getCode() + "," +
+                                        room.getName() + "," +
+                                        c.getExamDuration());
                         bw.newLine();
                     }
                 }
