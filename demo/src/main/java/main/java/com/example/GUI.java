@@ -1,6 +1,5 @@
 package main.java.com.example;
 
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -47,71 +46,70 @@ public class GUI extends Application {
 
     private void loadInitialData() {
 
-    System.out.println("Working dir = " + System.getProperty("user.dir"));
+        System.out.println("Working dir = " + System.getProperty("user.dir"));
 
-    students.setAll(
-        FileManager.readStudents("data/sampleData_AllStudents.csv")
-    );
+        students.setAll(
+                FileManager.readStudents("data/sampleData_AllStudents.csv"));
 
-    classrooms.setAll(
-        FileManager.readClassrooms("data/sampleData_AllClassroomsAndTheirCapacities.csv")
-    );
+        classrooms.setAll(
+                FileManager.readClassrooms("data/sampleData_AllClassroomsAndTheirCapacities.csv"));
 
-    courses.setAll(
-    FileManager.readCourses(
-        "data/sampleData_AllCourses.csv",
-        new ArrayList<>(students),
-        new ArrayList<>(classrooms)
-    )
-);
+        courses.setAll(
+                FileManager.readCourses(
+                        "data/sampleData_AllCourses.csv",
+                        new ArrayList<>(students),
+                        new ArrayList<>(classrooms)));
+        FileManager.readAttendance(
+                "data/sampleData_AllAttendanceLists.csv",
+                new ArrayList<>(students),
+                new ArrayList<>(courses));
 
-
-    System.out.println("Loaded students = " + students.size());
-    System.out.println("Loaded classrooms = " + classrooms.size());
-    System.out.println("Loaded courses = " + courses.size());
-}
-
-
+        System.out.println("Loaded students = " + students.size());
+        System.out.println("Loaded classrooms = " + classrooms.size());
+        System.out.println("Loaded courses = " + courses.size());
+    }
 
     @Override
-public void start(Stage stage) {
-    stage.setTitle("Exam Scheduler");
+    public void start(Stage stage) {
+        stage.setTitle("Exam Scheduler");
 
-    statusLabel = new Label("Ready");
+        statusLabel = new Label("Ready");
 
-    loadInitialData();   // 🔥 BU SATIR ŞART
-    contentArea = buildContentArea();
+        loadInitialData(); // 🔥 BU SATIR ŞART
+        contentArea = buildContentArea();
 
-    MenuBar menuBar = buildMenuBar();
-    VBox navigation = buildNavigationPanel();
-    HBox statusBar = buildStatusBar();
+        MenuBar menuBar = buildMenuBar();
+        VBox navigation = buildNavigationPanel();
+        HBox statusBar = buildStatusBar();
 
-    BorderPane root = new BorderPane();
-    root.setTop(menuBar);
-    root.setLeft(navigation);
-    root.setCenter(contentArea);
-    root.setBottom(statusBar);
+        BorderPane root = new BorderPane();
+        root.setTop(menuBar);
+        root.setLeft(navigation);
+        root.setCenter(contentArea);
+        root.setBottom(statusBar);
 
-    Scene scene = new Scene(root, 900, 800);
-    stage.setScene(scene);
-    stage.show();
+        Scene scene = new Scene(root, 900, 800);
+        stage.setScene(scene);
+        stage.show();
 
-    showCourses(); // default view
-}
-
+        showCourses(); // default view
+    }
 
     private MenuBar buildMenuBar() {
         Menu fileMenu = new Menu("File");
         MenuItem importStudents = new MenuItem("Import students");
         MenuItem importClassrooms = new MenuItem("Import classrooms");
         MenuItem importCourses = new MenuItem("Import courses");
+        MenuItem importAttendance = new MenuItem("Import attendance");
         MenuItem exportSchedule = new MenuItem("Export schedule");
         MenuItem exit = new MenuItem("Exit");
         exit.setOnAction(event -> Platform.exit());
         importStudents.setOnAction(event -> importStudents());
         importClassrooms.setOnAction(event -> importClassrooms());
         importCourses.setOnAction(event -> importCourses());
-        fileMenu.getItems().addAll(importStudents, importClassrooms, importCourses, exportSchedule, new SeparatorMenuItem(), exit);
+        importAttendance.setOnAction(event -> importAttendance());
+        fileMenu.getItems().addAll(importStudents, importClassrooms, importCourses, importAttendance, exportSchedule,
+                new SeparatorMenuItem(), exit);
 
         Menu manageMenu = new Menu("Manage");
         MenuItem editCourses = new MenuItem("Courses");
@@ -124,7 +122,7 @@ public void start(Stage stage) {
 
         Menu helpMenu = new Menu("Help");
         MenuItem about = new MenuItem("About");
-        
+
         helpMenu.getItems().add(about);
 
         return new MenuBar(fileMenu, manageMenu, helpMenu);
@@ -135,12 +133,10 @@ public void start(Stage stage) {
         Button addButton = new Button("Add");
         Button editButton = new Button("Edit");
         Button deleteButton = new Button("Delete");
-        
 
         addButton.setMaxWidth(Double.MAX_VALUE);
         editButton.setMaxWidth(Double.MAX_VALUE);
         deleteButton.setMaxWidth(Double.MAX_VALUE);
-       
 
         addButton.setOnAction(event -> handleAction("Add"));
         editButton.setOnAction(event -> handleAction("Edit"));
@@ -197,38 +193,38 @@ public void start(Stage stage) {
         statusBar.setStyle("-fx-background-color: #8b8b8bff;");
         return statusBar;
     }
+
     private void showCourses() {
-    currentView = View.COURSES;
-    dataTable.getColumns().setAll(
-        column("Code", value -> String.valueOf(((Course) value).getCode())),
-        column("Duration (min)", value -> {
-            int d = ((Course) value).getExamDuration();
-            return d == 0 ? "-" : String.valueOf(d);
-        }),
-        column("Students", value -> {
-            Student[] arr = ((Course) value).getAttendees();
-            if (arr == null || arr.length == 0) return "-";
-            return Arrays.stream(arr)
-                    .map(Student::getID)
-                    .map(String::valueOf)
-                    .collect(Collectors.joining(", "));
-        }),
-        column("Classrooms", value -> {
-            ArrayList<Classroom> rooms = ((Course) value).getExamClass();
-            if (rooms == null || rooms.isEmpty()) return "-";
-            return rooms.stream()
-                    .map(Classroom::getName)
-                    .map(String::valueOf)
-                    .collect(Collectors.joining(", "));
-        })
-    );
-    dataTable.getItems().setAll(courses);
-    statusLabel.setText("Showing courses (" + courses.size() + ")");
-    fitColumns(4);
-}
+        currentView = View.COURSES;
+        dataTable.getColumns().setAll(
+                column("Code", value -> String.valueOf(((Course) value).getCode())),
+                column("Duration (min)", value -> {
+                    int d = ((Course) value).getExamDuration();
+                    return d == 0 ? "-" : String.valueOf(d);
+                }),
+                column("Students", value -> {
+                    Student[] arr = ((Course) value).getAttendees();
+                    if (arr == null || arr.length == 0)
+                        return "-";
+                    return Arrays.stream(arr)
+                            .map(Student::getID)
+                            .map(String::valueOf)
+                            .collect(Collectors.joining(", "));
+                }),
+                column("Classrooms", value -> {
+                    ArrayList<Classroom> rooms = ((Course) value).getExamClass();
+                    if (rooms == null || rooms.isEmpty())
+                        return "-";
+                    return rooms.stream()
+                            .map(Classroom::getName)
+                            .map(String::valueOf)
+                            .collect(Collectors.joining(", "));
+                }));
+        dataTable.getItems().setAll(courses);
+        statusLabel.setText("Showing courses (" + courses.size() + ")");
+        fitColumns(4);
+    }
 
-
-    
     private void showClassrooms() {
         currentView = View.CLASSROOMS;
         dataTable.getColumns().setAll(
@@ -237,8 +233,7 @@ public void start(Stage stage) {
                 column("Time Blocks", value -> String.valueOf(((Classroom) value).getBlocks().length)),
                 column("Booked", value -> String.valueOf(Arrays.stream(((Classroom) value).getBlocks())
                         .filter(Objects::nonNull)
-                        .count()))
-        );
+                        .count())));
         dataTable.getItems().setAll(classrooms);
         statusLabel.setText("Showing classrooms (" + classrooms.size() + ")");
         fitColumns(4);
@@ -251,8 +246,7 @@ public void start(Stage stage) {
                 column("Courses", value -> String.valueOf(courses.stream()
                         .filter(course -> Arrays.stream(course.getAttendees())
                                 .anyMatch(student -> student.getID() == ((Student) value).getID()))
-                        .count()))
-        );
+                        .count())));
         dataTable.getItems().setAll(students);
         statusLabel.setText("Showing students (" + students.size() + ")");
         fitColumns(2);
@@ -264,9 +258,7 @@ public void start(Stage stage) {
         chooser.setTitle(title);
         chooser.getExtensionFilters().clear();
         chooser.getExtensionFilters().add(
-    new FileChooser.ExtensionFilter("Data Files", "*.csv", "*.txt")
-);
-
+                new FileChooser.ExtensionFilter("Data Files", "*.csv", "*.txt"));
 
         File dataDir = new File("demo/data");
         if (dataDir.exists() && dataDir.isDirectory()) {
@@ -278,7 +270,8 @@ public void start(Stage stage) {
 
     private void importStudents() {
         File file = chooseCsvFile("Import students");
-        if (file == null) return;
+        if (file == null)
+            return;
         try {
             students.setAll(FileManager.readStudents(file.getAbsolutePath()));
             showStudents();
@@ -290,7 +283,8 @@ public void start(Stage stage) {
 
     private void importClassrooms() {
         File file = chooseCsvFile("Import classrooms");
-        if (file == null) return;
+        if (file == null)
+            return;
         try {
             classrooms.setAll(FileManager.readClassrooms(file.getAbsolutePath()));
             showClassrooms();
@@ -302,11 +296,27 @@ public void start(Stage stage) {
 
     private void importCourses() {
         File file = chooseCsvFile("Import courses");
-        if (file == null) return;
+        if (file == null)
+            return;
         try {
-            courses.setAll(FileManager.readCourses(file.getAbsolutePath(), new ArrayList<>(students), new ArrayList<>(classrooms)));
+            courses.setAll(FileManager.readCourses(file.getAbsolutePath(), new ArrayList<>(students),
+                    new ArrayList<>(classrooms)));
             showCourses();
             statusLabel.setText("Imported courses from " + file.getName());
+        } catch (Exception e) {
+            statusLabel.setText("Import failed: ");
+        }
+    }
+
+    private void importAttendance() {
+        File file = chooseCsvFile("Import attendance");
+        if (file == null)
+            return;
+        try {
+            FileManager.readAttendance(file.getAbsolutePath(), new ArrayList<>(students), new ArrayList<>(courses));
+            showCourses();
+            showStudents();
+            statusLabel.setText("Imported attendance from " + file.getName());
         } catch (Exception e) {
             statusLabel.setText("Import failed: ");
         }
@@ -318,7 +328,8 @@ public void start(Stage stage) {
         return col;
     }
 
-    private void seedSampleData() {                              //we will use this method to get the data into the tables in the furute when importing is working
+    private void seedSampleData() { // we will use this method to get the data into the tables in the furute when
+                                    // importing is working
         // Student alice = new Student(1001);
         // Student bob = new Student(1002);
         // Student charlie = new Student(1003);
@@ -329,18 +340,21 @@ public void start(Stage stage) {
         // Classroom roomC = new Classroom(303, 30);
         // classrooms.setAll(roomA, roomB, roomC);
 
-        // Course math = new Course(501, new Student[]{alice, bob}, new Classroom[]{roomA}, 90);
-        // Course cs = new Course(502, new Student[]{charlie}, new Classroom[]{roomB}, 60);
-        // Course physics = new Course(503, new Student[]{alice, charlie}, new Classroom[]{roomA, roomC}, 120);
+        // Course math = new Course(501, new Student[]{alice, bob}, new
+        // Classroom[]{roomA}, 90);
+        // Course cs = new Course(502, new Student[]{charlie}, new Classroom[]{roomB},
+        // 60);
+        // Course physics = new Course(503, new Student[]{alice, charlie}, new
+        // Classroom[]{roomA, roomC}, 120);
         // courses.setAll(math, cs, physics);
     }
 
     // private ArrayList<Integer> defaultHours() {
-    //     ArrayList<Integer> hours = new ArrayList<>();
-    //     for (int i = 0; i < 24; i++) {
-    //         hours.add(0);
-    //     }
-    //     return hours;
+    // ArrayList<Integer> hours = new ArrayList<>();
+    // for (int i = 0; i < 24; i++) {
+    // hours.add(0);
+    // }
+    // return hours;
     // }
 
     private void handleAction(String action) {
@@ -367,19 +381,26 @@ public void start(Stage stage) {
     }
 
     // placeholders kept for future logic wiring
-    public static void EditCourses() { }
+    public static void EditCourses() {
+    }
 
-    public static void EditClassrooms() { }
+    public static void EditClassrooms() {
+    }
 
-    public static void EditStudents() { }
+    public static void EditStudents() {
+    }
 
-    public static void DeleteCourse() { }
+    public static void DeleteCourse() {
+    }
 
-    public static void DeleteClasroom() { }
+    public static void DeleteClasroom() {
+    }
 
-    public static void DeleteStudent() { }
+    public static void DeleteStudent() {
+    }
 
-    public static void Search() { }
+    public static void Search() {
+    }
 
     public static void main(String[] args) {
         launch(args);
