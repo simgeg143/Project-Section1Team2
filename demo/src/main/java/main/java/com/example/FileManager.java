@@ -127,54 +127,34 @@ public static ArrayList<Course> readCourses(
 
     try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
         String line;
-        int currentCourseCode = -1;
+        boolean skipHeader = true;
 
         while ((line = br.readLine()) != null) {
             line = line.trim();
             if (line.isEmpty()) continue;
 
-            // 📌 CourseCode satırı
-            if (line.startsWith("CourseCode")) {
-                currentCourseCode = Integer.parseInt(
-                        line.replaceAll("\\D+", "")
-                );
+            if (skipHeader) {
+                skipHeader = false;
+                continue;
             }
 
-            // 📌 Öğrenci listesi satırı
-            else if (line.startsWith("[") && currentCourseCode != -1) {
 
-                line = line.replace("[", "").replace("]", "").replace("'", "");
-                String[] ids = line.split(",");
+            String digits = line.replaceAll("\\D+", "");
+            if (digits.isEmpty()) continue;
 
-                ArrayList<Student> attendees = new ArrayList<>();
+            int code = Integer.parseInt(digits);
 
-                for (String idStr : ids) {
-                    int id = Integer.parseInt(idStr.replaceAll("\\D+", ""));
-                    for (Student s : students) {
-                        if (s.getID() == id) {
-                            attendees.add(s);
-                            break;
-                        }
-                    }
-                }
-
-                // ⏱ Duration yok → placeholder (örn 90 dk)
-                int duration = 90;
-
-                courses.add(
-                    new Course(
-                        currentCourseCode,
-                        attendees.toArray(new Student[0]),
-                        new ArrayList<>(classrooms), // şimdilik hepsi
-                        duration
-                    )
-                );
-
-                currentCourseCode = -1;
-            }
+            courses.add(
+                new Course(
+                    code,
+                    new Student[0],          
+                    new ArrayList<>(),       
+                    90                       
+                )
+            );
         }
 
-    } catch (Exception e) {
+    } catch (IOException e) {
         e.printStackTrace();
     }
 

@@ -58,12 +58,13 @@ public class GUI extends Application {
     );
 
     courses.setAll(
-        FileManager.readCourses(
-            "data/sampleData_AllCourses.csv",
-            null,
-            null
-        )
-    );
+    FileManager.readCourses(
+        "data/sampleData_AllCourses.csv",
+        new ArrayList<>(students),
+        new ArrayList<>(classrooms)
+    )
+);
+
 
     System.out.println("Loaded students = " + students.size());
     System.out.println("Loaded classrooms = " + classrooms.size());
