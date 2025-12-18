@@ -170,6 +170,9 @@ public class Main {
         boolean done = false;
         int examDuration = calculateBlock(course.getExamDuration());
         Classroom bestfit = bestFittingClass(course, classrooms); // finding the best fitting classroom
+        if(course.alreadyScheduled){    // for not to schedule already scheduled exams
+            return false;
+        }
         if(bestfit == null){
             // findMultipleClasses(course, classrooms); ------------------------------------------------------------------------------------>  UNCOMMENT AFTER MAKING THE METHOD
         }
@@ -192,12 +195,28 @@ public class Main {
     }
 
     // TODO
-    public static void nextDay(){
-        /*
-            This method is used to reset all the classes's occupation, preparing it for the next day's exam calculation.
-        */
-        // MUST RESET CLASSROOMS HOUR BLOCKS AND ALSO REMOVE OR DISABLE THE ALREADY DONE EXAMS (using the "alreadyScheduled" flag in each course object)
+    public static void nextDay(ArrayList<Classroom> classrooms,ArrayList<Course> courses) {
+    //reset blocks
+    for (Classroom classroom : classrooms) {
+
+        Course[] blocks = classroom.getBlocks();
+        for (int i = 0; i < blocks.length; i++) {
+            blocks[i] = null;
+        }
+
+        classroom.availability = 24;
+        classroom.allBlocksFilled = false;
     }
+
+    for (Course course : courses) {
+        if (course.getExamClass() != null && !course.getExamClass().isEmpty()) {
+            course.alreadyScheduled = true;
+        }
+    }
+
+    System.out.println("Everything is ready for the next day.");
+}
+
 
     // TODO
     public static boolean allClassHoursFilled(){
@@ -226,7 +245,7 @@ public class Main {
                 }
                 days.add(dayCourses);
             }
-            nextDay();
+            nextDay(classrooms, courses);
         }
         
         

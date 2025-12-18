@@ -21,7 +21,7 @@ public class FileManager {
 
     public static List<String[]> FileReader(String filePath) {
         System.out.println("Trying to read: " + filePath);
-System.out.println("Exists? " + Files.exists(Path.of(filePath)));
+// System.out.println("Exists? " + Files.exists(Path.of(filePath)));
 
         List<String[]> rows = new ArrayList<>();
 
