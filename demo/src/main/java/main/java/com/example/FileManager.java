@@ -52,25 +52,51 @@ public class FileManager {
         ArrayList<Student> students = new ArrayList<>();
         List<String[]> rows = FileReader(filePath);
 
-        for (String[] row : rows) {
-            int id = Integer.parseInt(row[0]);
-            students.add(new Student(id));
+         for (String[] row : rows) {
+            if (row.length == 0) continue;
+            String digits = row[0].replaceAll("\\D+", "");
+            if (digits.isEmpty()) continue;
+            try {
+                int id = Integer.parseInt(digits);
+                students.add(new Student(id));
+            } catch (NumberFormatException ignored) {
+            }
         }
 
         return students;
     }
+    
 
     public static ArrayList<Classroom> readClassrooms(String filePath) {
         ArrayList<Classroom> classrooms = new ArrayList<>();
         List<String[]> rows = FileReader(filePath);
 
         for (String[] row : rows) {
-            int name = Integer.parseInt(row[0]);
-            int capacity = Integer.parseInt(row[1]);
-            classrooms.add(new Classroom(name, capacity));
-        }
+            if (row.length == 0) continue;
 
-        return classrooms;
+            // files can be "Classroom_01;40" or "101,40"
+            String first = row[0];
+            String second = row.length > 1 ? row[1] : "";
+            if (first.contains(";")) {
+                String[] parts = first.split(";");
+                if (parts.length > 0) first = parts[0];
+                if (parts.length > 1) second = parts[1];
+            }
+
+            String nameDigits = first.replaceAll("\\D+", "");
+            String capDigits = second.replaceAll("\\D+", "");
+            if (nameDigits.isEmpty() || capDigits.isEmpty()) continue;
+            try {
+                int name = Integer.parseInt(nameDigits);
+                int capacity = Integer.parseInt(capDigits);
+                classrooms.add(new Classroom(name, capacity));
+            } catch (NumberFormatException ignored) {
+            }
+            
+        }
+        return classrooms ;
+
+       
     }
 
     public static ArrayList<Course> readCourses(
