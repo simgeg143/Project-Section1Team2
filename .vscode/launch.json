@@ -6,6 +6,13 @@
             "type": "java",
             "name": "GUI",
             "request": "launch",
+            "mainClass": "main.java.com.example.GUI",
+            "projectName": "Project-Section1Team2_a1e94631"
+        },
+        {
+            "type": "java",
+            "name": "GUI",
+            "request": "launch",
             "mainClass": "main.java.com.example.Main",
             "projectName": "Project-Section1Team2_57e304cf"
         },

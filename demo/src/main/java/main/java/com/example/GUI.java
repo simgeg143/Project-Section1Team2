@@ -45,30 +45,59 @@ public class GUI extends Application {
     private final ObservableList<Course> courses = FXCollections.observableArrayList();
     private final ObservableList<Classroom> classrooms = FXCollections.observableArrayList();
 
+    private void loadInitialData() {
+
+    System.out.println("Working dir = " + System.getProperty("user.dir"));
+
+    students.setAll(
+        FileManager.readStudents("data/sampleData_AllStudents.csv")
+    );
+
+    classrooms.setAll(
+        FileManager.readClassrooms("data/sampleData_AllClassroomsAndTheirCapacities.csv")
+    );
+
+    courses.setAll(
+        FileManager.readCourses(
+            "data/sampleData_AllCourses.csv",
+            null,
+            null
+        )
+    );
+
+    System.out.println("Loaded students = " + students.size());
+    System.out.println("Loaded classrooms = " + classrooms.size());
+    System.out.println("Loaded courses = " + courses.size());
+}
+
+
+
     @Override
-    public void start(Stage stage) {
-        stage.setTitle("Exam Scheduler");
+public void start(Stage stage) {
+    stage.setTitle("Exam Scheduler");
 
-        statusLabel = new Label("Ready");
-        seedSampleData();
-        contentArea = buildContentArea();
+    statusLabel = new Label("Ready");
 
-        MenuBar menuBar = buildMenuBar();
-        VBox navigation = buildNavigationPanel();
-        HBox statusBar = buildStatusBar();
+    loadInitialData();   // 🔥 BU SATIR ŞART
+    contentArea = buildContentArea();
 
-        BorderPane root = new BorderPane();
-        root.setTop(menuBar);
-        root.setLeft(navigation);
-        root.setCenter(contentArea);
-        root.setBottom(statusBar);
+    MenuBar menuBar = buildMenuBar();
+    VBox navigation = buildNavigationPanel();
+    HBox statusBar = buildStatusBar();
 
-        Scene scene = new Scene(root, 900, 800);
-        stage.setScene(scene);
-        stage.show();
+    BorderPane root = new BorderPane();
+    root.setTop(menuBar);
+    root.setLeft(navigation);
+    root.setCenter(contentArea);
+    root.setBottom(statusBar);
 
-        showCourses(); // default view on launch
-    }
+    Scene scene = new Scene(root, 900, 800);
+    stage.setScene(scene);
+    stage.show();
+
+    showCourses(); // default view
+}
+
 
     private MenuBar buildMenuBar() {
         Menu fileMenu = new Menu("File");
@@ -167,43 +196,38 @@ public class GUI extends Application {
         statusBar.setStyle("-fx-background-color: #8b8b8bff;");
         return statusBar;
     }
-
     private void showCourses() {
-        currentView = View.COURSES;
-        dataTable.getColumns().setAll(
-                column("Code", value -> String.valueOf(((Course) value).getCode())),
-                column("Duration (min)", value -> String.valueOf(((Course) value).getExamDuration())),
-                column("Students", value -> Arrays.stream(((Course) value).getAttendees())
-                        .map(Student::getID)
-                        .map(String::valueOf)
-                        .collect(Collectors.joining(", "))),
-                column("Classrooms", value -> {
-                    Object examClassrooms = ((Course) value).getExamClass();
-                    if (examClassrooms == null) {
-                        return "";
-                    }
-                    if (examClassrooms instanceof Classroom[] rooms) {
-                        return Arrays.stream(rooms)
-                                .map(Classroom::getName)
-                                .map(String::valueOf)
-                                .collect(Collectors.joining(", "));
-                    }
-                    if (examClassrooms instanceof Iterable<?> iterable) {
-                        return StreamSupport.stream(iterable.spliterator(), false)
-                                .filter(Objects::nonNull)
-                                .map(room -> (Classroom) room)
-                                .map(Classroom::getName)
-                                .map(String::valueOf)
-                                .collect(Collectors.joining(", "));
-                    }
-                    return "";
-                })
-        );
-        dataTable.getItems().setAll(courses);
-        statusLabel.setText("Showing courses (" + courses.size() + ")");
-        fitColumns(4);
-    }
+    currentView = View.COURSES;
+    dataTable.getColumns().setAll(
+        column("Code", value -> String.valueOf(((Course) value).getCode())),
+        column("Duration (min)", value -> {
+            int d = ((Course) value).getExamDuration();
+            return d == 0 ? "-" : String.valueOf(d);
+        }),
+        column("Students", value -> {
+            Student[] arr = ((Course) value).getAttendees();
+            if (arr == null || arr.length == 0) return "-";
+            return Arrays.stream(arr)
+                    .map(Student::getID)
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(", "));
+        }),
+        column("Classrooms", value -> {
+            ArrayList<Classroom> rooms = ((Course) value).getExamClass();
+            if (rooms == null || rooms.isEmpty()) return "-";
+            return rooms.stream()
+                    .map(Classroom::getName)
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(", "));
+        })
+    );
+    dataTable.getItems().setAll(courses);
+    statusLabel.setText("Showing courses (" + courses.size() + ")");
+    fitColumns(4);
+}
 
+
+    
     private void showClassrooms() {
         currentView = View.CLASSROOMS;
         dataTable.getColumns().setAll(
@@ -237,9 +261,13 @@ public class GUI extends Application {
         Stage stage = (Stage) statusLabel.getScene().getWindow();
         FileChooser chooser = new FileChooser();
         chooser.setTitle(title);
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
+        chooser.getExtensionFilters().clear();
+        chooser.getExtensionFilters().add(
+    new FileChooser.ExtensionFilter("Data Files", "*.csv", "*.txt")
+);
 
-        File dataDir = new File("data");
+
+        File dataDir = new File("demo/data");
         if (dataDir.exists() && dataDir.isDirectory()) {
             chooser.setInitialDirectory(dataDir);
         }
