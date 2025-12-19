@@ -335,6 +335,52 @@ public class FileManager {
         e.printStackTrace();
     }
 }
+public static void exportStudents(
+        ArrayList<Student> students,
+        String filePath) {
+
+    if (students == null || filePath == null) {
+        return;
+    }
+
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+
+        // header
+        bw.write("StudentID");
+        bw.newLine();
+
+        for (Student s : students) {
+            if (s == null) continue;
+            bw.write(String.valueOf(s.getID()));
+            bw.newLine();
+        }
+
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+public static void exportClassrooms(ArrayList<Classroom> classrooms, String filePath) {
+
+    if (classrooms == null || filePath == null) return;
+
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+
+        
+        bw.write("Room;Capacity");
+        bw.newLine();
+
+        for (Classroom c : classrooms) {
+            if (c == null) continue;
+            bw.write(c.getName() + ";" + c.getCapacity());
+            bw.newLine();
+        }
+
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+
+
 
 
     public static void editStudent(
@@ -463,7 +509,29 @@ public static void editAttendanceStudent(String filePath, int courseCode, Studen
 
 
 
+public static void exportCourses(ArrayList<Course> courses, String filePath) {
+    if (courses == null || filePath == null) {
+        return;
+    }
 
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+        
+        bw.write("CourseCode,ExamDuration");
+        bw.newLine();
+
+        for (Course c : courses) {
+            if (c == null) continue;
+            
+           
+            bw.write(c.getCode() + "," + c.getExamDuration());
+            bw.newLine();
+        }
+
+    } catch (IOException e) {
+        System.out.println("Course export error: " + e.getMessage());
+        e.printStackTrace();
+    }
+}
 
 
 
