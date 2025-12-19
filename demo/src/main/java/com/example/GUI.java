@@ -222,24 +222,9 @@ public class GUI extends Application {
                 return;
             }
 
-            statusLabel.setText("Calculating schedule...");
-            Task<Void> task = new Task<>() {
-                @Override
-                protected Void call() {
-                    Main.calculate(new ArrayList<>(classrooms), new ArrayList<>(courses), new ArrayList<>(students));
-                    return null;
-                }
-            };
+            Main.calculate(new ArrayList<>(classrooms), new ArrayList<>(courses), new ArrayList<>(students));
+            showStudentSchedule(selected);
 
-            task.setOnSucceeded(ev -> {
-                statusLabel.setText("Schedule ready.");
-                showStudentSchedule(selected);
-            });
-            task.setOnFailed(ev -> statusLabel.setText(
-                    "Scheduling failed: "
-                            + (task.getException() == null ? "Unknown error" : task.getException().getMessage())));
-
-            new Thread(task, "student-schedule-calc").start();
         });
 
         HBox studentsHeader = new HBox(8, studentsLabel, studentScheduleButton);
@@ -1082,6 +1067,7 @@ public class GUI extends Application {
     }
 
     public void showStudentSchedule(Student student) {
+        System.out.println("POPUP ÇAĞRILDI (STUDENT)");
         if (student == null) {
             statusLabel.setText("No student selected.");
             return;
@@ -1148,6 +1134,7 @@ public class GUI extends Application {
     }
 
     public void showCourseSchedule(Course course) {
+        System.out.println("POPUP ÇAĞRILDI (COURSE)");
         if (course == null) {
             statusLabel.setText("No course selected.");
             return;
@@ -1190,6 +1177,7 @@ public class GUI extends Application {
     }
 
     public void showClassroomSchedule(Classroom classroom) {
+        System.out.println("POPUP ÇAĞRILDI (CLASS)");
         if (classroom == null) {
             statusLabel.setText("No classroom selected.");
             return;
