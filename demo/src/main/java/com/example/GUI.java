@@ -148,7 +148,6 @@ public class GUI extends Application {
 
     private VBox buildNavigationPanel() {
         Label navTitle = new Label("Actions");
-        Button addButton = new Button("Add");
         Button editButton = new Button("Edit");
         Button deleteButton = new Button("Delete");
         Label searchLabel = new Label("Search");
@@ -156,15 +155,13 @@ public class GUI extends Application {
         searchField.setPromptText("Type to filter (not wired yet)");
         searchField.setMaxWidth(Double.MAX_VALUE);
 
-        addButton.setMaxWidth(Double.MAX_VALUE);
         editButton.setMaxWidth(Double.MAX_VALUE);
         deleteButton.setMaxWidth(Double.MAX_VALUE);
 
-        addButton.setOnAction(event -> openAddDialog());
         editButton.setOnAction(event -> openEditDialog());
         deleteButton.setOnAction(event -> deleteSelectedItem());
 
-        VBox navigation = new VBox(10, navTitle, addButton, editButton, deleteButton, searchLabel, searchField);
+        VBox navigation = new VBox(10, navTitle, editButton, deleteButton, searchLabel, searchField);
         navigation.setPadding(new Insets(12));
         navigation.setPrefWidth(180);
         navigation.setStyle("-fx-background-color: #7c7a7aff;");
@@ -174,27 +171,48 @@ public class GUI extends Application {
 
     private VBox buildContentArea() {
         Label coursesLabel = new Label("Courses");
-        Button importCoursesButton = new Button("Import");
-        importCoursesButton.setOnAction(e -> importCourses());
-        HBox coursesHeader = new HBox(8, coursesLabel, importCoursesButton);
+        Button courseScheduleButton = new Button("Exam schedule");
+        courseScheduleButton.setOnAction(e -> {
+            Course selected = coursesTable.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                showCourseSchedule(selected);
+            } else {
+                statusLabel.setText("Select a course to view its schedule.");
+            }
+        });
+        HBox coursesHeader = new HBox(8, coursesLabel, courseScheduleButton);
         coursesTable = buildCoursesTable();
         VBox coursesBox = new VBox(6, coursesHeader, coursesTable);
         VBox.setVgrow(coursesTable, Priority.ALWAYS);
         VBox.setVgrow(coursesBox, Priority.ALWAYS);
 
         Label classroomsLabel = new Label("Classrooms");
-        Button importClassroomsButton = new Button("Import");
-        importClassroomsButton.setOnAction(e -> importClassrooms());
-        HBox classroomsHeader = new HBox(8, classroomsLabel, importClassroomsButton);
+        Button classroomScheduleButton = new Button("Exam schedule");
+        classroomScheduleButton.setOnAction(e -> {
+            Classroom selected = classroomsTable.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                showClassroomSchedule(selected);
+            } else {
+                statusLabel.setText("Select a classroom to view its schedule.");
+            }
+        });
+        HBox classroomsHeader = new HBox(8, classroomsLabel, classroomScheduleButton);
         classroomsTable = buildClassroomsTable();
         VBox classroomsBox = new VBox(6, classroomsHeader, classroomsTable);
         VBox.setVgrow(classroomsTable, Priority.ALWAYS);
         VBox.setVgrow(classroomsBox, Priority.ALWAYS);
 
         Label studentsLabel = new Label("Students");
-        Button importStudentsButton = new Button("Import");
-        importStudentsButton.setOnAction(e -> importStudents());
-        HBox studentsHeader = new HBox(8, studentsLabel, importStudentsButton);
+        Button studentScheduleButton = new Button("Exam schedule");
+        studentScheduleButton.setOnAction(e -> {
+            Student selected = studentsTable.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                showStudentSchedule(selected);
+            } else {
+                statusLabel.setText("Select a student to view their schedule.");
+            }
+        });
+        HBox studentsHeader = new HBox(8, studentsLabel, studentScheduleButton);
         studentsTable = buildStudentsTable();
         VBox studentsBox = new VBox(6, studentsHeader, studentsTable);
         VBox.setVgrow(studentsTable, Priority.ALWAYS);
