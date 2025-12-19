@@ -503,7 +503,29 @@ public static void editAttendanceStudent(String filePath, int courseCode, Studen
 
 
 
+public static void exportCourses(ArrayList<Course> courses, String filePath) {
+    if (courses == null || filePath == null) {
+        return;
+    }
 
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+        
+        bw.write("CourseCode,ExamDuration");
+        bw.newLine();
+
+        for (Course c : courses) {
+            if (c == null) continue;
+            
+           
+            bw.write(c.getCode() + "," + c.getExamDuration());
+            bw.newLine();
+        }
+
+    } catch (IOException e) {
+        System.out.println("Course export error: " + e.getMessage());
+        e.printStackTrace();
+    }
+}
 
 
 
