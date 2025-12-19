@@ -19,12 +19,15 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Popup;
 import javafx.util.Duration;
 
@@ -145,7 +148,7 @@ public class GUI extends Application {
         editButton.setMaxWidth(Double.MAX_VALUE);
         deleteButton.setMaxWidth(Double.MAX_VALUE);
 
-        addButton.setOnAction(event -> handleAction("Add"));
+        addButton.setOnAction(event -> openAddDialog());
         editButton.setOnAction(event -> handleAction("Edit"));
         deleteButton.setOnAction(event -> deleteSelectedItem());
 
@@ -435,6 +438,183 @@ public class GUI extends Application {
         }
 
         return true;
+    }
+
+    private void openAddDialog() {
+        switch (currentView) {
+            case STUDENTS -> showAddStudentDialog();
+            case CLASSROOMS -> showAddClassroomDialog();
+            case COURSES -> showAddCourseDialog();
+        }
+    }
+
+    private Stage createDialog(String title) {
+        Stage dialog = new Stage();
+        dialog.setTitle(title);
+        dialog.initOwner(primaryStage);
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        return dialog;
+    }
+
+    private void showAddStudentDialog() {
+        Stage dialog = createDialog("Add student");
+
+        GridPane form = new GridPane();
+        form.setPadding(new Insets(12));
+        form.setHgap(8);
+        form.setVgap(8);
+
+        Label idLabel = new Label("Student ID:");
+        TextField idField = new TextField();
+        form.addRow(0, idLabel, idField);
+
+        Label feedback = new Label();
+        Button save = new Button("Save and add");
+
+        save.setOnAction(event -> {
+            try {
+                int id = Integer.parseInt(idField.getText().trim());
+                students.add(new Student(id));
+                dialog.close();
+                refreshCurrentView();
+                statusLabel.setText("Student added.");
+            } catch (NumberFormatException ex) {
+                feedback.setText("Enter a valid numeric ID.");
+            }
+        });
+
+        VBox layout = new VBox(10, form, save, feedback);
+        layout.setPadding(new Insets(12));
+        dialog.setScene(new Scene(layout));
+        dialog.showAndWait();
+    }
+
+    private void showAddClassroomDialog() {
+        Stage dialog = createDialog("Add classroom");
+
+        GridPane form = new GridPane();
+        form.setPadding(new Insets(12));
+        form.setHgap(8);
+        form.setVgap(8);
+
+        Label nameLabel = new Label("Room number:");
+        TextField nameField = new TextField();
+        Label capacityLabel = new Label("Capacity:");
+        TextField capacityField = new TextField();
+
+        form.addRow(0, nameLabel, nameField);
+        form.addRow(1, capacityLabel, capacityField);
+
+        Label feedback = new Label();
+        Button save = new Button("Save and add");
+
+        save.setOnAction(event -> {
+            try {
+                int name = Integer.parseInt(nameField.getText().trim());
+                int capacity = Integer.parseInt(capacityField.getText().trim());
+                classrooms.add(new Classroom(name, capacity));
+                dialog.close();
+                refreshCurrentView();
+                statusLabel.setText("Classroom added.");
+            } catch (NumberFormatException ex) {
+                feedback.setText("Enter valid numeric values.");
+            }
+        });
+
+        VBox layout = new VBox(10, form, save, feedback);
+        layout.setPadding(new Insets(12));
+        dialog.setScene(new Scene(layout));
+        dialog.showAndWait();
+    }
+
+    private void showAddCourseDialog() {
+        Stage dialog = createDialog("Add course");
+
+        GridPane form = new GridPane();
+        form.setPadding(new Insets(12));
+        form.setHgap(8);
+        form.setVgap(8);
+
+        Label codeLabel = new Label("Course code:");
+        TextField codeField = new TextField();
+        Label durationLabel = new Label("Duration (minutes):");
+        TextField durationField = new TextField();
+        Label studentIdsLabel = new Label("Student IDs (comma-separated):");
+        TextField studentIdsField = new TextField();
+        Label classroomIdsLabel = new Label("Classroom numbers (comma-separated):");
+        TextField classroomIdsField = new TextField();
+
+        form.addRow(0, codeLabel, codeField);
+        form.addRow(1, durationLabel, durationField);
+        form.addRow(2, studentIdsLabel, studentIdsField);
+        form.addRow(3, classroomIdsLabel, classroomIdsField);
+
+        Label feedback = new Label();
+        Button save = new Button("Save and add");
+
+        save.setOnAction(event -> {
+            try {
+                int code = Integer.parseInt(codeField.getText().trim());
+                int duration = Integer.parseInt(durationField.getText().trim());
+                Student[] attendees = findStudentsByIds(studentIdsField.getText());
+                ArrayList<Classroom> examRooms = findClassroomsByIds(classroomIdsField.getText());
+
+                Course course = new Course(code, attendees, examRooms, duration);
+                courses.add(course);
+                dialog.close();
+                refreshCurrentView();
+                statusLabel.setText("Course added.");
+            } catch (NumberFormatException ex) {
+                feedback.setText("Code and duration must be numeric.");
+            }
+        });
+
+        VBox layout = new VBox(10, form, save, feedback);
+        layout.setPadding(new Insets(12));
+        dialog.setScene(new Scene(layout));
+        dialog.showAndWait();
+    }
+
+    private Student[] findStudentsByIds(String text) {
+        if (text == null || text.isBlank()) {
+            return new Student[0];
+        }
+        ArrayList<Student> matched = new ArrayList<>();
+        Arrays.stream(text.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .forEach(idStr -> {
+                    try {
+                        int id = Integer.parseInt(idStr);
+                        students.stream()
+                                .filter(s -> s.getID() == id)
+                                .findFirst()
+                                .ifPresent(matched::add);
+                    } catch (NumberFormatException ignored) {
+                    }
+                });
+        return matched.toArray(new Student[0]);
+    }
+
+    private ArrayList<Classroom> findClassroomsByIds(String text) {
+        ArrayList<Classroom> matched = new ArrayList<>();
+        if (text == null || text.isBlank()) {
+            return matched;
+        }
+        Arrays.stream(text.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .forEach(idStr -> {
+                    try {
+                        int id = Integer.parseInt(idStr);
+                        classrooms.stream()
+                                .filter(c -> c.getName() == id)
+                                .findFirst()
+                                .ifPresent(matched::add);
+                    } catch (NumberFormatException ignored) {
+                    }
+                });
+        return matched;
     }
 
     private void showToast(Stage owner, String message) {
