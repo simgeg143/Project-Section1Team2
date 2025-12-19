@@ -3,13 +3,12 @@ package com.example;
 import java.util.ArrayList;
 
 public class Main {
-
     public static ArrayList<Student> students = new ArrayList<>();
     public static ArrayList<Course> courses = new ArrayList<>();
     public static ArrayList<Classroom> classrooms = new ArrayList<>();
     /*
      * 
-     * BLOCK HERE -------------------------------------------->
+     * <-------------------- CAN CHANGE THE SIZE OF EACH -------------------->
      * Each exam day is considered as 12 hours, from 9 a.m to 9 p.m.
      * eachBlockDuration is set in minutes.
      * blocksPerDay is calculated based on eachBlockDuration.
@@ -133,7 +132,33 @@ public class Main {
         return bestFit;
     }
 
-    public static boolean findMultipleClasses(Course course, ArrayList<Classroom> classrooms) {
+    public static boolean hasMinimumBreakTime(Course course, int proposedStartBlock){
+        /*
+            Checks if scheduling this course at the proposed time would violate the 30-minute break rule.
+            Returns true if all students have adequate break time, false otherwise.
+        */
+        if (course == null || course.getAttendees() == null || course.getAttendees().length == 0) return true;
+        int proposedTimeInMinutes = proposedStartBlock * eachBlockDuration + (9 * 60); // add day start offset
+        int examDurationInMinutes = course.getExamDuration();
+        int proposedEndTime = proposedTimeInMinutes + examDurationInMinutes;
+        
+        for(Student attendee : course.getAttendees()){
+            if(attendee.currentDayExams == 1){
+                int firstExamTime = attendee.getFirstExamTime(); // already absolute minutes since midnight
+                int firstExamDuration = attendee.getFirstExamDuration();
+                int firstExamEndTime = firstExamTime + firstExamDuration;
+                
+                // New exam after the first exam -> ensure >= 30 min gap
+                if(proposedTimeInMinutes >= firstExamEndTime){
+                    if(proposedTimeInMinutes - firstExamEndTime < 30) return false;
+                }
+                // New exam before the first exam -> ensure >= 30 min gap
+                else if(firstExamTime >= proposedEndTime){
+                    if(firstExamTime - proposedEndTime < 30) return false;
+                }
+                // Overlap -> invalid
+                else{
+                    return false;
                 }
             }
         }
