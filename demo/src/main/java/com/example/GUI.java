@@ -179,6 +179,117 @@ public class GUI extends Application {
         return navigation;
     }
 
+    public void showAllCoursesSchedule() {
+        Stage dialog = new Stage();
+        dialog.initOwner(primaryStage);
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setTitle("All Courses Exam Schedule");
+
+        TableView<Course> table = new TableView<>();
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TableColumn<Course, String> colCourse = new TableColumn<>("Course");
+        colCourse.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().getCode())));
+
+        TableColumn<Course, String> colRoom = new TableColumn<>("Classroom");
+        colRoom.setCellValueFactory(c -> new SimpleStringProperty(
+                (c.getValue().getExamClass() == null || c.getValue().getExamClass().isEmpty())
+                        ? "-"
+                        : c.getValue().getExamClass()
+                                .stream()
+                                .map(r -> String.valueOf(r.getName()))
+                                .collect(Collectors.joining(", "))));
+
+        TableColumn<Course, String> colTime = new TableColumn<>("Time");
+        colTime.setCellValueFactory(c -> new SimpleStringProperty(
+                c.getValue().getTimeOfExam() == null
+                        ? "-"
+                        : c.getValue().getTimeOfExam() + " - " + c.getValue().getEndOfExam()));
+
+        table.getColumns().addAll(colCourse, colRoom, colTime);
+        table.getItems().addAll(courses);
+
+        VBox root = new VBox(10, table);
+        root.setPadding(new Insets(10));
+
+        dialog.setScene(new Scene(root, 700, 400));
+        dialog.showAndWait();
+    }
+
+    public void showAllClassroomSchedules() {
+        Stage dialog = new Stage();
+        dialog.initOwner(primaryStage);
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setTitle("All Classroom Exam Schedule");
+
+        TableView<Course> table = new TableView<>();
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TableColumn<Course, String> colRoom = new TableColumn<>("Classroom");
+        colRoom.setCellValueFactory(c -> new SimpleStringProperty(
+                c.getValue().getExamClass() == null || c.getValue().getExamClass().isEmpty()
+                        ? "-"
+                        : c.getValue().getExamClass()
+                                .stream()
+                                .map(r -> String.valueOf(r.getName()))
+                                .collect(Collectors.joining(", "))));
+
+        TableColumn<Course, String> colCourse = new TableColumn<>("Course");
+        colCourse.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().getCode())));
+
+        TableColumn<Course, String> colTime = new TableColumn<>("Time");
+        colTime.setCellValueFactory(c -> new SimpleStringProperty(
+                c.getValue().getTimeOfExam() == null
+                        ? "-"
+                        : c.getValue().getTimeOfExam() + " - " + c.getValue().getEndOfExam()));
+
+        table.getColumns().addAll(colRoom, colCourse, colTime);
+        table.getItems().addAll(courses);
+
+        VBox root = new VBox(10, table);
+        root.setPadding(new Insets(10));
+
+        dialog.setScene(new Scene(root, 700, 400));
+        dialog.showAndWait();
+    }
+
+    public void showAllStudentsSchedule() {
+        Stage dialog = new Stage();
+        dialog.initOwner(primaryStage);
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setTitle("All Students Exam Schedule");
+
+        TableView<Course> table = new TableView<>();
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TableColumn<Course, String> colCourse = new TableColumn<>("Course");
+        colCourse.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().getCode())));
+
+        TableColumn<Course, String> colRoom = new TableColumn<>("Classroom");
+        colRoom.setCellValueFactory(c -> new SimpleStringProperty(
+                c.getValue().getExamClass() == null || c.getValue().getExamClass().isEmpty()
+                        ? "-"
+                        : c.getValue().getExamClass()
+                                .stream()
+                                .map(r -> String.valueOf(r.getName()))
+                                .collect(Collectors.joining(", "))));
+
+        TableColumn<Course, String> colTime = new TableColumn<>("Time");
+        colTime.setCellValueFactory(c -> new SimpleStringProperty(
+                c.getValue().getTimeOfExam() == null
+                        ? "-"
+                        : c.getValue().getTimeOfExam() + " - " + c.getValue().getEndOfExam()));
+
+        table.getColumns().addAll(colCourse, colRoom, colTime);
+        table.getItems().addAll(courses);
+
+        VBox root = new VBox(10, table);
+        root.setPadding(new Insets(10));
+
+        dialog.setScene(new Scene(root, 700, 400));
+        dialog.showAndWait();
+    }
+
     private VBox buildContentArea() {
         Label coursesLabel = new Label("Courses");
         Button courseScheduleButton = new Button("Exam schedule");
@@ -188,7 +299,7 @@ public class GUI extends Application {
             if (selected != null) {
                 showCourseSchedule(selected);
             } else {
-                statusLabel.setText("Select a course to view its schedule.");
+                showAllCoursesSchedule();
             }
         });
         HBox coursesHeader = new HBox(8, coursesLabel, courseScheduleButton);
@@ -200,11 +311,12 @@ public class GUI extends Application {
         Label classroomsLabel = new Label("Classrooms");
         Button classroomScheduleButton = new Button("Exam schedule");
         classroomScheduleButton.setOnAction(e -> {
+            Main.calculate(new ArrayList<>(classrooms), new ArrayList<>(courses), new ArrayList<>(students));
             Classroom selected = classroomsTable.getSelectionModel().getSelectedItem();
             if (selected != null) {
                 showClassroomSchedule(selected);
             } else {
-                statusLabel.setText("Select a classroom to view its schedule.");
+                showAllClassroomSchedules();
             }
         });
         HBox classroomsHeader = new HBox(8, classroomsLabel, classroomScheduleButton);
@@ -216,14 +328,13 @@ public class GUI extends Application {
         Label studentsLabel = new Label("Students");
         Button studentScheduleButton = new Button("Exam schedule");
         studentScheduleButton.setOnAction(e -> {
-            Student selected = studentsTable.getSelectionModel().getSelectedItem();
-            if (selected == null) {
-                statusLabel.setText("Select a student to view their schedule.");
-                return;
-            }
-
             Main.calculate(new ArrayList<>(classrooms), new ArrayList<>(courses), new ArrayList<>(students));
-            showStudentSchedule(selected);
+            Student selected = studentsTable.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                showStudentSchedule(selected);
+            } else {
+                showAllStudentsSchedule();
+            }
 
         });
 
