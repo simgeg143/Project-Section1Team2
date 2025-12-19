@@ -5,7 +5,7 @@ public class Classroom {
     int name;
     int capacity;
     Course blocks[];
-    int availability = 24;
+    int availability = Main.blocksPerDay;
     boolean allBlocksFilled = false;
 
 
@@ -13,7 +13,7 @@ public class Classroom {
         this.name = name;
         this.capacity = capacity;
         this.blocks =  new Course[availability]; 
-                // an array with a fixed 24 index length, each representing the block hours. 
+                // an array with a fixed length, each representing the block hours. 
                 // To determine which course each block is taken by, we hold a course object in each index.
                 // a "null" value means unallocated block (empty).
         for(int i = 0; i < blocks.length; i++){
