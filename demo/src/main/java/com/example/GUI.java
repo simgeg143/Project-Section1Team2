@@ -672,12 +672,16 @@ public class GUI extends Application {
             if (filtered.size() != attendees.length) {
                 course.setAttendees(filtered.toArray(new Student[0]));
             }
-            FileManager.exportAttendance(
-                new ArrayList<>(courses),
-                "data/sampleData_AllAttendanceLists.csv"
-);
 
         }
+        FileManager.exportAttendance(
+            new ArrayList<>(courses),
+  "data/sampleData_AllAttendanceLists.csv"
+        );
+        FileManager.exportStudents(
+            new ArrayList<>(students),
+            "data/sampleData_AllStudents.csv"
+        );
 
         return true;
     }
@@ -731,6 +735,10 @@ public class GUI extends Application {
             try {
                 int id = Integer.parseInt(idField.getText().trim());
                 students.add(new Student(id));
+                FileManager.exportStudents(
+            new ArrayList<>(students),
+            "data/sampleData_AllStudents.csv"
+        );
                 dialog.close();
                 refreshCurrentView();
                 statusLabel.setText("Student added.");
@@ -764,6 +772,10 @@ public class GUI extends Application {
             try {
                 int id = Integer.parseInt(idField.getText().trim());
                 student.setID(id);
+                FileManager.exportStudents(
+            new ArrayList<>(students),
+            "data/sampleData_AllStudents.csv"
+        );
                 dialog.close();
                 refreshCurrentView();
                 statusLabel.setText("Student updated.");
@@ -802,6 +814,10 @@ public class GUI extends Application {
                 int name = Integer.parseInt(nameField.getText().trim());
                 int capacity = Integer.parseInt(capacityField.getText().trim());
                 classrooms.add(new Classroom(name, capacity));
+                FileManager.exportClassrooms(
+    new ArrayList<>(classrooms),
+    "data/sampleData_AllClassroomsAndTheirCapacities.csv"
+);
                 dialog.close();
                 refreshCurrentView();
                 statusLabel.setText("Classroom added.");
@@ -841,6 +857,10 @@ public class GUI extends Application {
                 int capacity = Integer.parseInt(capacityField.getText().trim());
                 classroom.setName(name);
                 classroom.setCapacity(capacity);
+                FileManager.exportClassrooms(
+    new ArrayList<>(classrooms),
+    "data/sampleData_AllClassroomsAndTheirCapacities.csv"
+);
                 dialog.close();
                 refreshCurrentView();
                 statusLabel.setText("Classroom updated.");
@@ -961,6 +981,7 @@ public class GUI extends Application {
                     new ArrayList<>(courses),
                     "data/sampleData_AllAttendanceLists.csv"
 );
+
 
 
                 dialog.close();

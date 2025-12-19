@@ -335,6 +335,46 @@ public class FileManager {
         e.printStackTrace();
     }
 }
+public static void exportStudents(
+        ArrayList<Student> students,
+        String filePath) {
+
+    if (students == null || filePath == null) {
+        return;
+    }
+
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+
+        // header
+        bw.write("StudentID");
+        bw.newLine();
+
+        for (Student s : students) {
+            if (s == null) continue;
+            bw.write(String.valueOf(s.getID()));
+            bw.newLine();
+        }
+
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+public static void exportClassrooms(ArrayList<Classroom> classrooms, String filePath) {
+
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+
+        for (Classroom c : classrooms) {
+            bw.write(String.valueOf(c.getName()));
+            bw.write(",");
+            bw.write(String.valueOf(c.getCapacity()));
+            bw.newLine();
+        }
+
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+
 
 
     public static void editStudent(
