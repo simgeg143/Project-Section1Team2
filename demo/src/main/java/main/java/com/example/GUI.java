@@ -140,7 +140,7 @@ public class GUI extends Application {
 
         addButton.setOnAction(event -> handleAction("Add"));
         editButton.setOnAction(event -> handleAction("Edit"));
-        deleteButton.setOnAction(event -> handleAction("Delete"));
+        deleteButton.setOnAction(event -> deleteSelectedItem());
 
         VBox navigation = new VBox(10, navTitle, addButton, editButton, deleteButton);
         navigation.setPadding(new Insets(12));
@@ -364,6 +364,62 @@ public class GUI extends Application {
             case STUDENTS -> "students";
         };
         statusLabel.setText(action + " " + target + " (not wired yet)");
+    }
+
+    private void deleteSelectedItem() {
+        Object selected = dataTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            statusLabel.setText("Select a row to delete.");
+            return;
+        }
+
+        boolean removed = switch (currentView) {
+            case COURSES -> courses.remove(selected);
+            case CLASSROOMS -> classrooms.remove(selected);
+            case STUDENTS -> removeStudent((Student) selected);
+        };
+
+        if (removed) {
+            refreshCurrentView();
+            statusLabel.setText("Deleted selected entry.");
+        } else {
+            statusLabel.setText("Could not delete the selected entry.");
+        }
+    }
+
+    private void refreshCurrentView() {
+        switch (currentView) {
+            case COURSES -> showCourses();
+            case CLASSROOMS -> showClassrooms();
+            case STUDENTS -> showStudents();
+        }
+    }
+
+    private boolean removeStudent(Student student) {
+        boolean removedFromList = students.remove(student);
+        if (!removedFromList) {
+            return false;
+        }
+
+        for (Course course : courses) {
+            Student[] attendees = course.getAttendees();
+            if (attendees == null || attendees.length == 0) {
+                continue;
+            }
+
+            ArrayList<Student> filtered = new ArrayList<>();
+            for (Student attendee : attendees) {
+                if (attendee != null && attendee.getID() != student.getID()) {
+                    filtered.add(attendee);
+                }
+            }
+
+            if (filtered.size() != attendees.length) {
+                course.setAttendees(filtered.toArray(new Student[0]));
+            }
+        }
+
+        return true;
     }
 
     private enum View {
