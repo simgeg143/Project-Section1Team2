@@ -1,0 +1,360 @@
+.root {
+    -fx-font-family: "Manrope SemiBold", "Segoe UI", sans-serif;
+    -fx-background-color: linear-gradient(to bottom right, #050814 0%, #0b1530 45%, #0b2146 100%);
+    -fx-text-fill: #e5e7eb;
+}
+
+.bg-layer {
+    -fx-background-radius: 12;
+}
+
+.app-shell {
+    -fx-background-color: linear-gradient(to bottom, rgba(8, 12, 24, 0.9), rgba(5, 9, 18, 0.9));
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.55), 24, 0, 0, 14);
+}
+
+.label {
+    -fx-text-fill: #edf2ff;
+}
+
+.menu-bar {
+    -fx-background-color: rgba(8, 12, 24, 0.92);
+    -fx-border-color: rgba(255, 255, 255, 0.06);
+    -fx-border-width: 0 0 1 0;
+    -fx-text-fill: #e2e8f0;
+}
+
+.menu-bar .label {
+    -fx-text-fill: #d7e0ff;
+}
+
+.menu-item {
+    -fx-background-color: #0f172a;
+    -fx-text-fill: #e2e8f0;
+    -fx-border-color: transparent;
+    -fx-padding: 6 12 6 12;
+}
+
+.menu-item:focused, .menu-item:hover {
+    -fx-background-color: linear-gradient(to right, #1d4ed8, #22d3ee);
+    -fx-text-fill: #f8fafc;
+}
+
+.context-menu {
+    -fx-background-color: #0f172a;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-width: 1;
+    -fx-padding: 4;
+}
+
+.nav-pane {
+    -fx-background-color: rgba(12, 18, 33, 0.9);
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.35), 10, 0, 0, 6);
+}
+
+.hero {
+    -fx-background-color: linear-gradient(to right, #1b1e3f 0%, #1b2d6b 40%, #0f8fe0 85%, #7b3ff2 100%);
+    -fx-background-radius: 14;
+    -fx-padding: 18 22 20 22;
+    -fx-effect: dropshadow(one-pass-box, rgba(13, 19, 39, 0.55), 22, 0, 0, 10);
+    -fx-spacing: 12;
+    -fx-border-color: rgba(255, 255, 255, 0.06);
+    -fx-border-radius: 14;
+}
+
+.hero-title {
+    -fx-text-fill: #f8fafc;
+    -fx-font-size: 28px;
+    -fx-font-weight: 800;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.55), 8, 0, 0, 3);
+}
+
+.hero-subtitle {
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 14px;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.35), 8, 0, 0, 2);
+}
+
+.stat-card {
+    -fx-background-color: linear-gradient(to bottom right, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02));
+    -fx-background-radius: 12;
+    -fx-padding: 12 14 14 14;
+    -fx-border-color: rgba(255, 255, 255, 0.12);
+    -fx-border-radius: 12;
+}
+
+.stat-value {
+    -fx-text-fill: #f8fafc;
+    -fx-font-size: 22px;
+    -fx-font-weight: 700;
+}
+
+.stat-label {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12px;
+}
+
+.button {
+    -fx-background-radius: 12;
+    -fx-background-insets: 0;
+    -fx-text-fill: #f8fafc;
+    -fx-font-weight: 600;
+    -fx-background-color: linear-gradient(to bottom right, #1d4ed8, #0ea5e9);
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-radius: 12;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: linear-gradient(to bottom right, #2563eb, #22d3ee);
+}
+
+.button:focused {
+    -fx-border-color: #67e8f9;
+    -fx-effect: dropshadow(one-pass-box, rgba(34, 211, 238, 0.4), 12, 0, 0, 0);
+}
+
+.primary-button {
+    -fx-background-color: linear-gradient(to right, #22d3ee, #0ea5e9, #a855f7);
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 12;
+    -fx-padding: 10 16 10 16;
+    -fx-cursor: hand;
+}
+
+.primary-button:hover {
+    -fx-background-color: linear-gradient(to right, #38e4ff, #22c3ff, #c084fc);
+}
+
+.ghost-button {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-border-color: #38e4ff;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-text-fill: #e2e8f0;
+    -fx-padding: 9 14 9 14;
+}
+
+.ghost-button:hover {
+    -fx-border-color: #67e8f9;
+}
+
+.danger-button {
+    -fx-background-color: linear-gradient(to right, #fb7185, #ef4444);
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-padding: 9 14;
+}
+
+.toolbar {
+    -fx-padding: 8 12 8 12;
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+    -fx-background-radius: 12;
+    -fx-spacing: 10;
+}
+
+.content-area {
+    -fx-background-color: linear-gradient(to bottom, rgba(8, 12, 24, 0.95), rgba(6, 10, 20, 0.92));
+}
+
+.content-panel {
+    -fx-background-color: rgba(9, 12, 24, 0.92);
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-width: 1;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+}
+
+.search-field {
+    -fx-background-color: rgba(12, 18, 33, 0.9);
+    -fx-text-fill: #e2e8f0;
+    -fx-prompt-text-fill: #64748b;
+    -fx-background-radius: 12;
+    -fx-border-color: #22d3ee;
+    -fx-border-radius: 12;
+    -fx-padding: 10;
+}
+
+.card {
+    -fx-background-color: rgba(255, 255, 255, 0.04);
+    -fx-background-radius: 18;
+    -fx-padding: 16;
+    -fx-spacing: 12;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.35), 16, 0, 0, 10);
+}
+
+.table-card {
+    -fx-background-color: rgba(9, 12, 24, 0.9);
+    -fx-background-radius: 16;
+    -fx-padding: 10;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.55), 18, 0, 0, 12);
+}
+
+.primary-tabs {
+    -fx-background-color: transparent;
+}
+
+.primary-tabs > .tab-header-area {
+    -fx-background-color: rgba(8, 12, 24, 0.92);
+    -fx-border-color: rgba(255, 255, 255, 0.04);
+    -fx-border-width: 0 0 1 0;
+}
+
+.primary-tabs > .tab-content-area {
+    -fx-background-color: rgba(8, 12, 24, 0.92);
+}
+
+.section-title {
+    -fx-text-fill: #e5e7eb;
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+}
+
+.section-subtitle {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 13px;
+}
+
+.table-view {
+    -fx-background-color: transparent;
+    -fx-control-inner-background: #0c1224;
+    -fx-control-inner-background-alt: #11182d;
+    -fx-table-cell-border-color: #1c2742;
+    -fx-table-header-border-color: transparent;
+    -fx-text-background-color: #e2e8f0;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.table-view .filler,
+.table-view .virtual-flow,
+.table-view .clipped-container,
+.table-view .sheet {
+    -fx-background-color: #0c1224;
+}
+
+.table-view .column-header {
+    -fx-background-color: linear-gradient(to right, #111a33, #0e223f);
+    -fx-text-fill: #e0f2fe;
+    -fx-border-color: transparent;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: linear-gradient(to right, #0f182e, #0f2038);
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #e0f2fe;
+    -fx-font-weight: 600;
+}
+
+.table-view .cell {
+    -fx-text-fill: #e5e7eb;
+    -fx-padding: 10 8 10 8;
+}
+
+.table-row-cell .text {
+    -fx-fill: #e6ecf8;
+}
+
+.table-row-cell {
+    -fx-background-color: rgba(17, 24, 39, 0.8);
+    -fx-border-color: rgba(255, 255, 255, 0.02);
+}
+
+.table-row-cell:odd {
+    -fx-background-color: rgba(24, 32, 52, 0.78);
+}
+
+.table-row-cell:selected {
+    -fx-background-color: linear-gradient(to right, #1d4ed8, #0ea5e9);
+    -fx-text-fill: white;
+}
+
+.table-row-cell:selected .text {
+    -fx-fill: white;
+}
+
+.table-row-cell:focused .text {
+    -fx-fill: #e6ecf8;
+}
+
+/* Scrollbar styling for tables */
+.scroll-bar:horizontal, .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .track {
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+    -fx-background-radius: 8;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: linear-gradient(to bottom, #1e3a8a, #22d3ee);
+    -fx-background-radius: 8;
+}
+
+.scroll-bar .increment-button, .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-bar .increment-arrow, .scroll-bar .decrement-arrow {
+    -fx-background-color: transparent;
+}
+
+.text-field, .search-field {
+    -fx-background-color: #0c1224;
+    -fx-text-fill: #f1f5f9;
+    -fx-prompt-text-fill: #8ba0c0;
+    -fx-border-color: #22d3ee;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 10;
+}
+
+.status-bar {
+    -fx-background-color: rgba(11, 18, 33, 0.9);
+    -fx-padding: 8 14;
+    -fx-border-color: #15233e;
+    -fx-border-width: 1 0 0 0;
+    -fx-text-fill: #e2e8f0;
+}
+
+.status-label {
+    -fx-text-fill: #e2e8f0;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-background-insets: 0;
+    -fx-background-radius: 10 10 0 0;
+    -fx-padding: 8 14 8 14;
+    -fx-background-color: transparent;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab:selected {
+    -fx-background-color: linear-gradient(to right, #0f1c35, #123162);
+}
+
+.tab-pane .tab-label {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-weight: 600;
+}
+
+.tab-pane .tab-header-background {
+    -fx-background-color: rgba(8, 12, 24, 0.92);
+    -fx-border-color: transparent;
+}
+
+.dialog {
+    -fx-spacing: 12;
+}
+
+.dialog-form {
+    -fx-padding: 6;
+    -fx-background-color: rgba(255, 255, 255, 0.02);
+    -fx-background-radius: 10;
+}

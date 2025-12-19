@@ -101,12 +101,14 @@ public class GUI extends Application {
         HBox statusBar = buildStatusBar();
 
         BorderPane root = new BorderPane();
+        root.getStyleClass().add("app-shell");
         root.setTop(menuBar);
         root.setLeft(navigation);
         root.setCenter(contentArea);
         root.setBottom(statusBar);
 
         Scene scene = new Scene(root, 1200, 800);
+        attachStyles(scene);
         stage.setScene(scene);
         stage.show();
 
@@ -164,7 +166,7 @@ public class GUI extends Application {
         VBox navigation = new VBox(10, navTitle, editButton, deleteButton, searchLabel, searchField);
         navigation.setPadding(new Insets(12));
         navigation.setPrefWidth(180);
-        navigation.setStyle("-fx-background-color: #7c7a7aff;");
+        navigation.getStyleClass().add("nav-pane");
 
         return navigation;
     }
@@ -224,11 +226,12 @@ public class GUI extends Application {
         HBox.setHgrow(studentsBox, Priority.ALWAYS);
         tablesRow.setFillHeight(true);
         tablesRow.setPadding(new Insets(12, 12, 12, 12));
-        tablesRow.setStyle("-fx-background-color: white; -fx-border-color: #b3b3b3; -fx-border-width: 1;");
+        tablesRow.getStyleClass().add("content-panel");
 
         VBox wrapper = new VBox(tablesRow);
         VBox.setVgrow(tablesRow, Priority.ALWAYS);
         wrapper.setPadding(new Insets(0));
+        wrapper.getStyleClass().add("content-area");
         return wrapper;
     }
 
@@ -252,15 +255,6 @@ public class GUI extends Application {
                         return "-";
                     return Arrays.stream(arr)
                             .map(Student::getID)
-                            .map(String::valueOf)
-                            .collect(Collectors.joining(", "));
-                }),
-                tableColumn("Classrooms", value -> {
-                    ArrayList<Classroom> rooms = value.getExamClass();
-                    if (rooms == null || rooms.isEmpty())
-                        return "-";
-                    return rooms.stream()
-                            .map(Classroom::getName)
                             .map(String::valueOf)
                             .collect(Collectors.joining(", "));
                 }));
@@ -292,7 +286,6 @@ public class GUI extends Application {
         table.getColumns().setAll(
                 tableColumn("Room", value -> String.valueOf(value.getName())),
                 tableColumn("Capacity", value -> String.valueOf(value.getCapacity())),
-                tableColumn("Time Blocks", value -> String.valueOf(value.getBlocks().length)),
                 tableColumn("Booked", value -> String.valueOf(Arrays.stream(value.getBlocks())
                         .filter(Objects::nonNull)
                         .count())));
@@ -347,7 +340,7 @@ public class GUI extends Application {
     private HBox buildStatusBar() {
         HBox statusBar = new HBox(statusLabel);
         statusBar.setPadding(new Insets(6, 12, 6, 12));
-        statusBar.setStyle("-fx-background-color: #8b8b8bff;");
+        statusBar.getStyleClass().add("status-bar");
         return statusBar;
     }
 
@@ -917,6 +910,28 @@ public class GUI extends Application {
             fade.play();
         });
         delay.play();
+    }
+
+    private void attachStyles(Scene scene) {
+        if (scene == null) {
+            return;
+        }
+        String found = null;
+        var css = GUI.class.getResource("/ui.css");
+        if (css == null) {
+            css = GUI.class.getResource("ui.css");
+        }
+        if (css != null) {
+            found = css.toExternalForm();
+        } else {
+            File fallback = new File("demo/src/main/resources/ui.css");
+            if (fallback.exists()) {
+                found = fallback.toURI().toString();
+            }
+        }
+        if (found != null) {
+            scene.getStylesheets().add(found);
+        }
     }
 
     private enum View {
