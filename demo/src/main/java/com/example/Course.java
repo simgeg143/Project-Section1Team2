@@ -10,6 +10,7 @@ public class Course {
     int examDuration; // in minutes
     String timeOfExam; // The scheduled time (add 9*60 minutes to find the exam hour in minutes, then divide it by 60 to find hour and minute.)
     int examHour, examMinute; // in case the exam hour and date are needed as integers.
+    int timeOfExamInMinutes;
 
     String endOfExam; // the time exam finished
     int endOfExamHour, endOfExamMinute; // the hour and minute exam finishes.
@@ -52,7 +53,7 @@ public class Course {
 
     public void setExamClass(ArrayList<Classroom> examClass) {
         this.examClass = examClass; // the class in which the exam will be held
-        alreadyScheduled = true; // the exam is scheduled 
+        // alreadyScheduled flag is set in Main.java scheduling methods
     }
 
     public void setTimeOfExam(int startBlock){
@@ -61,10 +62,20 @@ public class Course {
         */
         int time = startBlock * Main.eachBlockDuration;
         time += 9 * 60;
+        setTimeOfExamInMinutes(time);
         this.examHour = time / 60;
         this.examMinute = time % 60;
         this.timeOfExam = Integer.toString(this.examHour) + ":" + Integer.toString(this.examMinute);
         calculateEndOfExam();
+        for(Student attendee : attendees){
+            if(attendee.currentDayExams == 0){
+                attendee.setFirstExamTime(time);
+                attendee.setFirstExamDuration(this.examDuration);
+            }
+        }
+    }
+    private void setTimeOfExamInMinutes(int time){
+        this.timeOfExamInMinutes = time;
     }
 
     private void calculateEndOfExam(){
@@ -75,6 +86,10 @@ public class Course {
         this.endOfExamHour = total / 60;
         this.endOfExamMinute = total % 60;
         endOfExam = Integer.toString(this.endOfExamHour) + ":" + Integer.toString(this.endOfExamMinute);
+    }
+
+    public int getTimeOfExamInMinutes(){
+        return this.timeOfExamInMinutes;
     }
 
     public String getEndOfExam(){
