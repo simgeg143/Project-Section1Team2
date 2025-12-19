@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.*;
 
 public class FileManager {
 
@@ -351,5 +352,82 @@ public class FileManager {
 
         FileWriter(filePath, data);
     }
-    // edit attendance eklenecek
+    
+
+
+
+
+  
+
+public static void editAttendanceStudent(String filePath, int courseCode, Student oldStudent, Student newStudent) {
+    List<String> lines = new ArrayList<>();
+    
+    
+    try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+        String line;
+        while ((line = br.readLine()) != null) {
+            lines.add(line);
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+        return;
+    }
+
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+        boolean insideTargetCourse = false;
+        
+        Pattern pattern = Pattern.compile("Std_ID_(\\d+)");
+
+        for (int i = 0; i < lines.size(); i++) {
+            String currentLine = lines.get(i).trim();
+
+            if (currentLine.startsWith("CourseCode_")) {
+                int foundCode = Integer.parseInt(currentLine.replaceAll("\\D+", ""));
+                insideTargetCourse = (foundCode == courseCode);
+                bw.write(lines.get(i));
+            } 
+            else if (insideTargetCourse && currentLine.startsWith("[")) {
+                Matcher matcher = pattern.matcher(currentLine);
+                StringBuilder sb = new StringBuilder();
+                int lastEnd = 0;
+
+                while (matcher.find()) {
+                   
+                    int foundId = Integer.parseInt(matcher.group(1));
+                    
+                    
+                    sb.append(currentLine, lastEnd, matcher.start());
+                    
+                    if (foundId == oldStudent.getID()) {
+                        
+                        sb.append("Std_ID_").append(newStudent.getID());
+                    } else {
+                       
+                        sb.append(matcher.group());
+                    }
+                    lastEnd = matcher.end();
+                }
+                sb.append(currentLine.substring(lastEnd));
+                bw.write(sb.toString());
+                insideTargetCourse = false;
+            } 
+            else {
+                bw.write(lines.get(i));
+            }
+            bw.newLine();
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+
+    // düzenlendi  ve test edildi
+}
+
+
+
+
+
+
+
+
 }
