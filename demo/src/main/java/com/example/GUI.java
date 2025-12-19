@@ -4,6 +4,8 @@ import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,11 +17,15 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -30,9 +36,12 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Popup;
 import javafx.util.Duration;
+import javafx.util.StringConverter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -539,14 +548,34 @@ public class GUI extends Application {
         TextField codeField = new TextField();
         Label durationLabel = new Label("Duration (minutes):");
         TextField durationField = new TextField();
-        Label studentIdsLabel = new Label("Student IDs (comma-separated):");
-        TextField studentIdsField = new TextField();
+        Label studentIdsLabel = new Label("Students (check to include):");
+        ListView<Student> studentsList = new ListView<>(students);
+        studentsList.setPrefHeight(200);
+        Map<Student, BooleanProperty> selectedStudents = new LinkedHashMap<>();
+        studentsList.setCellFactory(CheckBoxListCell.forListView(student -> {
+            BooleanProperty prop = selectedStudents.get(student);
+            if (prop == null) {
+                prop = new SimpleBooleanProperty(false);
+                selectedStudents.put(student, prop);
+            }
+            return prop;
+        }, new StringConverter<Student>() {
+            @Override
+            public String toString(Student student) {
+                return student == null ? "" : String.valueOf(student.getID());
+            }
+
+            @Override
+            public Student fromString(String string) {
+                return null; // not used
+            }
+        }));
         Label classroomIdsLabel = new Label("Classroom numbers (comma-separated):");
         TextField classroomIdsField = new TextField();
 
         form.addRow(0, codeLabel, codeField);
         form.addRow(1, durationLabel, durationField);
-        form.addRow(2, studentIdsLabel, studentIdsField);
+        form.addRow(2, studentIdsLabel, studentsList);
         form.addRow(3, classroomIdsLabel, classroomIdsField);
 
         Label feedback = new Label();
@@ -556,7 +585,10 @@ public class GUI extends Application {
             try {
                 int code = Integer.parseInt(codeField.getText().trim());
                 int duration = Integer.parseInt(durationField.getText().trim());
-                Student[] attendees = findStudentsByIds(studentIdsField.getText());
+                Student[] attendees = selectedStudents.entrySet().stream()
+                        .filter(entry -> entry.getValue().get())
+                        .map(Map.Entry::getKey)
+                        .toArray(Student[]::new);
                 ArrayList<Classroom> examRooms = findClassroomsByIds(classroomIdsField.getText());
 
                 Course course = new Course(code, attendees, examRooms, duration);
@@ -573,27 +605,6 @@ public class GUI extends Application {
         layout.setPadding(new Insets(12));
         dialog.setScene(new Scene(layout));
         dialog.showAndWait();
-    }
-
-    private Student[] findStudentsByIds(String text) {
-        if (text == null || text.isBlank()) {
-            return new Student[0];
-        }
-        ArrayList<Student> matched = new ArrayList<>();
-        Arrays.stream(text.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .forEach(idStr -> {
-                    try {
-                        int id = Integer.parseInt(idStr);
-                        students.stream()
-                                .filter(s -> s.getID() == id)
-                                .findFirst()
-                                .ifPresent(matched::add);
-                    } catch (NumberFormatException ignored) {
-                    }
-                });
-        return matched.toArray(new Student[0]);
     }
 
     private ArrayList<Classroom> findClassroomsByIds(String text) {
