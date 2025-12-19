@@ -168,18 +168,27 @@ public class GUI extends Application {
 
     private VBox buildContentArea() {
         Label coursesLabel = new Label("Courses");
+        Button importCoursesButton = new Button("Import");
+        importCoursesButton.setOnAction(e -> importCourses());
+        HBox coursesHeader = new HBox(8, coursesLabel, importCoursesButton);
         coursesTable = buildCoursesTable();
-        VBox coursesBox = new VBox(6, coursesLabel, coursesTable);
+        VBox coursesBox = new VBox(6, coursesHeader, coursesTable);
         coursesBox.setPrefWidth(300);
 
         Label classroomsLabel = new Label("Classrooms");
+        Button importClassroomsButton = new Button("Import");
+        importClassroomsButton.setOnAction(e -> importClassrooms());
+        HBox classroomsHeader = new HBox(8, classroomsLabel, importClassroomsButton);
         classroomsTable = buildClassroomsTable();
-        VBox classroomsBox = new VBox(6, classroomsLabel, classroomsTable);
+        VBox classroomsBox = new VBox(6, classroomsHeader, classroomsTable);
         classroomsBox.setPrefWidth(250);
 
         Label studentsLabel = new Label("Students");
+        Button importStudentsButton = new Button("Import");
+        importStudentsButton.setOnAction(e -> importStudents());
+        HBox studentsHeader = new HBox(8, studentsLabel, importStudentsButton);
         studentsTable = buildStudentsTable();
-        VBox studentsBox = new VBox(6, studentsLabel, studentsTable);
+        VBox studentsBox = new VBox(6, studentsHeader, studentsTable);
         studentsBox.setPrefWidth(220);
 
         VBox searchBox = new VBox(6);
