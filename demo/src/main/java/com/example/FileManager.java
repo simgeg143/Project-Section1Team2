@@ -223,7 +223,7 @@ public class FileManager {
             e.printStackTrace();
         }
 
-        System.out.println("ATTENDANCE LOADED = " + totalAssigned);
+        System.out.println("Loaded attendance = " + totalAssigned);
     }
 
     public static void FileWriter(String filePath, List<String[]> data) {
@@ -282,53 +282,73 @@ public class FileManager {
         }
     }
 
+    public static void updateLine(
+            String filePath,
+            int lineIndex,
+            String[] newData) {
+        List<String[]> data = FileReader(filePath);
 
-
-public static void editCourse(
-        String filePath,
-        int courseCode,
-        int newDuration
-) {
-    List<String[]> data = FileReader(filePath);
-
-    for (int i = 0; i < data.size(); i++) {
-        if (data.get(i)[0].equals(String.valueOf(courseCode))) {
-            data.set(i, new String[]{
-                    String.valueOf(courseCode),
-                    String.valueOf(newDuration)
-            });
-            break;
+        if (data == null || lineIndex < 0 || lineIndex >= data.size()) {
+            return;
         }
+
+        data.set(lineIndex, newData);
+
+        FileWriter(filePath, data);
+    } // CVC DEKİ HER SATIRI UPTADELEYEBİLMEK İÇİN
+
+    public static void editStudent(
+            String filePath,
+            int studentId,
+            int newStudentId) {
+        List<String[]> data = FileReader(filePath);
+
+        for (int i = 0; i < data.size(); i++) {
+            if (data.get(i)[0].equals(String.valueOf(studentId))) {
+                data.set(i, new String[] { String.valueOf(newStudentId) });
+                break;
+            }
+        }
+
+        FileWriter(filePath, data);
     }
 
-    FileWriter(filePath, data);
-}
+    public static void editCourse(
+            String filePath,
+            int courseCode,
+            int newDuration) {
+        List<String[]> data = FileReader(filePath);
 
-
-
-public static void editClassroom(
-        String filePath,
-        int roomNo,
-        int newCapacity
-) {
-    List<String[]> data = FileReader(filePath);
-
-    for (int i = 0; i < data.size(); i++) {
-        if (data.get(i)[0].equals(String.valueOf(roomNo))) {
-            data.set(i, new String[]{
-                    String.valueOf(roomNo),
-                    String.valueOf(newCapacity)
-            });
-            break;
+        for (int i = 0; i < data.size(); i++) {
+            if (data.get(i)[0].equals(String.valueOf(courseCode))) {
+                data.set(i, new String[] {
+                        String.valueOf(courseCode),
+                        String.valueOf(newDuration)
+                });
+                break;
+            }
         }
+
+        FileWriter(filePath, data);
     }
 
-    FileWriter(filePath, data);
-}
+    public static void editClassroom(
+            String filePath,
+            int roomNo,
+            int newCapacity) {
+        List<String[]> data = FileReader(filePath);
 
+        for (int i = 0; i < data.size(); i++) {
+            if (data.get(i)[0].equals(String.valueOf(roomNo))) {
+                data.set(i, new String[] {
+                        String.valueOf(roomNo),
+                        String.valueOf(newCapacity)
+                });
+                break;
+            }
+        }
 
-
-
-
+        FileWriter(filePath, data);
+    }
 
 }
