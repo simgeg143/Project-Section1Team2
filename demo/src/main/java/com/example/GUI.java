@@ -624,7 +624,16 @@ public class GUI extends Application {
 
         boolean removed = switch (currentView) {
             case COURSES -> courses.remove(selected);
-            case CLASSROOMS -> classrooms.remove(selected);
+            case CLASSROOMS -> {
+            boolean r = classrooms.remove(selected);
+            if (r) {
+                FileManager.exportClassrooms(
+                    new ArrayList<>(classrooms),
+                    "data/sampleData_AllClassroomsAndTheirCapacities.csv"
+                );
+            }
+            yield r;
+        }
             case STUDENTS -> removeStudent((Student) selected);
         };
 

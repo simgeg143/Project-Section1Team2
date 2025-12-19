@@ -361,12 +361,17 @@ public static void exportStudents(
 }
 public static void exportClassrooms(ArrayList<Classroom> classrooms, String filePath) {
 
+    if (classrooms == null || filePath == null) return;
+
     try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
 
+        
+        bw.write("Room;Capacity");
+        bw.newLine();
+
         for (Classroom c : classrooms) {
-            bw.write(String.valueOf(c.getName()));
-            bw.write(",");
-            bw.write(String.valueOf(c.getCapacity()));
+            if (c == null) continue;
+            bw.write(c.getName() + ";" + c.getCapacity());
             bw.newLine();
         }
 
@@ -374,6 +379,7 @@ public static void exportClassrooms(ArrayList<Classroom> classrooms, String file
         e.printStackTrace();
     }
 }
+
 
 
 
