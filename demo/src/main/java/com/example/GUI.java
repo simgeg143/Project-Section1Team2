@@ -23,9 +23,12 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -379,13 +382,13 @@ public class GUI extends Application {
                 deleteSelectedItem();
             }
         });
-        table.setOnMouseClicked(event -> setCurrentView(View.COURSES));
         table.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
             if (newSel != null) {
                 setCurrentView(View.COURSES);
             }
         });
 
+        enableRowDeselection(table, View.COURSES);
         return table;
     }
 
@@ -412,13 +415,13 @@ public class GUI extends Application {
                 deleteSelectedItem();
             }
         });
-        table.setOnMouseClicked(event -> setCurrentView(View.CLASSROOMS));
         table.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
             if (newSel != null) {
                 setCurrentView(View.CLASSROOMS);
             }
         });
 
+        enableRowDeselection(table, View.CLASSROOMS);
         return table;
     }
 
@@ -445,13 +448,13 @@ public class GUI extends Application {
                 deleteSelectedItem();
             }
         });
-        table.setOnMouseClicked(event -> setCurrentView(View.STUDENTS));
         table.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
             if (newSel != null) {
                 setCurrentView(View.STUDENTS);
             }
         });
 
+        enableRowDeselection(table, View.STUDENTS);
         return table;
     }
 
@@ -658,6 +661,32 @@ public class GUI extends Application {
         if (studentsTable != null) {
             studentsTable.refresh();
         }
+    }
+
+    private <T> void enableRowDeselection(TableView<T> table, View view) {
+        table.setRowFactory(tv -> {
+            TableRow<T> row = new TableRow<>();
+            row.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
+                setCurrentView(view);
+                if (row.isEmpty()) {
+                    table.getSelectionModel().clearSelection();
+                    event.consume();
+                } else if (table.getSelectionModel().isSelected(row.getIndex())) {
+                    table.getSelectionModel().clearSelection();
+                    statusLabel.setText("Selection cleared.");
+                    event.consume();
+                }
+            });
+            return row;
+        });
+
+        table.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.ESCAPE) {
+                table.getSelectionModel().clearSelection();
+                statusLabel.setText("Selection cleared.");
+                event.consume();
+            }
+        });
     }
 
     private void setCurrentView(View view) {
