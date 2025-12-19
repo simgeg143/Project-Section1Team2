@@ -1,5 +1,7 @@
 package main.java.com.example;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -17,11 +19,14 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
+import javafx.stage.Popup;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,6 +42,7 @@ public class GUI extends Application {
     private VBox contentArea;
     private TableView<Object> dataTable;
     private TabPane dataTabs;
+    private Stage primaryStage;
 
     private View currentView = View.COURSES;
 
@@ -72,6 +78,7 @@ public class GUI extends Application {
     @Override
     public void start(Stage stage) {
         stage.setTitle("Exam Scheduler");
+        this.primaryStage = stage;
 
         statusLabel = new Label("Ready");
 
@@ -181,6 +188,11 @@ public class GUI extends Application {
         dataTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
         dataTable.setPrefHeight(520);
         dataTable.setStyle("-fx-border-color: #b3b3b3; -fx-border-width: 1; -fx-background-insets: 0;");
+        dataTable.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.DELETE) {
+                deleteSelectedItem();
+            }
+        });
 
         box.setStyle("-fx-background-color: white; -fx-border-color: #b3b3b3; -fx-border-width: 1;");
         box.getChildren().addAll(dataTabs, dataTable);
@@ -382,6 +394,9 @@ public class GUI extends Application {
         if (removed) {
             refreshCurrentView();
             statusLabel.setText("Deleted selected entry.");
+            if (currentView == View.STUDENTS) {
+                showToast(primaryStage, "Student deleted successfully!");
+            }
         } else {
             statusLabel.setText("Could not delete the selected entry.");
         }
@@ -420,6 +435,39 @@ public class GUI extends Application {
         }
 
         return true;
+    }
+
+    private void showToast(Stage owner, String message) {
+        if (owner == null) {
+            return;
+        }
+
+        Popup popup = new Popup();
+        Label toastLabel = new Label(message);
+        toastLabel.setStyle("-fx-background-color: #323232; -fx-text-fill: white; -fx-padding: 8 12 8 12; -fx-background-radius: 6;");
+
+        popup.getContent().add(toastLabel);
+        popup.setAutoFix(true);
+        popup.setAutoHide(true);
+
+        popup.show(owner);
+
+        Platform.runLater(() -> {
+            double x = owner.getX() + (owner.getWidth() - toastLabel.getWidth()) / 2;
+            double y = owner.getY() + owner.getHeight() - 80;
+            popup.setX(x);
+            popup.setY(y);
+        });
+
+        PauseTransition delay = new PauseTransition(Duration.seconds(2.0));
+        delay.setOnFinished(e -> {
+            FadeTransition fade = new FadeTransition(Duration.seconds(0.8), toastLabel);
+            fade.setFromValue(1.0);
+            fade.setToValue(0.0);
+            fade.setOnFinished(ev -> popup.hide());
+            fade.play();
+        });
+        delay.play();
     }
 
     private enum View {
