@@ -9,6 +9,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.example.Classroom;
+import com.example.Course;
+import com.example.Schedule;
+import com.example.Student;
+
 import java.util.Arrays;
 
 
@@ -215,4 +221,44 @@ public static ArrayList<Course> readCourses(
             System.out.println("Export error: " + e.getMessage());
         }
     }
+
+
+
+public static void updateLine(
+    //updating any lıne in  a csv file
+
+        String filePath,
+        int lineIndex,
+        String[] newData
+) {
+    List<String[]> data = FileReader(filePath);
+
+    if (data == null || lineIndex < 0 || lineIndex >= data.size()) {
+        return;
+    }
+
+    data.set(lineIndex, newData);
+
+    FileWriter(filePath, data);
+}
+
+
+public static void editStudent( String filePath, int studentId, int newStudentId) {
+    List<String[]> data = FileReader(filePath);
+
+    for (int i = 0; i < data.size(); i++) {
+        if (data.get(i)[0].equals(String.valueOf(studentId))) {
+            data.set(i, new String[]{ String.valueOf(newStudentId) });
+            break;
+        }
+    }
+
+    FileWriter(filePath, data);
+}
+
+
+
+
+
+
 }
