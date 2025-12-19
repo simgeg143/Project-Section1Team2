@@ -231,29 +231,19 @@ public class Main {
         return false;
     }
 
-    // TODO
     public static void nextDay(ArrayList<Course> courses, ArrayList<Classroom> classrooms) {
         /*
-         * This method is used to reset all the classes's occupation, preparing it for
-         * the next day's exam calculation.
-         */
-        // MUST RESET CLASSROOMS HOUR BLOCKS AND ALSO REMOVE OR DISABLE THE ALREADY DONE
-        // EXAMS (using the "alreadyScheduled" flag in each course object)
+            This method is used to reset all the classes's occupation, preparing it for
+            the next day's exam calculation.
+        */
+        
         for (Classroom room : classrooms) {
             Course[] blocks = room.getBlocks();
             for (int i = 0; i < blocks.length; i++) {
                 blocks[i] = null;
             }
             room.allBlocksFilled = false;
-            room.availability = 24;
-        }
-        for (Course c : courses) {
-            if (c.alreadyScheduled) {
-                c.alreadyScheduled = false;
-            }
-            if (c.getExamClass() != null) {
-                c.getExamClass().clear();
-            }
+            room.availability = blocksPerDay;
         }
     }
 
