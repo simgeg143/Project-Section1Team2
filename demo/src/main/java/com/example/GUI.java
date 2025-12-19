@@ -9,6 +9,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -44,7 +46,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.io.File;
-import java.security.DrbgParameters.Capability;
 
 public class GUI extends Application {
 
@@ -54,12 +55,16 @@ public class GUI extends Application {
     private TableView<Classroom> classroomsTable;
     private TableView<Student> studentsTable;
     private Stage primaryStage;
+    private TextField searchField;
 
     private View currentView = View.COURSES;
 
     private final ObservableList<Student> students = FXCollections.observableArrayList();
     private final ObservableList<Course> courses = FXCollections.observableArrayList();
     private final ObservableList<Classroom> classrooms = FXCollections.observableArrayList();
+    private final FilteredList<Student> filteredStudents = new FilteredList<>(students, s -> true);
+    private final FilteredList<Course> filteredCourses = new FilteredList<>(courses, c -> true);
+    private final FilteredList<Classroom> filteredClassrooms = new FilteredList<>(classrooms, r -> true);
 
     private void loadInitialData() {
 
@@ -153,9 +158,10 @@ public class GUI extends Application {
         Button editButton = new Button("Edit");
         Button deleteButton = new Button("Delete");
         Label searchLabel = new Label("Search");
-        TextField searchField = new TextField();
-        searchField.setPromptText("Type to filter (not wired yet)");
+        searchField = new TextField();
+        searchField.setPromptText("Type to filter");
         searchField.setMaxWidth(Double.MAX_VALUE);
+        searchField.textProperty().addListener((obs, oldText, newText) -> applySearchFilter(newText));
 
         editButton.setMaxWidth(Double.MAX_VALUE);
         deleteButton.setMaxWidth(Double.MAX_VALUE);
@@ -241,7 +247,9 @@ public class GUI extends Application {
         table.setTableMenuButtonVisible(false);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setMaxWidth(Double.MAX_VALUE);
-        table.setItems(courses);
+        SortedList<Course> sortedCourses = new SortedList<>(filteredCourses);
+        sortedCourses.comparatorProperty().bind(table.comparatorProperty());
+        table.setItems(sortedCourses);
 
         table.getColumns().setAll(
                 tableColumn("Code", value -> String.valueOf(value.getCode())),
@@ -281,7 +289,9 @@ public class GUI extends Application {
         table.setTableMenuButtonVisible(false);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setMaxWidth(Double.MAX_VALUE);
-        table.setItems(classrooms);
+        SortedList<Classroom> sortedClassrooms = new SortedList<>(filteredClassrooms);
+        sortedClassrooms.comparatorProperty().bind(table.comparatorProperty());
+        table.setItems(sortedClassrooms);
 
         table.getColumns().setAll(
                 tableColumn("Room", value -> String.valueOf(value.getName())),
@@ -312,7 +322,9 @@ public class GUI extends Application {
         table.setTableMenuButtonVisible(false);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setMaxWidth(Double.MAX_VALUE);
-        table.setItems(students);
+        SortedList<Student> sortedStudents = new SortedList<>(filteredStudents);
+        sortedStudents.comparatorProperty().bind(table.comparatorProperty());
+        table.setItems(sortedStudents);
 
         table.getColumns().setAll(
                 tableColumn("Student ID", value -> String.valueOf(value.getID())),
@@ -534,11 +546,95 @@ public class GUI extends Application {
 
     private void setCurrentView(View view) {
         currentView = view;
-        switch (view) {
-            case COURSES -> statusLabel.setText("Showing courses (" + courses.size() + ")");
-            case CLASSROOMS -> statusLabel.setText("Showing classrooms (" + classrooms.size() + ")");
-            case STUDENTS -> statusLabel.setText("Showing students (" + students.size() + ")");
+        updateStatusWithCounts(searchField != null ? searchField.getText() : "");
+    }
+
+    private void applySearchFilter(String rawQuery) {
+        String query = rawQuery == null ? "" : rawQuery.trim().toLowerCase();
+
+        filteredCourses.setPredicate(course -> matchesCourse(course, query));
+        filteredClassrooms.setPredicate(classroom -> matchesClassroom(classroom, query));
+        filteredStudents.setPredicate(student -> matchesStudent(student, query));
+
+        updateStatusWithCounts(rawQuery);
+    }
+
+    private void updateStatusWithCounts(String query) {
+        if (statusLabel == null) {
+            return;
         }
+
+        String trimmed = query == null ? "" : query.trim();
+        int visible = switch (currentView) {
+            case COURSES -> filteredCourses.size();
+            case CLASSROOMS -> filteredClassrooms.size();
+            case STUDENTS -> filteredStudents.size();
+        };
+        String label = switch (currentView) {
+            case COURSES -> "courses";
+            case CLASSROOMS -> "classrooms";
+            case STUDENTS -> "students";
+        };
+        if (trimmed.isEmpty()) {
+            statusLabel.setText("Showing " + label + " (" + visible + ")");
+        } else {
+            statusLabel.setText("Filtered " + label + " (" + visible + ")");
+        }
+    }
+
+    private boolean matchesCourse(Course course, String query) {
+        if (course == null) {
+            return false;
+        }
+        if (query == null || query.isEmpty()) {
+            return true;
+        }
+        if (String.valueOf(course.getCode()).toLowerCase().contains(query)) {
+            return true;
+        }
+        if (String.valueOf(course.getExamDuration()).toLowerCase().contains(query)) {
+            return true;
+        }
+
+        Student[] attendees = course.getAttendees();
+        if (attendees != null) {
+            for (Student student : attendees) {
+                if (student != null && String.valueOf(student.getID()).toLowerCase().contains(query)) {
+                    return true;
+                }
+            }
+        }
+
+        if (course.getExamClass() != null) {
+            for (Classroom room : course.getExamClass()) {
+                if (room != null && String.valueOf(room.getName()).toLowerCase().contains(query)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private boolean matchesClassroom(Classroom classroom, String query) {
+        if (classroom == null) {
+            return false;
+        }
+        if (query == null || query.isEmpty()) {
+            return true;
+        }
+        return String.valueOf(classroom.getName()).toLowerCase().contains(query)
+                || String.valueOf(classroom.getCapacity()).toLowerCase().contains(query);
+    }
+
+    private boolean matchesStudent(Student student, String query) {
+        if (student == null) {
+            return false;
+        }
+        if (query == null || query.isEmpty()) {
+            return true;
+        }
+        return String.valueOf(student.getID()).toLowerCase().contains(query);
     }
 
     private boolean removeStudent(Student student) {
