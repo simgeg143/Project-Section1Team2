@@ -380,7 +380,7 @@ public class Main {
                         if (!studentError && findClassForExam(course, classrooms)) { // if no student > 2 exams && can
                                                                                      // find class(es) for the exam
                             dayCourses.add(course);
-                            course.setExamDay(days.size() + 1);
+                            course.setExamDay(dayNumber);
                             scheduledInThisPass = true;
                         }
                     }
