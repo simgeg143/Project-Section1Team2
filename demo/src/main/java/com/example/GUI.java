@@ -26,6 +26,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
@@ -149,6 +150,10 @@ public class GUI extends Application {
         Button addButton = new Button("Add");
         Button editButton = new Button("Edit");
         Button deleteButton = new Button("Delete");
+        Label searchLabel = new Label("Search");
+        TextField searchField = new TextField();
+        searchField.setPromptText("Type to filter (not wired yet)");
+        searchField.setMaxWidth(Double.MAX_VALUE);
 
         addButton.setMaxWidth(Double.MAX_VALUE);
         editButton.setMaxWidth(Double.MAX_VALUE);
@@ -158,7 +163,7 @@ public class GUI extends Application {
         editButton.setOnAction(event -> openEditDialog());
         deleteButton.setOnAction(event -> deleteSelectedItem());
 
-        VBox navigation = new VBox(10, navTitle, addButton, editButton, deleteButton);
+        VBox navigation = new VBox(10, navTitle, addButton, editButton, deleteButton, searchLabel, searchField);
         navigation.setPadding(new Insets(12));
         navigation.setPrefWidth(180);
         navigation.setStyle("-fx-background-color: #7c7a7aff;");
@@ -173,7 +178,8 @@ public class GUI extends Application {
         HBox coursesHeader = new HBox(8, coursesLabel, importCoursesButton);
         coursesTable = buildCoursesTable();
         VBox coursesBox = new VBox(6, coursesHeader, coursesTable);
-        coursesBox.setPrefWidth(300);
+        VBox.setVgrow(coursesTable, Priority.ALWAYS);
+        VBox.setVgrow(coursesBox, Priority.ALWAYS);
 
         Label classroomsLabel = new Label("Classrooms");
         Button importClassroomsButton = new Button("Import");
@@ -181,7 +187,8 @@ public class GUI extends Application {
         HBox classroomsHeader = new HBox(8, classroomsLabel, importClassroomsButton);
         classroomsTable = buildClassroomsTable();
         VBox classroomsBox = new VBox(6, classroomsHeader, classroomsTable);
-        classroomsBox.setPrefWidth(250);
+        VBox.setVgrow(classroomsTable, Priority.ALWAYS);
+        VBox.setVgrow(classroomsBox, Priority.ALWAYS);
 
         Label studentsLabel = new Label("Students");
         Button importStudentsButton = new Button("Import");
@@ -189,20 +196,19 @@ public class GUI extends Application {
         HBox studentsHeader = new HBox(8, studentsLabel, importStudentsButton);
         studentsTable = buildStudentsTable();
         VBox studentsBox = new VBox(6, studentsHeader, studentsTable);
-        studentsBox.setPrefWidth(220);
+        VBox.setVgrow(studentsTable, Priority.ALWAYS);
+        VBox.setVgrow(studentsBox, Priority.ALWAYS);
 
-        VBox searchBox = new VBox(6);
-        Label searchLabel = new Label("Search");
-        TextField searchField = new TextField();
-        searchField.setPromptText("Type to filter (not wired yet)");
-        searchBox.getChildren().addAll(searchLabel, searchField);
-        searchBox.setPrefWidth(200);
-
-        HBox tablesRow = new HBox(12, coursesBox, classroomsBox, studentsBox, searchBox);
+        HBox tablesRow = new HBox(12, coursesBox, classroomsBox, studentsBox);
+        HBox.setHgrow(coursesBox, Priority.ALWAYS);
+        HBox.setHgrow(classroomsBox, Priority.ALWAYS);
+        HBox.setHgrow(studentsBox, Priority.ALWAYS);
+        tablesRow.setFillHeight(true);
         tablesRow.setPadding(new Insets(12, 12, 12, 12));
         tablesRow.setStyle("-fx-background-color: white; -fx-border-color: #b3b3b3; -fx-border-width: 1;");
 
         VBox wrapper = new VBox(tablesRow);
+        VBox.setVgrow(tablesRow, Priority.ALWAYS);
         wrapper.setPadding(new Insets(0));
         return wrapper;
     }
@@ -212,6 +218,7 @@ public class GUI extends Application {
         table.setPlaceholder(new Label("No courses to display yet."));
         table.setTableMenuButtonVisible(false);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setMaxWidth(Double.MAX_VALUE);
         table.setItems(courses);
 
         table.getColumns().setAll(
@@ -260,6 +267,7 @@ public class GUI extends Application {
         table.setPlaceholder(new Label("No classrooms to display yet."));
         table.setTableMenuButtonVisible(false);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setMaxWidth(Double.MAX_VALUE);
         table.setItems(classrooms);
 
         table.getColumns().setAll(
@@ -291,6 +299,7 @@ public class GUI extends Application {
         table.setPlaceholder(new Label("No students to display yet."));
         table.setTableMenuButtonVisible(false);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setMaxWidth(Double.MAX_VALUE);
         table.setItems(students);
 
         table.getColumns().setAll(
