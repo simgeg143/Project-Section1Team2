@@ -44,6 +44,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.io.File;
+import java.security.DrbgParameters.Capability;
 
 public class GUI extends Application {
 
@@ -873,7 +874,8 @@ public class GUI extends Application {
 
         Popup popup = new Popup();
         Label toastLabel = new Label(message);
-        toastLabel.setStyle("-fx-background-color: #323232; -fx-text-fill: white; -fx-padding: 8 12 8 12; -fx-background-radius: 6;");
+        toastLabel.setStyle(
+                "-fx-background-color: #323232; -fx-text-fill: white; -fx-padding: 8 12 8 12; -fx-background-radius: 6;");
 
         popup.getContent().add(toastLabel);
         popup.setAutoFix(true);
@@ -925,6 +927,41 @@ public class GUI extends Application {
     }
 
     public static void Search() {
+    }
+
+    public void showStudentSchedule(Student student) {
+        TableView<Student> tableView = new TableView<>();
+
+        TableColumn<Classroom, String> tableColumn = new TableColumn<>("Student");
+        TableColumn<Classroom, String> tableColumn2 = new TableColumn<>("Course");
+        TableColumn<Classroom, String> tableColumn3 = new TableColumn<>("Classroom");
+        TableColumn<Classroom, String> tableColumn4 = new TableColumn<>("Time Slot");
+        TableColumn<Classroom, String> tableColumn5 = new TableColumn<>("Duration");
+        TableColumn<Classroom, String> tableColumn6 = new TableColumn<>("Students");
+
+    }
+
+    public void showCourseSchedule(Course course) {
+        TableView<Course> tableView = new TableView<>();
+
+        TableColumn<Classroom, String> tableColumn = new TableColumn<>("Course");
+        TableColumn<Classroom, String> tableColumn2 = new TableColumn<>("Classroom");
+        TableColumn<Classroom, String> tableColumn3 = new TableColumn<>("Time Slot");
+        TableColumn<Classroom, String> tableColumn4 = new TableColumn<>("Duration");
+        TableColumn<Classroom, String> tableColumn5 = new TableColumn<>("Student");
+
+    }
+
+    public void showClassroomSchedule(Classroom classroom) {
+        TableView<Classroom> tableView = new TableView<>();
+
+        TableColumn<Classroom, String> tableColumn = new TableColumn<>("Classroom");
+        TableColumn<Classroom, String> tableColumn2 = new TableColumn<>("Capacity");
+        TableColumn<Classroom, String> tableColumn3 = new TableColumn<>("Course");
+        TableColumn<Classroom, String> tableColumn4 = new TableColumn<>("Time Slot");
+        TableColumn<Classroom, String> tableColumn5 = new TableColumn<>("Duration");
+        TableColumn<Classroom, String> tableColumn6 = new TableColumn<>("Students");
+
     }
 
     public static void main(String[] args) {
