@@ -95,7 +95,7 @@ public class Main {
         for (int i = 0; i < classrooms.size() - 1; i++) {
             int maxIndex = i; // index of the longest exam found so far
             for (int j = i + 1; j < classrooms.size(); j++) { // compare durations and find the longer exam
-                if (classrooms.get(j).getCapacity() > classrooms.get(maxIndex).getCapacity()) {
+                if (classrooms.get(j).getCapacity() < classrooms.get(maxIndex).getCapacity()) {
                     maxIndex = j;
                 }
             }
@@ -132,32 +132,36 @@ public class Main {
         return bestFit;
     }
 
-    public static boolean hasMinimumBreakTime(Course course, int proposedStartBlock){
+    public static boolean hasMinimumBreakTime(Course course, int proposedStartBlock) {
         /*
-            Checks if scheduling this course at the proposed time would violate the 30-minute break rule.
-            Returns true if all students have adequate break time, false otherwise.
-        */
-        if (course == null || course.getAttendees() == null || course.getAttendees().length == 0) return true;
+         * Checks if scheduling this course at the proposed time would violate the
+         * 30-minute break rule.
+         * Returns true if all students have adequate break time, false otherwise.
+         */
+        if (course == null || course.getAttendees() == null || course.getAttendees().length == 0)
+            return true;
         int proposedTimeInMinutes = proposedStartBlock * eachBlockDuration + (9 * 60); // add day start offset
         int examDurationInMinutes = course.getExamDuration();
         int proposedEndTime = proposedTimeInMinutes + examDurationInMinutes;
-        
-        for(Student attendee : course.getAttendees()){
-            if(attendee.currentDayExams == 1){
+
+        for (Student attendee : course.getAttendees()) {
+            if (attendee.currentDayExams == 1) {
                 int firstExamTime = attendee.getFirstExamTime(); // already absolute minutes since midnight
                 int firstExamDuration = attendee.getFirstExamDuration();
                 int firstExamEndTime = firstExamTime + firstExamDuration;
-                
+
                 // New exam after the first exam -> ensure >= 30 min gap
-                if(proposedTimeInMinutes >= firstExamEndTime){
-                    if(proposedTimeInMinutes - firstExamEndTime < 30) return false;
+                if (proposedTimeInMinutes >= firstExamEndTime) {
+                    if (proposedTimeInMinutes - firstExamEndTime < 30)
+                        return false;
                 }
                 // New exam before the first exam -> ensure >= 30 min gap
-                else if(firstExamTime >= proposedEndTime){
-                    if(firstExamTime - proposedEndTime < 30) return false;
+                else if (firstExamTime >= proposedEndTime) {
+                    if (firstExamTime - proposedEndTime < 30)
+                        return false;
                 }
                 // Overlap -> invalid
-                else{
+                else {
                     return false;
                 }
             }
@@ -165,20 +169,22 @@ public class Main {
         return true;
     }
 
-    public static boolean findMultipleClasses(Course course, ArrayList<Classroom> classrooms){
+    public static boolean findMultipleClasses(Course course, ArrayList<Classroom> classrooms) {
         /*
          * This method is used when the exam requires multiple classes to fit all of its
          * attendees.
          */
 
-        if (course == null || classrooms == null || classrooms.isEmpty()) return false;
+        if (course == null || classrooms == null || classrooms.isEmpty())
+            return false;
         int blockSize = calculateBlock(course.getExamDuration());
         int totalCapacityNeeded = course.getAttendees() != null ? course.getAttendees().length : 0;
-        if (totalCapacityNeeded == 0) return false;
-        
-        for(int startBlock = 0; startBlock < blocksPerDay; startBlock++){ // for each possible time block
+        if (totalCapacityNeeded == 0)
+            return false;
+
+        for (int startBlock = 0; startBlock < blocksPerDay; startBlock++) { // for each possible time block
             // Check if this time slot gives students enough break time
-            if(!hasMinimumBreakTime(course, startBlock)){
+            if (!hasMinimumBreakTime(course, startBlock)) {
                 continue; // Skip this time slot
             }
 
@@ -208,7 +214,7 @@ public class Main {
                         course.setExamClass(result);
                         course.setTimeOfExam(startBlock);
                         course.alreadyScheduled = true;
-                        for(Student attendee2 : course.getAttendees()){
+                        for (Student attendee2 : course.getAttendees()) {
                             attendee2.CurrentDayExamCount();
                         }
                         return true;
@@ -224,28 +230,28 @@ public class Main {
          * This is the main method for scheduling an exam's classroom and hour
          */
 
-        if (course == null || classrooms == null || classrooms.isEmpty()) return false;
+        if (course == null || classrooms == null || classrooms.isEmpty())
+            return false;
         int examDuration = calculateBlock(course.getExamDuration());
         Classroom bestfit = bestFittingClass(course, classrooms); // finding the best fitting classroom
 
         if (bestfit == null) {
             // No single class fits, try multiple classes
             return findMultipleClasses(course, classrooms);
-        }
-        else{
-            for(int i = 0; i < blocksPerDay; i++){ // checking hour availability
+        } else {
+            for (int i = 0; i < blocksPerDay; i++) { // checking hour availability
                 // Check if this time slot gives students enough break time
-                if(!hasMinimumBreakTime(course, i)){
+                if (!hasMinimumBreakTime(course, i)) {
                     continue; // Skip this time slot
                 }
 
-                if(scheduleClass(i, examDuration, bestfit, course)){
-                    ArrayList<Classroom> examClass = new ArrayList<>(); // since the method accepts an arraylist 
+                if (scheduleClass(i, examDuration, bestfit, course)) {
+                    ArrayList<Classroom> examClass = new ArrayList<>(); // since the method accepts an arraylist
                     examClass.add(bestfit);
                     course.setExamClass(examClass);
                     course.setTimeOfExam(i);
                     course.alreadyScheduled = true;
-                    for(Student attendee : course.getAttendees()){
+                    for (Student attendee : course.getAttendees()) {
                         attendee.CurrentDayExamCount();
                     }
                     return true; // Successfully scheduled
@@ -256,10 +262,12 @@ public class Main {
         // Try other single classrooms before multiple classrooms
         int requiredCapacity = course.getAttendees() != null ? course.getAttendees().length : 0;
         for (Classroom room : classrooms) {
-            if (room == bestfit) continue;
+            if (room == bestfit)
+                continue;
             if (room.getCapacity() >= requiredCapacity && room.availability >= examDuration) {
                 for (int i = 0; i < blocksPerDay; i++) {
-                    if (!hasMinimumBreakTime(course, i)) continue;
+                    if (!hasMinimumBreakTime(course, i))
+                        continue;
                     if (scheduleClass(i, examDuration, room, course)) {
                         ArrayList<Classroom> examClass = new ArrayList<>();
                         examClass.add(room);
@@ -317,7 +325,8 @@ public class Main {
         return true;
     }
 
-    public static void nextDay(ArrayList<Course> courses, ArrayList<Classroom> classrooms, ArrayList<Student> students) {
+    public static void nextDay(ArrayList<Course> courses, ArrayList<Classroom> classrooms,
+            ArrayList<Student> students) {
         /*
          * This method is used to reset all the classes's occupation, preparing it for
          * the next day's exam calculation.
@@ -331,12 +340,14 @@ public class Main {
             room.allBlocksFilled = false;
             room.availability = blocksPerDay;
         }
-        for(Student student : students){ // finalizing the day's amount of exam for each student and resetting the currentDayExam counter
+        for (Student student : students) { // finalizing the day's amount of exam for each student and resetting the
+                                           // currentDayExam counter
             student.endOfDay();
         }
     }
 
-    public static void calculate(ArrayList<Classroom> classrooms, ArrayList<Course> courses, ArrayList<Student> students){
+    public static void calculate(ArrayList<Classroom> classrooms, ArrayList<Course> courses,
+            ArrayList<Student> students) {
         /*
          * This method contains the main loop and the calls to all of the scheduling
          * methods.
@@ -348,37 +359,46 @@ public class Main {
 
         // The amount of days
         ArrayList<ArrayList<Course>> days = new ArrayList<ArrayList<Course>>(); // a list of courses in a list of days
+        int dayNumber = 1;
 
         // MAINLOOP
         while (!allExamsAreScheduled(courses)) {
-
             ArrayList<Course> dayCourses = new ArrayList<>();
             while (!allClassHoursFilled(classrooms) && !allExamsAreScheduled(courses)) { // Try to schedule courses
                                                                                          // until the day is full
 
                 boolean scheduledInThisPass = false;
-                for(Course course : courses){
+                for (Course course : courses) {
                     boolean studentError = false;
-                    if(!course.alreadyScheduled){
-                        for(Student attendee : course.getAttendees()){ // if any student taking this course already has 2 exams, don't schedule an exam for this course.
-                            if(attendee.getCurrentDayExams() >= 2) studentError = true;
+                    if (!course.alreadyScheduled) {
+                        for (Student attendee : course.getAttendees()) { // if any student taking this course already
+                                                                         // has 2 exams, don't schedule an exam for this
+                                                                         // course.
+                            if (attendee.getCurrentDayExams() >= 2)
+                                studentError = true;
                         }
-                        if(!studentError && findClassForExam(course, classrooms)){ // if no student > 2 exams && can find class(es) for the exam
+                        if (!studentError && findClassForExam(course, classrooms)) { // if no student > 2 exams && can
+                                                                                     // find class(es) for the exam
                             dayCourses.add(course);
+                            course.setExamDay(days.size() + 1);
                             scheduledInThisPass = true;
                         }
                     }
                 }
 
-                if(!scheduledInThisPass){ // If nothing was scheduled in this pass, break to avoid infinite loop
+                if (!scheduledInThisPass) { // If nothing was scheduled in this pass, break to avoid infinite loop
                     break;
                 }
 
             }
 
             if (dayCourses.size() > 0) { // Only add the day if something was scheduled
+                for (Course c : dayCourses) {
+                    c.setExamDay(dayNumber);
+                }
                 days.add(dayCourses);
                 nextDay(courses, classrooms, students); // reset for the next day
+                dayNumber++;
             } else {
                 // No exams were scheduled but not all are done - likely impossible to schedule
                 // remaining
@@ -389,31 +409,30 @@ public class Main {
 
         // output
         String s = days.size() > 1 ? "s" : "";
-        System.out.println("All exams are scheduled.\nIt takes the total of " + days.size() + " day" + s + " for all the exams to end.");
-        
+        System.out.println("All exams are scheduled.\nIt takes the total of " + days.size() + " day" + s
+                + " for all the exams to end.");
+
         setResults(classrooms, courses, students);
     }
 
-    public static void setResults(ArrayList<Classroom> classrooms, ArrayList<Course> courses, ArrayList<Student> students){
+    public static void setResults(ArrayList<Classroom> classrooms, ArrayList<Course> courses,
+            ArrayList<Student> students) {
         Main.students = students;
         Main.courses = courses;
         Main.classrooms = classrooms;
     }
-    
-    public ArrayList<Student> getStudents(){
+
+    public ArrayList<Student> getStudents() {
         return this.students;
     }
 
-    public ArrayList<Course> getCourses(){
+    public ArrayList<Course> getCourses() {
         return this.courses;
     }
 
-    public ArrayList<Classroom> getClassrooms(){
+    public ArrayList<Classroom> getClassrooms() {
         return this.classrooms;
     }
-
-
-
 
     public static void main(String[] args) {
         GUI.main(args);

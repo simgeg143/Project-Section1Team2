@@ -68,28 +68,7 @@ public class GUI extends Application {
     private final FilteredList<Classroom> filteredClassrooms = new FilteredList<>(classrooms, r -> true);
 
     private void loadInitialData() {
-
-        System.out.println("Working dir = " + System.getProperty("user.dir"));
-
-        students.setAll(
-                FileManager.readStudents("data/sampleData_AllStudents.csv"));
-
-        classrooms.setAll(
-                FileManager.readClassrooms("data/sampleData_AllClassroomsAndTheirCapacities.csv"));
-
-        courses.setAll(
-                FileManager.readCourses(
-                        "data/sampleData_AllCourses.csv",
-                        new ArrayList<>(students),
-                        new ArrayList<>(classrooms)));
-        FileManager.readAttendance(
-                "data/sampleData_AllAttendanceLists.csv",
-                new ArrayList<>(students),
-                new ArrayList<>(courses));
-
-        System.out.println("Loaded students = " + students.size());
-        System.out.println("Loaded classrooms = " + classrooms.size());
-        System.out.println("Loaded courses = " + courses.size());
+        System.out.println("No auto data loading. Waiting for user import.");
     }
 
     @Override
@@ -201,10 +180,16 @@ public class GUI extends Application {
                                 .collect(Collectors.joining(", "))));
 
         TableColumn<Course, String> colTime = new TableColumn<>("Time");
-        colTime.setCellValueFactory(c -> new SimpleStringProperty(
-                c.getValue().getTimeOfExam() == null
-                        ? "-"
-                        : c.getValue().getTimeOfExam() + " - " + c.getValue().getEndOfExam()));
+        colTime.setCellValueFactory(c -> {
+            Course course = c.getValue();
+            if (course.getTimeOfExam() == null)
+                return new SimpleStringProperty("-");
+
+            return new SimpleStringProperty(
+                    "Day " + course.getExamDay()
+                            + " | " + course.getTimeOfExam()
+                            + " - " + course.getEndOfExam());
+        });
 
         table.getColumns().addAll(colCourse, colRoom, colTime);
         table.getItems().addAll(courses);
@@ -238,10 +223,16 @@ public class GUI extends Application {
         colCourse.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().getCode())));
 
         TableColumn<Course, String> colTime = new TableColumn<>("Time");
-        colTime.setCellValueFactory(c -> new SimpleStringProperty(
-                c.getValue().getTimeOfExam() == null
-                        ? "-"
-                        : c.getValue().getTimeOfExam() + " - " + c.getValue().getEndOfExam()));
+        colTime.setCellValueFactory(c -> {
+            Course course = c.getValue();
+            if (course.getTimeOfExam() == null)
+                return new SimpleStringProperty("-");
+
+            return new SimpleStringProperty(
+                    "Day " + course.getExamDay()
+                            + " | " + course.getTimeOfExam()
+                            + " - " + course.getEndOfExam());
+        });
 
         table.getColumns().addAll(colRoom, colCourse, colTime);
         table.getItems().addAll(courses);
@@ -294,7 +285,6 @@ public class GUI extends Application {
         Label coursesLabel = new Label("Courses");
         Button courseScheduleButton = new Button("Exam schedule");
         courseScheduleButton.setOnAction(e -> {
-            Main.calculate(new ArrayList<>(classrooms), new ArrayList<>(courses), new ArrayList<>(students));
             Course selected = coursesTable.getSelectionModel().getSelectedItem();
             if (selected != null) {
                 showCourseSchedule(selected);
@@ -311,7 +301,6 @@ public class GUI extends Application {
         Label classroomsLabel = new Label("Classrooms");
         Button classroomScheduleButton = new Button("Exam schedule");
         classroomScheduleButton.setOnAction(e -> {
-            Main.calculate(new ArrayList<>(classrooms), new ArrayList<>(courses), new ArrayList<>(students));
             Classroom selected = classroomsTable.getSelectionModel().getSelectedItem();
             if (selected != null) {
                 showClassroomSchedule(selected);
@@ -328,7 +317,6 @@ public class GUI extends Application {
         Label studentsLabel = new Label("Students");
         Button studentScheduleButton = new Button("Exam schedule");
         studentScheduleButton.setOnAction(e -> {
-            Main.calculate(new ArrayList<>(classrooms), new ArrayList<>(courses), new ArrayList<>(students));
             Student selected = studentsTable.getSelectionModel().getSelectedItem();
             if (selected != null) {
                 showStudentSchedule(selected);
@@ -561,10 +549,6 @@ public class GUI extends Application {
             showCourses();
             showStudents();
             statusLabel.setText("Imported attendance from " + file.getName());
-            FileManager.exportAttendance(
-                new ArrayList<>(courses),
-                "data/sampleData_AllAttendanceLists.csv"
-);
 
         } catch (Exception e) {
             statusLabel.setText("Import failed: ");
@@ -783,10 +767,10 @@ public class GUI extends Application {
             if (filtered.size() != attendees.length) {
                 course.setAttendees(filtered.toArray(new Student[0]));
             }
-            FileManager.exportAttendance(
-                new ArrayList<>(courses),
-                "data/sampleData_AllAttendanceLists.csv"
-);
+            File saveFile = chooseSaveFile("Export Updated Attendance");
+            if (saveFile != null) {
+                FileManager.exportAttendance(new ArrayList<>(courses), saveFile.getAbsolutePath());
+            }
 
         }
 
@@ -1069,10 +1053,8 @@ public class GUI extends Application {
                     statusLabel.setText("Course added.");
                 }
                 FileManager.exportAttendance(
-                    new ArrayList<>(courses),
-                    "data/sampleData_AllAttendanceLists.csv"
-);
-
+                        new ArrayList<>(courses),
+                        "data/sampleData_AllAttendanceLists.csv");
 
                 dialog.close();
                 refreshCurrentView();
@@ -1240,9 +1222,13 @@ public class GUI extends Application {
         });
 
         TableColumn<Course, String> colTime = new TableColumn<>("Time");
-        colTime.setCellValueFactory(c -> new SimpleStringProperty(
-                c.getValue().getTimeOfExam() == null ? "-"
-                        : c.getValue().getTimeOfExam() + " - " + c.getValue().getEndOfExam()));
+        colTime.setCellValueFactory(c -> {
+            Course course = c.getValue();
+            String text = "Day " + course.getExamDay()
+                    + " | " + course.getTimeOfExam()
+                    + " - " + course.getEndOfExam();
+            return new SimpleStringProperty(text);
+        });
 
         TableColumn<Course, String> colDuration = new TableColumn<>("Duration (min)");
         colDuration.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().getExamDuration())));
@@ -1287,7 +1273,10 @@ public class GUI extends Application {
 
         TableColumn<Course, String> c3 = new TableColumn<>("Time");
         c3.setCellValueFactory(s -> new SimpleStringProperty(
-                course.getTimeOfExam() == null ? "-" : course.getTimeOfExam() + " - " + course.getEndOfExam()));
+                course.getTimeOfExam() == null
+                        ? "-"
+                        : "Day " + course.getExamDay() + "|"
+                                + course.getTimeOfExam() + " - " + course.getEndOfExam()));
 
         TableColumn<Course, String> c4 = new TableColumn<>("Duration");
         c4.setCellValueFactory(s -> new SimpleStringProperty(String.valueOf(course.getExamDuration())));
@@ -1328,9 +1317,16 @@ public class GUI extends Application {
 
         // Time column
         TableColumn<Course, String> colTime = new TableColumn<>("Time");
-        colTime.setCellValueFactory(c -> new SimpleStringProperty(
-                c.getValue().getTimeOfExam() == null ? "-"
-                        : c.getValue().getTimeOfExam() + " - " + c.getValue().getEndOfExam()));
+        colTime.setCellValueFactory(c -> {
+            Course course = c.getValue();
+            if (course.getTimeOfExam() == null)
+                return new SimpleStringProperty("-");
+
+            String text = "Day " + course.getExamDay()
+                    + " | " + course.getTimeOfExam()
+                    + " - " + course.getEndOfExam();
+            return new SimpleStringProperty(text);
+        });
 
         // Duration column
         TableColumn<Course, String> colDuration = new TableColumn<>("Duration (min)");
@@ -1364,6 +1360,15 @@ public class GUI extends Application {
 
         dialog.setScene(new Scene(root, 650, 400));
         dialog.showAndWait();
+    }
+
+    private File chooseSaveFile(String title) {
+        Stage stage = (Stage) statusLabel.getScene().getWindow();
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle(title);
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        return chooser.showSaveDialog(stage);
     }
 
     public static void main(String[] args) {
