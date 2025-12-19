@@ -48,6 +48,7 @@ public class Classroom {
 
     public void decreaseAvailability(int blocksTaken){
         this.availability -= blocksTaken;
+        if (this.availability < 0) this.availability = 0;
         if(this.availability == 0) allBlocksFilled = true;
     }
 }

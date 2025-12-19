@@ -65,7 +65,7 @@ public class Course {
         setTimeOfExamInMinutes(time);
         this.examHour = time / 60;
         this.examMinute = time % 60;
-        this.timeOfExam = Integer.toString(this.examHour) + ":" + Integer.toString(this.examMinute);
+        this.timeOfExam = String.format("%02d:%02d", this.examHour, this.examMinute);
         calculateEndOfExam();
         for(Student attendee : attendees){
             if(attendee.currentDayExams == 0){
@@ -85,7 +85,7 @@ public class Course {
         int total = this.examHour * 60 + this.examMinute + examDuration;
         this.endOfExamHour = total / 60;
         this.endOfExamMinute = total % 60;
-        endOfExam = Integer.toString(this.endOfExamHour) + ":" + Integer.toString(this.endOfExamMinute);
+        endOfExam = String.format("%02d:%02d", this.endOfExamHour, this.endOfExamMinute);
     }
 
     public int getTimeOfExamInMinutes(){
