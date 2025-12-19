@@ -17,13 +17,9 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.input.KeyCode;
@@ -46,15 +42,15 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import java.io.File;
 
 public class GUI extends Application {
 
     private Label statusLabel;
     private VBox contentArea;
-    private TableView<Object> dataTable;
-    private TabPane dataTabs;
+    private TableView<Course> coursesTable;
+    private TableView<Classroom> classroomsTable;
+    private TableView<Student> studentsTable;
     private Stage primaryStage;
 
     private View currentView = View.COURSES;
@@ -108,7 +104,7 @@ public class GUI extends Application {
         root.setCenter(contentArea);
         root.setBottom(statusBar);
 
-        Scene scene = new Scene(root, 900, 800);
+        Scene scene = new Scene(root, 1200, 800);
         stage.setScene(scene);
         stage.show();
 
@@ -171,45 +167,144 @@ public class GUI extends Application {
     }
 
     private VBox buildContentArea() {
-        VBox box = new VBox();
-        box.setSpacing(0);
-        box.setPadding(new Insets(12, 12, 12, 12));
+        Label coursesLabel = new Label("Courses");
+        coursesTable = buildCoursesTable();
+        VBox coursesBox = new VBox(6, coursesLabel, coursesTable);
+        coursesBox.setPrefWidth(300);
 
-        dataTabs = new TabPane();
-        dataTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-        dataTabs.setStyle("-fx-background-color: white;"
-                + "-fx-border-color: #b3b3b3 #b3b3b3 white #b3b3b3;"
-                + "-fx-border-width: 1 1 0 1;"
-                + "-fx-padding: 4 8 0 8;");
-        Tab coursesTab = new Tab("Courses");
-        Tab classroomsTab = new Tab("Classrooms");
-        Tab studentsTab = new Tab("Students");
-        dataTabs.getTabs().addAll(coursesTab, classroomsTab, studentsTab);
-        dataTabs.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
-            if (newTab == coursesTab) {
-                showCourses();
-            } else if (newTab == classroomsTab) {
-                showClassrooms();
-            } else if (newTab == studentsTab) {
-                showStudents();
-            }
-        });
+        Label classroomsLabel = new Label("Classrooms");
+        classroomsTable = buildClassroomsTable();
+        VBox classroomsBox = new VBox(6, classroomsLabel, classroomsTable);
+        classroomsBox.setPrefWidth(250);
 
-        dataTable = new TableView<>();
-        dataTable.setPlaceholder(new Label("No data to display yet."));
-        dataTable.setTableMenuButtonVisible(false);
-        dataTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
-        dataTable.setPrefHeight(520);
-        dataTable.setStyle("-fx-border-color: #b3b3b3; -fx-border-width: 1; -fx-background-insets: 0;");
-        dataTable.setOnKeyPressed(event -> {
+        Label studentsLabel = new Label("Students");
+        studentsTable = buildStudentsTable();
+        VBox studentsBox = new VBox(6, studentsLabel, studentsTable);
+        studentsBox.setPrefWidth(220);
+
+        VBox searchBox = new VBox(6);
+        Label searchLabel = new Label("Search");
+        TextField searchField = new TextField();
+        searchField.setPromptText("Type to filter (not wired yet)");
+        searchBox.getChildren().addAll(searchLabel, searchField);
+        searchBox.setPrefWidth(200);
+
+        HBox tablesRow = new HBox(12, coursesBox, classroomsBox, studentsBox, searchBox);
+        tablesRow.setPadding(new Insets(12, 12, 12, 12));
+        tablesRow.setStyle("-fx-background-color: white; -fx-border-color: #b3b3b3; -fx-border-width: 1;");
+
+        VBox wrapper = new VBox(tablesRow);
+        wrapper.setPadding(new Insets(0));
+        return wrapper;
+    }
+
+    private TableView<Course> buildCoursesTable() {
+        TableView<Course> table = new TableView<>();
+        table.setPlaceholder(new Label("No courses to display yet."));
+        table.setTableMenuButtonVisible(false);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setItems(courses);
+
+        table.getColumns().setAll(
+                tableColumn("Code", value -> String.valueOf(value.getCode())),
+                tableColumn("Duration (min)", value -> {
+                    int d = value.getExamDuration();
+                    return d == 0 ? "-" : String.valueOf(d);
+                }),
+                tableColumn("Students", value -> {
+                    Student[] arr = value.getAttendees();
+                    if (arr == null || arr.length == 0)
+                        return "-";
+                    return Arrays.stream(arr)
+                            .map(Student::getID)
+                            .map(String::valueOf)
+                            .collect(Collectors.joining(", "));
+                }),
+                tableColumn("Classrooms", value -> {
+                    ArrayList<Classroom> rooms = value.getExamClass();
+                    if (rooms == null || rooms.isEmpty())
+                        return "-";
+                    return rooms.stream()
+                            .map(Classroom::getName)
+                            .map(String::valueOf)
+                            .collect(Collectors.joining(", "));
+                }));
+
+        table.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.DELETE) {
+                currentView = View.COURSES;
                 deleteSelectedItem();
             }
         });
+        table.setOnMouseClicked(event -> setCurrentView(View.COURSES));
+        table.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            if (newSel != null) {
+                setCurrentView(View.COURSES);
+            }
+        });
 
-        box.setStyle("-fx-background-color: white; -fx-border-color: #b3b3b3; -fx-border-width: 1;");
-        box.getChildren().addAll(dataTabs, dataTable);
-        return box;
+        return table;
+    }
+
+    private TableView<Classroom> buildClassroomsTable() {
+        TableView<Classroom> table = new TableView<>();
+        table.setPlaceholder(new Label("No classrooms to display yet."));
+        table.setTableMenuButtonVisible(false);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setItems(classrooms);
+
+        table.getColumns().setAll(
+                tableColumn("Room", value -> String.valueOf(value.getName())),
+                tableColumn("Capacity", value -> String.valueOf(value.getCapacity())),
+                tableColumn("Time Blocks", value -> String.valueOf(value.getBlocks().length)),
+                tableColumn("Booked", value -> String.valueOf(Arrays.stream(value.getBlocks())
+                        .filter(Objects::nonNull)
+                        .count())));
+
+        table.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.DELETE) {
+                currentView = View.CLASSROOMS;
+                deleteSelectedItem();
+            }
+        });
+        table.setOnMouseClicked(event -> setCurrentView(View.CLASSROOMS));
+        table.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            if (newSel != null) {
+                setCurrentView(View.CLASSROOMS);
+            }
+        });
+
+        return table;
+    }
+
+    private TableView<Student> buildStudentsTable() {
+        TableView<Student> table = new TableView<>();
+        table.setPlaceholder(new Label("No students to display yet."));
+        table.setTableMenuButtonVisible(false);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setItems(students);
+
+        table.getColumns().setAll(
+                tableColumn("Student ID", value -> String.valueOf(value.getID())),
+                tableColumn("Courses", value -> String.valueOf(courses.stream()
+                        .filter(course -> Arrays.stream(course.getAttendees())
+                                .anyMatch(student -> student.getID() == value.getID()))
+                        .count())));
+
+        table.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.DELETE) {
+                currentView = View.STUDENTS;
+                deleteSelectedItem();
+            }
+        });
+        table.setOnMouseClicked(event -> setCurrentView(View.STUDENTS));
+        table.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            if (newSel != null) {
+                setCurrentView(View.STUDENTS);
+            }
+        });
+
+        return table;
     }
 
     private HBox buildStatusBar() {
@@ -220,61 +315,24 @@ public class GUI extends Application {
     }
 
     private void showCourses() {
-        currentView = View.COURSES;
-        dataTable.getColumns().setAll(
-                column("Code", value -> String.valueOf(((Course) value).getCode())),
-                column("Duration (min)", value -> {
-                    int d = ((Course) value).getExamDuration();
-                    return d == 0 ? "-" : String.valueOf(d);
-                }),
-                column("Students", value -> {
-                    Student[] arr = ((Course) value).getAttendees();
-                    if (arr == null || arr.length == 0)
-                        return "-";
-                    return Arrays.stream(arr)
-                            .map(Student::getID)
-                            .map(String::valueOf)
-                            .collect(Collectors.joining(", "));
-                }),
-                column("Classrooms", value -> {
-                    ArrayList<Classroom> rooms = ((Course) value).getExamClass();
-                    if (rooms == null || rooms.isEmpty())
-                        return "-";
-                    return rooms.stream()
-                            .map(Classroom::getName)
-                            .map(String::valueOf)
-                            .collect(Collectors.joining(", "));
-                }));
-        dataTable.getItems().setAll(courses);
-        statusLabel.setText("Showing courses (" + courses.size() + ")");
-        fitColumns(4);
+        setCurrentView(View.COURSES);
+        if (coursesTable != null) {
+            coursesTable.refresh();
+        }
     }
 
     private void showClassrooms() {
-        currentView = View.CLASSROOMS;
-        dataTable.getColumns().setAll(
-                column("Room", value -> String.valueOf(((Classroom) value).getName())),
-                column("Capacity", value -> String.valueOf(((Classroom) value).getCapacity())),
-                column("Time Blocks", value -> String.valueOf(((Classroom) value).getBlocks().length)),
-                column("Booked", value -> String.valueOf(Arrays.stream(((Classroom) value).getBlocks())
-                        .filter(Objects::nonNull)
-                        .count())));
-        dataTable.getItems().setAll(classrooms);
-        statusLabel.setText("Showing classrooms (" + classrooms.size() + ")");
-        fitColumns(4);
+        setCurrentView(View.CLASSROOMS);
+        if (classroomsTable != null) {
+            classroomsTable.refresh();
+        }
     }
 
     private void showStudents() {
-        currentView = View.STUDENTS;
-        dataTable.getColumns().setAll(
-                column("Student ID", value -> String.valueOf(((Student) value).getID())),
-                column("Courses", value -> String.valueOf(courses.stream()
-                        .filter(course -> Arrays.stream(course.getAttendees())
-                                .anyMatch(student -> student.getID() == ((Student) value).getID()))
-                        .count())));
-        dataTable.getItems().setAll(students);
-        statusLabel.setText("Showing students (" + students.size() + ")");
-        fitColumns(2);
+        setCurrentView(View.STUDENTS);
+        if (studentsTable != null) {
+            studentsTable.refresh();
+        }
     }
 
     private File chooseCsvFile(String title) {
@@ -347,8 +405,8 @@ public class GUI extends Application {
         }
     }
 
-    private TableColumn<Object, String> column(String title, Function<Object, String> mapper) {
-        TableColumn<Object, String> col = new TableColumn<>(title);
+    private <T> TableColumn<T, String> tableColumn(String title, Function<T, String> mapper) {
+        TableColumn<T, String> col = new TableColumn<>(title);
         col.setCellValueFactory(cell -> new SimpleStringProperty(mapper.apply(cell.getValue())));
         return col;
     }
@@ -392,7 +450,7 @@ public class GUI extends Application {
     }
 
     private void deleteSelectedItem() {
-        Object selected = dataTable.getSelectionModel().getSelectedItem();
+        Object selected = getSelectionFor(currentView);
         if (selected == null) {
             statusLabel.setText("Select a row to delete.");
             return;
@@ -415,11 +473,41 @@ public class GUI extends Application {
         }
     }
 
+    private Object getSelectionFor(View view) {
+        return switch (view) {
+            case COURSES -> coursesTable != null ? coursesTable.getSelectionModel().getSelectedItem() : null;
+            case CLASSROOMS -> classroomsTable != null ? classroomsTable.getSelectionModel().getSelectedItem() : null;
+            case STUDENTS -> studentsTable != null ? studentsTable.getSelectionModel().getSelectedItem() : null;
+        };
+    }
+
     private void refreshCurrentView() {
+        refreshAllTables();
         switch (currentView) {
             case COURSES -> showCourses();
             case CLASSROOMS -> showClassrooms();
             case STUDENTS -> showStudents();
+        }
+    }
+
+    private void refreshAllTables() {
+        if (coursesTable != null) {
+            coursesTable.refresh();
+        }
+        if (classroomsTable != null) {
+            classroomsTable.refresh();
+        }
+        if (studentsTable != null) {
+            studentsTable.refresh();
+        }
+    }
+
+    private void setCurrentView(View view) {
+        currentView = view;
+        switch (view) {
+            case COURSES -> statusLabel.setText("Showing courses (" + courses.size() + ")");
+            case CLASSROOMS -> statusLabel.setText("Showing classrooms (" + classrooms.size() + ")");
+            case STUDENTS -> statusLabel.setText("Showing students (" + students.size() + ")");
         }
     }
 
@@ -459,7 +547,7 @@ public class GUI extends Application {
     }
 
     private void openEditDialog() {
-        Object selected = dataTable.getSelectionModel().getSelectedItem();
+        Object selected = getSelectionFor(currentView);
         if (selected == null) {
             statusLabel.setText("Select a row to edit.");
             return;
@@ -797,14 +885,6 @@ public class GUI extends Application {
         COURSES,
         CLASSROOMS,
         STUDENTS
-    }
-
-    private void fitColumns(int count) {
-        double padding = 20; // scroll bar wiggle room
-        dataTable.getColumns().forEach(col -> {
-            col.prefWidthProperty().unbind();
-            col.prefWidthProperty().bind(dataTable.widthProperty().subtract(padding).divide(count));
-        });
     }
 
     // placeholders kept for future logic wiring
