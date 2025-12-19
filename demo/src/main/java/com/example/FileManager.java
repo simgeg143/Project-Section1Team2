@@ -281,4 +281,54 @@ public class FileManager {
             System.out.println("Export error: " + e.getMessage());
         }
     }
+
+
+
+public static void editCourse(
+        String filePath,
+        int courseCode,
+        int newDuration
+) {
+    List<String[]> data = FileReader(filePath);
+
+    for (int i = 0; i < data.size(); i++) {
+        if (data.get(i)[0].equals(String.valueOf(courseCode))) {
+            data.set(i, new String[]{
+                    String.valueOf(courseCode),
+                    String.valueOf(newDuration)
+            });
+            break;
+        }
+    }
+
+    FileWriter(filePath, data);
+}
+
+
+
+public static void editClassroom(
+        String filePath,
+        int roomNo,
+        int newCapacity
+) {
+    List<String[]> data = FileReader(filePath);
+
+    for (int i = 0; i < data.size(); i++) {
+        if (data.get(i)[0].equals(String.valueOf(roomNo))) {
+            data.set(i, new String[]{
+                    String.valueOf(roomNo),
+                    String.valueOf(newCapacity)
+            });
+            break;
+        }
+    }
+
+    FileWriter(filePath, data);
+}
+
+
+
+
+
+
 }
