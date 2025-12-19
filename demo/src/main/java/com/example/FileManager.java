@@ -298,6 +298,44 @@ public class FileManager {
 
         FileWriter(filePath, data);
     } // CVC DEKİ HER SATIRI UPTADELEYEBİLMEK İÇİN
+    public static void exportAttendance(
+        ArrayList<Course> courses,
+        String filePath) {
+
+    if (courses == null || filePath == null) {
+        return;
+    }
+
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+
+        for (Course c : courses) {
+
+            bw.write("CourseCode_" + c.getCode());
+            bw.newLine();
+
+            Student[] attendees = c.getAttendees();
+
+            if (attendees == null || attendees.length == 0) {
+                bw.write("[]");
+            } else {
+                bw.write("[");
+                for (int i = 0; i < attendees.length; i++) {
+                    bw.write(String.valueOf(attendees[i].getID()));
+                    if (i < attendees.length - 1) {
+                        bw.write(", ");
+                    }
+                }
+                bw.write("]");
+            }
+
+            bw.newLine();
+        }
+
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+
 
     public static void editStudent(
             String filePath,

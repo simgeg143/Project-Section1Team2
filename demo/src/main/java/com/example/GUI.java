@@ -450,6 +450,11 @@ public class GUI extends Application {
             showCourses();
             showStudents();
             statusLabel.setText("Imported attendance from " + file.getName());
+            FileManager.exportAttendance(
+                new ArrayList<>(courses),
+                "data/sampleData_AllAttendanceLists.csv"
+);
+
         } catch (Exception e) {
             statusLabel.setText("Import failed: ");
         }
@@ -667,6 +672,11 @@ public class GUI extends Application {
             if (filtered.size() != attendees.length) {
                 course.setAttendees(filtered.toArray(new Student[0]));
             }
+            FileManager.exportAttendance(
+                new ArrayList<>(courses),
+                "data/sampleData_AllAttendanceLists.csv"
+);
+
         }
 
         return true;
@@ -947,6 +957,11 @@ public class GUI extends Application {
                     courses.add(newCourse);
                     statusLabel.setText("Course added.");
                 }
+                FileManager.exportAttendance(
+                    new ArrayList<>(courses),
+                    "data/sampleData_AllAttendanceLists.csv"
+);
+
 
                 dialog.close();
                 refreshCurrentView();
