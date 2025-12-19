@@ -43,6 +43,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -158,7 +159,7 @@ public class GUI extends Application {
         deleteButton.setMaxWidth(Double.MAX_VALUE);
 
         addButton.setOnAction(event -> openAddDialog());
-        editButton.setOnAction(event -> handleAction("Edit"));
+        editButton.setOnAction(event -> openEditDialog());
         deleteButton.setOnAction(event -> deleteSelectedItem());
 
         VBox navigation = new VBox(10, navTitle, addButton, editButton, deleteButton);
@@ -457,6 +458,20 @@ public class GUI extends Application {
         }
     }
 
+    private void openEditDialog() {
+        Object selected = dataTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            statusLabel.setText("Select a row to edit.");
+            return;
+        }
+
+        switch (currentView) {
+            case STUDENTS -> showEditStudentDialog((Student) selected);
+            case CLASSROOMS -> showEditClassroomDialog((Classroom) selected);
+            case COURSES -> showEditCourseDialog((Course) selected);
+        }
+    }
+
     private Stage createDialog(String title) {
         Stage dialog = new Stage();
         dialog.setTitle(title);
@@ -487,6 +502,39 @@ public class GUI extends Application {
                 dialog.close();
                 refreshCurrentView();
                 statusLabel.setText("Student added.");
+            } catch (NumberFormatException ex) {
+                feedback.setText("Enter a valid numeric ID.");
+            }
+        });
+
+        VBox layout = new VBox(10, form, save, feedback);
+        layout.setPadding(new Insets(12));
+        dialog.setScene(new Scene(layout));
+        dialog.showAndWait();
+    }
+
+    private void showEditStudentDialog(Student student) {
+        Stage dialog = createDialog("Edit student");
+
+        GridPane form = new GridPane();
+        form.setPadding(new Insets(12));
+        form.setHgap(8);
+        form.setVgap(8);
+
+        Label idLabel = new Label("Student ID:");
+        TextField idField = new TextField(String.valueOf(student.getID()));
+        form.addRow(0, idLabel, idField);
+
+        Label feedback = new Label();
+        Button save = new Button("Save changes");
+
+        save.setOnAction(event -> {
+            try {
+                int id = Integer.parseInt(idField.getText().trim());
+                student.setID(id);
+                dialog.close();
+                refreshCurrentView();
+                statusLabel.setText("Student updated.");
             } catch (NumberFormatException ex) {
                 feedback.setText("Enter a valid numeric ID.");
             }
@@ -536,8 +584,60 @@ public class GUI extends Application {
         dialog.showAndWait();
     }
 
+    private void showEditClassroomDialog(Classroom classroom) {
+        Stage dialog = createDialog("Edit classroom");
+
+        GridPane form = new GridPane();
+        form.setPadding(new Insets(12));
+        form.setHgap(8);
+        form.setVgap(8);
+
+        Label nameLabel = new Label("Room number:");
+        TextField nameField = new TextField(String.valueOf(classroom.getName()));
+        Label capacityLabel = new Label("Capacity:");
+        TextField capacityField = new TextField(String.valueOf(classroom.getCapacity()));
+
+        form.addRow(0, nameLabel, nameField);
+        form.addRow(1, capacityLabel, capacityField);
+
+        Label feedback = new Label();
+        Button save = new Button("Save changes");
+
+        save.setOnAction(event -> {
+            try {
+                int name = Integer.parseInt(nameField.getText().trim());
+                int capacity = Integer.parseInt(capacityField.getText().trim());
+                classroom.setName(name);
+                classroom.setCapacity(capacity);
+                dialog.close();
+                refreshCurrentView();
+                statusLabel.setText("Classroom updated.");
+            } catch (NumberFormatException ex) {
+                feedback.setText("Enter valid numeric values.");
+            }
+        });
+
+        VBox layout = new VBox(10, form, save, feedback);
+        layout.setPadding(new Insets(12));
+        dialog.setScene(new Scene(layout));
+        dialog.showAndWait();
+    }
+
     private void showAddCourseDialog() {
         Stage dialog = createDialog("Add course");
+
+        Course empty = new Course(0, new Student[0], new ArrayList<>(), 0);
+        buildCourseForm(dialog, empty, false);
+    }
+
+    private void showEditCourseDialog(Course course) {
+        Stage dialog = createDialog("Edit course");
+        buildCourseForm(dialog, course, true);
+    }
+
+    private void buildCourseForm(Stage dialog, Course course, boolean isEdit) {
+        String dialogTitle = isEdit ? "Edit course" : "Add course";
+        dialog.setTitle(dialogTitle);
 
         GridPane form = new GridPane();
         form.setPadding(new Insets(12));
@@ -545,9 +645,9 @@ public class GUI extends Application {
         form.setVgap(8);
 
         Label codeLabel = new Label("Course code:");
-        TextField codeField = new TextField();
+        TextField codeField = new TextField(isEdit ? String.valueOf(course.getCode()) : "");
         Label durationLabel = new Label("Duration (minutes):");
-        TextField durationField = new TextField();
+        TextField durationField = new TextField(isEdit ? String.valueOf(course.getExamDuration()) : "");
         Label studentIdsLabel = new Label("Students (check to include):");
         ListView<Student> studentsList = new ListView<>(students);
         studentsList.setPrefHeight(200);
@@ -573,6 +673,29 @@ public class GUI extends Application {
         Label classroomIdsLabel = new Label("Classroom numbers (comma-separated):");
         TextField classroomIdsField = new TextField();
 
+        // pre-select existing students if editing
+        if (isEdit && course.getAttendees() != null) {
+            Set<Integer> currentIds = Arrays.stream(course.getAttendees())
+                    .filter(Objects::nonNull)
+                    .map(Student::getID)
+                    .collect(Collectors.toSet());
+
+            students.forEach(st -> {
+                if (currentIds.contains(st.getID())) {
+                    BooleanProperty prop = selectedStudents.computeIfAbsent(st, s -> new SimpleBooleanProperty(false));
+                    prop.set(true);
+                }
+            });
+        }
+
+        // pre-fill classroom list if editing
+        if (isEdit && course.getExamClass() != null && !course.getExamClass().isEmpty()) {
+            String existingRooms = course.getExamClass().stream()
+                    .map(room -> String.valueOf(room.getName()))
+                    .collect(Collectors.joining(", "));
+            classroomIdsField.setText(existingRooms);
+        }
+
         form.addRow(0, codeLabel, codeField);
         form.addRow(1, durationLabel, durationField);
         form.addRow(2, studentIdsLabel, studentsList);
@@ -591,11 +714,20 @@ public class GUI extends Application {
                         .toArray(Student[]::new);
                 ArrayList<Classroom> examRooms = findClassroomsByIds(classroomIdsField.getText());
 
-                Course course = new Course(code, attendees, examRooms, duration);
-                courses.add(course);
+                if (isEdit) {
+                    course.setCode(code);
+                    course.setExamDuration(duration);
+                    course.setAttendees(attendees);
+                    course.setExamClass(examRooms);
+                    statusLabel.setText("Course updated.");
+                } else {
+                    Course newCourse = new Course(code, attendees, examRooms, duration);
+                    courses.add(newCourse);
+                    statusLabel.setText("Course added.");
+                }
+
                 dialog.close();
                 refreshCurrentView();
-                statusLabel.setText("Course added.");
             } catch (NumberFormatException ex) {
                 feedback.setText("Code and duration must be numeric.");
             }
