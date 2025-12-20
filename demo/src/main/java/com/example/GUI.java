@@ -618,7 +618,16 @@ classroomExportButton.setOnAction(e -> {
 
         Label studentsLabel = new Label("Students");
         Button studentScheduleButton = new Button("Exam schedule");
-       
+        //export button for student
+        Button studentExportButton = new Button("Export");
+
+        studentExportButton.setOnAction(e -> {
+    File file = chooseSaveFile("Export Updated Students");
+    if (file != null) {
+        FileManager.exportStudents(new ArrayList<>(students), file.getAbsolutePath());
+        statusLabel.setText("Students exported to: " + file.getName());
+    }
+});
         studentScheduleButton.setOnAction(e -> {
             Student selected = studentsTable.getSelectionModel().getSelectedItem();
             if (selected != null) {
@@ -629,7 +638,7 @@ classroomExportButton.setOnAction(e -> {
 
         });
 
-        HBox studentsHeader = new HBox(8, studentsLabel, studentScheduleButton);
+        HBox studentsHeader = new HBox(8, studentsLabel, studentScheduleButton,studentExportButton);
         studentsTable = buildStudentsTable();
         VBox studentsBox = new VBox(6, studentsHeader, studentsTable);
         VBox.setVgrow(studentsTable, Priority.ALWAYS);
