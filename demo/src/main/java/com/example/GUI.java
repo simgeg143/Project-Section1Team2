@@ -15,7 +15,9 @@ import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -58,6 +60,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -173,6 +176,10 @@ public class GUI extends Application {
         Label navTitle = new Label("Actions");
         Button editButton = new Button("Edit");
         Button deleteButton = new Button("Delete");
+        Button rescheduleButton = new Button("Reschedule Exams");
+rescheduleButton.setMaxWidth(Double.MAX_VALUE);
+        rescheduleButton.setOnAction(e -> rescheduleAll());
+
         Label searchLabel = new Label("Search");
         searchField = new TextField();
         Button dayTimeButton = new Button("Day – Time Schedule");
@@ -189,7 +196,7 @@ public class GUI extends Application {
         editButton.setOnAction(event -> openEditDialog());
         deleteButton.setOnAction(event -> deleteSelectedItem());
 
-        VBox navigation = new VBox(10, navTitle, editButton, deleteButton, searchLabel, searchField, dayTimeButton);
+        VBox navigation = new VBox(10, navTitle, editButton, deleteButton,rescheduleButton, searchLabel, searchField, dayTimeButton);
 
         navigation.setPadding(new Insets(12));
         navigation.setPrefWidth(180);
@@ -1941,6 +1948,39 @@ classroomExportButton.setOnAction(e -> {
         dialog.setScene(buildStyledDialogScene(root, 650, 400));
         dialog.showAndWait();
     }
+    private void rescheduleAll() {
+        if (courses.isEmpty() || classrooms.isEmpty() || students.isEmpty()) {
+            statusLabel.setText("Please import students, classrooms, courses and attendance first.");
+            return;
+        }
+
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Reschedule Exams");
+        alert.setHeaderText("This will rebuild the entire exam schedule.");
+        alert.setContentText("Are you sure you want to continue?");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.OK) {
+            return;
+        }
+
+        Main.resetSchedule(
+            new ArrayList<>(classrooms),
+            new ArrayList<>(courses),
+            new ArrayList<>(students)
+        );
+
+        Main.calculate(
+            new ArrayList<>(classrooms),
+            new ArrayList<>(courses),
+            new ArrayList<>(students)
+        );
+
+        refreshAllTables();
+        statusLabel.setText("Exam schedule rebuilt successfully.");
+    }
+
 
     private File chooseSaveFile(String title) {
         Stage stage = (Stage) statusLabel.getScene().getWindow();

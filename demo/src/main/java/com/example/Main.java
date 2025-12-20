@@ -1,6 +1,10 @@
 package com.example;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+
+
 
 public class Main {
     public static ArrayList<Student> students = new ArrayList<>();
@@ -352,6 +356,9 @@ public class Main {
          * This method contains the main loop and the calls to all of the scheduling
          * methods.
          */
+        // shuffling all lists to avoid bias
+        Collections.shuffle(courses);
+        Collections.shuffle(classrooms);
 
         // sorting all lists
         sortCourses(courses);
@@ -414,6 +421,32 @@ public class Main {
 
         setResults(classrooms, courses, students);
     }
+    public static void resetSchedule(
+        ArrayList<Classroom> classrooms,
+        ArrayList<Course> courses,
+        ArrayList<Student> students) {
+
+    //Classroom reset
+    for (Classroom room : classrooms) {
+        Arrays.fill(room.getBlocks(), null);
+        room.availability = blocksPerDay;
+        room.allBlocksFilled = false;
+    }
+
+    //Course reset
+    for (Course c : courses) {
+        c.alreadyScheduled = false;
+        c.setExamDay(0);
+        c.setTimeOfExam(-1);
+        c.setExamClass(new ArrayList<>());
+    }
+
+    // Student reset
+    for (Student s : students) {
+        s.endOfDay();
+    }
+}
+
 
     public static void setResults(ArrayList<Classroom> classrooms, ArrayList<Course> courses,
             ArrayList<Student> students) {
