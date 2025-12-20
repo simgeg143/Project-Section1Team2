@@ -562,6 +562,21 @@ public static void exportCourseExamSchedule(Course course, String filePath) {
 }
 
 
+public static void exportClassroomExamSchedule(Classroom classroom, ArrayList<Course> classroomCourses, String filePath) {
+    if (classroom == null || filePath == null) return;
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+        bw.write("Classroom,Capacity,Course,Day,Time,Students");
+        bw.newLine();
+        for (Course c : classroomCourses) {
+            String time = (c.getTimeOfExam() == null) ? "-" : c.getTimeOfExam() + " - " + c.getEndOfExam();
+            String studentList = (c.getAttendees() == null) ? "-" : Arrays.stream(c.getAttendees()).map(s -> String.valueOf(s.getID())).collect(Collectors.joining("; "));
+            bw.write(classroom.getName() + "," + classroom.getCapacity() + "," + c.getCode() + "," + c.getExamDay() + "," + time + ",\"" + studentList + "\"");
+            bw.newLine();
+        }
+    } catch (IOException e) { e.printStackTrace(); }
+}
+
+
 
 
 
