@@ -136,6 +136,23 @@ public class Main {
         return bestFit;
     }
 
+    public static boolean canScheduleWithoutExceedingDailyLimit(Course course) {
+        /*
+         * Checks if scheduling this course would cause any student to exceed 2 exams per day.
+         * Returns true if all students are below the limit, false otherwise.
+         */
+        if (course == null || course.getAttendees() == null || course.getAttendees().length == 0)
+            return true;
+
+        for (Student attendee : course.getAttendees()) {
+            // If student would have 2+ exams after this one, cannot schedule
+            if (attendee.getCurrentDayExams() >= 2) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static boolean hasMinimumBreakTime(Course course, int proposedStartBlock) {
         /*
          * Checks if scheduling this course at the proposed time would violate the
@@ -311,16 +328,13 @@ public class Main {
         return true;
     }
 
-    // TODO
     public static boolean allExamsAreScheduled(ArrayList<Course> courses) {
         /*
          * This method checks whether all exam's are scheduled or not.
          * Returns true if all are scheduled, false if there is even a single
          * unscheduled exam.
          */
-        // This class must check and see whether all course exam's are scheduled or not.
-        // If there is even a single course with an unscheduled exam, false must be
-        // returned.
+        
         for (Course course : courses) {
             if (!course.alreadyScheduled) {
                 return false;
@@ -376,19 +390,14 @@ public class Main {
 
                 boolean scheduledInThisPass = false;
                 for (Course course : courses) {
-                    boolean studentError = false;
                     if (!course.alreadyScheduled) {
-                        for (Student attendee : course.getAttendees()) { // if any student taking this course already
-                                                                         // has 2 exams, don't schedule an exam for this
-                                                                         // course.
-                            if (attendee.getCurrentDayExams() >= 2)
-                                studentError = true;
-                        }
-                        if (!studentError && findClassForExam(course, classrooms)) { // if no student > 2 exams && can
-                                                                                     // find class(es) for the exam
-                            dayCourses.add(course);
-                            course.setExamDay(dayNumber);
-                            scheduledInThisPass = true;
+                        // Check if scheduling this course would exceed the 2-exam-per-day limit
+                        if (canScheduleWithoutExceedingDailyLimit(course)) {
+                            if (findClassForExam(course, classrooms)) { // Try to find class(es) for the exam
+                                dayCourses.add(course);
+                                course.setExamDay(dayNumber);
+                                scheduledInThisPass = true;
+                            }
                         }
                     }
                 }
