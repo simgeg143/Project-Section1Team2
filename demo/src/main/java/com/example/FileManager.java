@@ -544,8 +544,7 @@ public static void exportCourses(ArrayList<Course> courses, String filePath) {
 
 
 
-// deneme
-// GUIdeki  tekli exam schedule exportlanmasi
+
 
 
 public static void exportCourseExamSchedule(Course course, String filePath) {
@@ -577,7 +576,19 @@ public static void exportClassroomExamSchedule(Classroom classroom, ArrayList<Co
 }
 
 
-
+public static void exportStudentExamSchedule(Student student, ArrayList<Course> studentCourses, String filePath) {
+    if (student == null || filePath == null) return;
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+        bw.write("Student,Course,Classroom,Day,Time");
+        bw.newLine();
+        for (Course c : studentCourses) {
+            String rooms = c.getExamClass() == null ? "-" : c.getExamClass().stream().map(r -> String.valueOf(r.getName())).collect(Collectors.joining("; "));
+            String time = (c.getTimeOfExam() == null) ? "-" : c.getTimeOfExam() + " - " + c.getEndOfExam();
+            bw.write(student.getID() + "," + c.getCode() + "," + rooms + "," + c.getExamDay() + "," + time);
+            bw.newLine();
+        }
+    } catch (IOException e) { e.printStackTrace(); }
+}
 
 
 
