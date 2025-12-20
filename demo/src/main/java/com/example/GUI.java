@@ -38,6 +38,7 @@ import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Popup;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 
@@ -200,7 +201,7 @@ public class GUI extends Application {
         VBox root = new VBox(10, table);
         root.setPadding(new Insets(10));
 
-        dialog.setScene(new Scene(root, 700, 400));
+        dialog.setScene(buildStyledDialogScene(root, 700, 400));
         dialog.showAndWait();
     }
 
@@ -243,7 +244,7 @@ public class GUI extends Application {
         VBox root = new VBox(10, table);
         root.setPadding(new Insets(10));
 
-        dialog.setScene(new Scene(root, 700, 400));
+        dialog.setScene(buildStyledDialogScene(root, 700, 400));
         dialog.showAndWait();
     }
 
@@ -280,7 +281,7 @@ public class GUI extends Application {
         VBox root = new VBox(10, table);
         root.setPadding(new Insets(10));
 
-        dialog.setScene(new Scene(root, 700, 400));
+        dialog.setScene(buildStyledDialogScene(root, 700, 400));
         dialog.showAndWait();
     }
 
@@ -1179,6 +1180,21 @@ public class GUI extends Application {
         delay.play();
     }
 
+    private Scene buildStyledDialogScene(VBox root, double width, double height) {
+        if (root != null) {
+            if (!root.getStyleClass().contains("dialog")) {
+                root.getStyleClass().add("dialog");
+            }
+            if (!root.getStyleClass().contains("dialog-window")) {
+                root.getStyleClass().add("dialog-window");
+            }
+        }
+        Scene scene = new Scene(root, width, height);
+        scene.setFill(Color.web("#0c1224"));
+        attachStyles(scene);
+        return scene;
+    }
+
     private void attachStyles(Scene scene) {
         if (scene == null) {
             return;
@@ -1296,7 +1312,7 @@ public class GUI extends Application {
         VBox root = new VBox(10, tableView);
         root.setPadding(new Insets(10));
 
-        dialog.setScene(new Scene(root, 650, 400));
+        dialog.setScene(buildStyledDialogScene(root, 650, 400));
         dialog.showAndWait();
     }
 
@@ -1342,7 +1358,7 @@ public class GUI extends Application {
         VBox root = new VBox(10, table);
         root.setPadding(new Insets(10));
 
-        dialog.setScene(new Scene(root, 600, 350));
+        dialog.setScene(buildStyledDialogScene(root, 600, 350));
         dialog.showAndWait();
     }
 
@@ -1413,7 +1429,7 @@ public class GUI extends Application {
         VBox root = new VBox(10, table);
         root.setPadding(new Insets(10));
 
-        dialog.setScene(new Scene(root, 650, 400));
+        dialog.setScene(buildStyledDialogScene(root, 650, 400));
         dialog.showAndWait();
     }
 
