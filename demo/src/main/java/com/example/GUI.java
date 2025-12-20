@@ -27,6 +27,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.CheckBoxListCell;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -62,6 +63,7 @@ public class GUI extends Application {
     private TableView<Student> studentsTable;
     private Stage primaryStage;
     private TextField searchField;
+    private Image appIcon;
 
     private View currentView = View.COURSES;
 
@@ -81,6 +83,8 @@ public class GUI extends Application {
 
         stage.setTitle("Exam Scheduler");
         this.primaryStage = stage;
+        appIcon = loadAppIcon();
+        applyAppIcon(stage);
 
         statusLabel = new Label("Ready");
         loadInitialData();
@@ -167,6 +171,7 @@ public class GUI extends Application {
         Stage dialog = new Stage();
         dialog.initOwner(primaryStage);
         dialog.initModality(Modality.APPLICATION_MODAL);
+        applyAppIcon(dialog);
         dialog.setTitle("All Courses Exam Schedule");
 
         TableView<Course> table = new TableView<>();
@@ -210,6 +215,7 @@ public class GUI extends Application {
         Stage dialog = new Stage();
         dialog.initOwner(primaryStage);
         dialog.initModality(Modality.APPLICATION_MODAL);
+        applyAppIcon(dialog);
         dialog.setTitle("All Classroom Exam Schedule");
 
         TableView<Course> table = new TableView<>();
@@ -253,6 +259,7 @@ public class GUI extends Application {
         Stage dialog = new Stage();
         dialog.initOwner(primaryStage);
         dialog.initModality(Modality.APPLICATION_MODAL);
+        applyAppIcon(dialog);
         dialog.setTitle("All Students Exam Schedule");
 
         TableView<Course> table = new TableView<>();
@@ -849,6 +856,7 @@ public class GUI extends Application {
         dialog.setTitle(title);
         dialog.initOwner(primaryStage);
         dialog.initModality(Modality.APPLICATION_MODAL);
+        applyAppIcon(dialog);
         return dialog;
     }
 
@@ -1223,6 +1231,30 @@ public class GUI extends Application {
         }
     }
 
+    private Image loadAppIcon() {
+        try {
+            var stream = GUI.class.getResourceAsStream("/iconn.png");
+            if (stream != null) {
+                return new Image(stream);
+            }
+        } catch (Exception ignored) {
+        }
+        File fallback = new File("demo/src/main/resources/iconn.png");
+        if (fallback.exists()) {
+            try {
+                return new Image(fallback.toURI().toString());
+            } catch (Exception ignored) {
+            }
+        }
+        return null;
+    }
+
+    private void applyAppIcon(Stage stage) {
+        if (stage != null && appIcon != null && !stage.getIcons().contains(appIcon)) {
+            stage.getIcons().add(appIcon);
+        }
+    }
+
     private enum View {
         COURSES,
         CLASSROOMS,
@@ -1274,6 +1306,7 @@ public class GUI extends Application {
         Stage dialog = new Stage();
         dialog.initOwner(primaryStage);
         dialog.initModality(Modality.APPLICATION_MODAL);
+        applyAppIcon(dialog);
         dialog.setTitle("Exam Schedule for Student " + student.getID());
 
         TableView<Course> tableView = new TableView<>();
@@ -1332,6 +1365,7 @@ public class GUI extends Application {
         Stage dialog = new Stage();
         dialog.initOwner(primaryStage);
         dialog.initModality(Modality.APPLICATION_MODAL);
+        applyAppIcon(dialog);
         dialog.setTitle("Course Schedule - " + course.getCode());
 
         TableView<Course> table = new TableView<>();
@@ -1378,6 +1412,7 @@ public class GUI extends Application {
         Stage dialog = new Stage();
         dialog.initOwner(primaryStage);
         dialog.initModality(Modality.APPLICATION_MODAL);
+        applyAppIcon(dialog);
         dialog.setTitle("Schedule for Classroom " + classroom.getName());
 
         TableView<Course> table = new TableView<>();
