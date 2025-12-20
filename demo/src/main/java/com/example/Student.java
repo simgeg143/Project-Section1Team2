@@ -50,4 +50,21 @@ public class Student {
         this.firstExamDuration = 0; // Reset for next day
     }
 
+    public ArrayList<Integer> getDailyExamCounts() {
+        return this.dailyAmountOfExams;
+    }
+
+    public boolean exceedsDailyLimit() {
+        return this.currentDayExams > 2;
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "ID=" + ID +
+                ", currentDayExams=" + currentDayExams +
+                ", totalDailyExams=" + dailyAmountOfExams +
+                '}';
+    }
+
 }
