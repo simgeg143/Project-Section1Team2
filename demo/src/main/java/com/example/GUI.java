@@ -136,7 +136,13 @@ public class GUI extends Application {
         MenuItem importClassrooms = new MenuItem("Import classrooms");
         MenuItem importCourses = new MenuItem("Import courses");
         MenuItem importAttendance = new MenuItem("Import attendance");
-        MenuItem exportSchedule = new MenuItem("Export schedule");
+        
+        //export butonları 
+        MenuItem exportAll = new MenuItem("Export all");
+    MenuItem exportCourses = new MenuItem("Export courses");
+    MenuItem exportClassrooms = new MenuItem("Export classrooms");
+    MenuItem exportStudents = new MenuItem("Export students");
+
         MenuItem exit = new MenuItem("Exit");
         exit.setOnAction(event -> Platform.exit());
         importAll.setOnAction(event -> importAllData());
@@ -144,6 +150,12 @@ public class GUI extends Application {
         importClassrooms.setOnAction(event -> importClassrooms());
         importCourses.setOnAction(event -> importCourses());
         importAttendance.setOnAction(event -> importAttendance());
+
+        exportAll.setOnAction(event -> exportAllData());
+    exportCourses.setOnAction(event -> exportCoursesAction());
+    exportClassrooms.setOnAction(event -> exportClassroomsAction());
+    exportStudents.setOnAction(event -> exportStudentsAction());
+
         fileMenu.getItems().addAll(
                 importAll,
                 new SeparatorMenuItem(),
@@ -151,9 +163,21 @@ public class GUI extends Application {
                 importClassrooms,
                 importCourses,
                 importAttendance,
-                exportSchedule,
+                
                 new SeparatorMenuItem(),
+             // export için
+                exportAll,
+            exportCourses,
+            exportClassrooms,
+            exportStudents,
+            new SeparatorMenuItem(),
                 exit);
+
+
+
+
+
+
 
         Menu manageMenu = new Menu("Manage");
         MenuItem editCourses = new MenuItem("Courses");
@@ -171,6 +195,41 @@ public class GUI extends Application {
 
         return new MenuBar(fileMenu, manageMenu, helpMenu);
     }
+
+
+private void exportAllData() {
+    exportCoursesAction();
+    exportClassroomsAction();
+    exportStudentsAction();
+}
+
+private void exportCoursesAction() {
+    File file = chooseSaveFile("Export Courses");
+    if (file != null) {
+        FileManager.exportCourses(new ArrayList<>(courses), file.getAbsolutePath());
+        statusLabel.setText("Courses exported to: " + file.getName());
+    }
+}
+
+private void exportClassroomsAction() {
+    File file = chooseSaveFile("Export Classrooms");
+    if (file != null) {
+        FileManager.exportClassrooms(new ArrayList<>(classrooms), file.getAbsolutePath());
+        statusLabel.setText("Classrooms exported to: " + file.getName());
+    }
+}
+
+private void exportStudentsAction() {
+    File file = chooseSaveFile("Export Students");
+    if (file != null) {
+        FileManager.exportStudents(new ArrayList<>(students), file.getAbsolutePath());
+        statusLabel.setText("Students exported to: " + file.getName());
+    }
+}
+
+
+
+
 
     private VBox buildNavigationPanel() {
         Label navTitle = new Label("Actions");
