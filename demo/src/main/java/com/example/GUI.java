@@ -44,15 +44,20 @@ import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.io.File;
 
 public class GUI extends Application {
 
@@ -73,6 +78,14 @@ public class GUI extends Application {
     private final FilteredList<Student> filteredStudents = new FilteredList<>(students, s -> true);
     private final FilteredList<Course> filteredCourses = new FilteredList<>(courses, c -> true);
     private final FilteredList<Classroom> filteredClassrooms = new FilteredList<>(classrooms, r -> true);
+
+    private enum DataFileType {
+        STUDENTS,
+        CLASSROOMS,
+        COURSES,
+        ATTENDANCE,
+        UNKNOWN
+    }
 
     private void loadInitialData() {
         System.out.println("No auto data loading. Waiting for user import.");
@@ -112,6 +125,7 @@ public class GUI extends Application {
 
     private MenuBar buildMenuBar() {
         Menu fileMenu = new Menu("File");
+        MenuItem importAll = new MenuItem("Import all (auto-detect)");
         MenuItem importStudents = new MenuItem("Import students");
         MenuItem importClassrooms = new MenuItem("Import classrooms");
         MenuItem importCourses = new MenuItem("Import courses");
@@ -119,12 +133,21 @@ public class GUI extends Application {
         MenuItem exportSchedule = new MenuItem("Export schedule");
         MenuItem exit = new MenuItem("Exit");
         exit.setOnAction(event -> Platform.exit());
+        importAll.setOnAction(event -> importAllData());
         importStudents.setOnAction(event -> importStudents());
         importClassrooms.setOnAction(event -> importClassrooms());
         importCourses.setOnAction(event -> importCourses());
         importAttendance.setOnAction(event -> importAttendance());
-        fileMenu.getItems().addAll(importStudents, importClassrooms, importCourses, importAttendance, exportSchedule,
-                new SeparatorMenuItem(), exit);
+        fileMenu.getItems().addAll(
+                importAll,
+                new SeparatorMenuItem(),
+                importStudents,
+                importClassrooms,
+                importCourses,
+                importAttendance,
+                exportSchedule,
+                new SeparatorMenuItem(),
+                exit);
 
         Menu manageMenu = new Menu("Manage");
         MenuItem editCourses = new MenuItem("Courses");
