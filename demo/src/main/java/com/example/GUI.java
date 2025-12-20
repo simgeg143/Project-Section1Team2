@@ -42,6 +42,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Popup;
@@ -201,10 +202,25 @@ exportAttendance.setOnAction(event -> exportAttendanceAction());
 
 
 private void exportAllData() {
-    exportCoursesAction();
-    exportClassroomsAction();
-    exportStudentsAction();
-    exportAttendanceAction();
+   DirectoryChooser directoryChooser = new DirectoryChooser();
+    directoryChooser.setTitle("Select Directory to Save Files");
+    File selectedDirectory = directoryChooser.showDialog(primaryStage);
+
+    if (selectedDirectory != null) {
+        String path = selectedDirectory.getAbsolutePath();
+        
+        try {
+            // Saves all files to the selected directory with updated names
+            FileManager.exportCourses(new ArrayList<>(courses), path + "/updated_courses.csv");
+            FileManager.exportClassrooms(new ArrayList<>(classrooms), path + "/updated_classrooms.csv");
+            FileManager.exportStudents(new ArrayList<>(students), path + "/updated_students.csv");
+            FileManager.exportAttendance(new ArrayList<>(courses), path + "/updated_attendance.csv");
+
+            statusLabel.setText("All files successfully saved to the selected directory.");
+        } catch (Exception e) {
+            statusLabel.setText("An error occurred during export: " + e.getMessage());
+        }
+    }
 }
 
 private void exportCoursesAction() {
@@ -235,7 +251,7 @@ private void exportAttendanceAction() {
     File file = chooseSaveFile("Export Attendance");
     if (file != null) {
         // Not: attendance listenizin adının 'attendances' veya benzeri olduğunu varsayıyorum
-        FileManager.exportAttendance(new ArrayList<>(attendances), file.getAbsolutePath());
+        FileManager.exportAttendance(new ArrayList<>(courses), file.getAbsolutePath());
         statusLabel.setText("Attendance exported to: " + file.getName());
     }
 }
