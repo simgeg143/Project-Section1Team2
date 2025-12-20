@@ -13,6 +13,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -883,7 +884,7 @@ public class GUI extends Application {
 
         VBox layout = new VBox(10, form, save, feedback);
         layout.setPadding(new Insets(12));
-        dialog.setScene(new Scene(layout));
+        dialog.setScene(buildStyledDialogScene(layout));
         dialog.showAndWait();
     }
 
@@ -919,7 +920,7 @@ public class GUI extends Application {
 
         VBox layout = new VBox(10, form, save, feedback);
         layout.setPadding(new Insets(12));
-        dialog.setScene(new Scene(layout));
+        dialog.setScene(buildStyledDialogScene(layout));
         dialog.showAndWait();
     }
 
@@ -960,7 +961,7 @@ public class GUI extends Application {
 
         VBox layout = new VBox(10, form, save, feedback);
         layout.setPadding(new Insets(12));
-        dialog.setScene(new Scene(layout));
+        dialog.setScene(buildStyledDialogScene(layout));
         dialog.showAndWait();
     }
 
@@ -1002,7 +1003,7 @@ public class GUI extends Application {
 
         VBox layout = new VBox(10, form, save, feedback);
         layout.setPadding(new Insets(12));
-        dialog.setScene(new Scene(layout));
+        dialog.setScene(buildStyledDialogScene(layout));
         dialog.showAndWait();
     }
 
@@ -1033,6 +1034,7 @@ public class GUI extends Application {
         TextField durationField = new TextField(isEdit ? String.valueOf(course.getExamDuration()) : "");
         Label studentIdsLabel = new Label("Students (check to include):");
         ListView<Student> studentsList = new ListView<>(students);
+        studentsList.getStyleClass().add("dialog-list");
         studentsList.setPrefHeight(200);
         Map<Student, BooleanProperty> selectedStudents = new LinkedHashMap<>();
         studentsList.setCellFactory(CheckBoxListCell.forListView(student -> {
@@ -1121,7 +1123,7 @@ public class GUI extends Application {
 
         VBox layout = new VBox(10, form, save, feedback);
         layout.setPadding(new Insets(12));
-        dialog.setScene(new Scene(layout));
+        dialog.setScene(buildStyledDialogScene(layout, 520, 520));
         dialog.showAndWait();
     }
 
@@ -1180,7 +1182,7 @@ public class GUI extends Application {
         delay.play();
     }
 
-    private Scene buildStyledDialogScene(VBox root, double width, double height) {
+    private Scene buildStyledDialogScene(Parent root, double width, double height) {
         if (root != null) {
             if (!root.getStyleClass().contains("dialog")) {
                 root.getStyleClass().add("dialog");
@@ -1189,10 +1191,14 @@ public class GUI extends Application {
                 root.getStyleClass().add("dialog-window");
             }
         }
-        Scene scene = new Scene(root, width, height);
+        Scene scene = (width > 0 && height > 0) ? new Scene(root, width, height) : new Scene(root);
         scene.setFill(Color.web("#0c1224"));
         attachStyles(scene);
         return scene;
+    }
+
+    private Scene buildStyledDialogScene(Parent root) {
+        return buildStyledDialogScene(root, -1, -1);
     }
 
     private void attachStyles(Scene scene) {

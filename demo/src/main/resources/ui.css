@@ -366,3 +366,49 @@
     -fx-background-color: rgba(255, 255, 255, 0.02);
     -fx-background-radius: 10;
 }
+
+.dialog-list {
+    -fx-background-color: transparent;
+    -fx-control-inner-background: #0c1224;
+    -fx-control-inner-background-alt: #0f182e;
+    -fx-border-color: #1f2d4a;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 6;
+    -fx-cell-size: 32px;
+}
+
+.dialog-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #e2e8f0;
+    -fx-padding: 6 10;
+}
+
+.dialog-list .list-cell:filled:selected {
+    -fx-background-color: linear-gradient(to right, #1d4ed8, #0ea5e9);
+    -fx-text-fill: #ffffff;
+}
+
+.dialog-list .list-cell:filled:hover {
+    -fx-background-color: rgba(34, 211, 238, 0.14);
+}
+
+.dialog-list .check-box {
+    -fx-text-fill: inherit;
+}
+
+.dialog-list .check-box .box {
+    -fx-background-color: #0f182e;
+    -fx-border-color: #22d3ee;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+}
+
+.dialog-list .check-box:selected .box {
+    -fx-background-color: linear-gradient(to right, #1d4ed8, #22d3ee);
+    -fx-border-color: transparent;
+}
+
+.dialog-list .check-box:selected .mark {
+    -fx-background-color: white;
+}
