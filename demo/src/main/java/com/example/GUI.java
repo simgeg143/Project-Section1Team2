@@ -534,8 +534,167 @@ public class GUI extends Application {
         return chooser.showOpenDialog(stage);
     }
 
+    private List<File> chooseCsvFiles(String title) {
+        Stage stage = (Stage) statusLabel.getScene().getWindow();
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle(title);
+        chooser.getExtensionFilters().clear();
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Data Files", "*.csv", "*.txt"));
+
+        File dataDir = new File("demo/data");
+        if (dataDir.exists() && dataDir.isDirectory()) {
+            chooser.setInitialDirectory(dataDir);
+        }
+
+        return chooser.showOpenMultipleDialog(stage);
+    }
+
+    private DataFileType detectFileType(File file) {
+        if (file == null || !file.exists() || !file.isFile()) {
+            return DataFileType.UNKNOWN;
+        }
+
+        String first = null;
+        String second = null;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty())
+                    continue;
+                if (first == null) {
+                    first = line;
+                } else {
+                    second = line;
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            return DataFileType.UNKNOWN;
+        }
+
+        String lowerFirst = first == null ? "" : first.toLowerCase();
+        String lowerSecond = second == null ? "" : second.toLowerCase();
+
+        boolean firstHasCourseCode = lowerFirst.startsWith("coursecode_") || lowerFirst.contains("coursecode");
+        boolean secondHasCourseCode = lowerSecond.startsWith("coursecode_") || lowerSecond.contains("coursecode");
+        boolean looksLikeAttendanceList = lowerSecond.startsWith("[") || lowerSecond.contains("std_id_");
+
+        if (lowerFirst.contains("classroom") || lowerFirst.contains("capacity") || lowerFirst.contains(";")
+                || lowerSecond.contains(";")) {
+            return DataFileType.CLASSROOMS;
+        }
+
+        // attendance uses course codes followed by a list of Std_ID entries
+        if (firstHasCourseCode && looksLikeAttendanceList) {
+            return DataFileType.ATTENDANCE;
+        }
+
+        if (lowerFirst.contains("course") && secondHasCourseCode) {
+            return DataFileType.COURSES;
+        }
+
+        if (firstHasCourseCode) {
+            return DataFileType.COURSES;
+        }
+
+        if (secondHasCourseCode) {
+            return DataFileType.COURSES;
+        }
+
+        if (lowerFirst.contains("student") || lowerFirst.contains("std_id_") || lowerSecond.contains("std_id_")) {
+            return DataFileType.STUDENTS;
+        }
+
+        return DataFileType.UNKNOWN;
+    }
+
+    private void importAllData() {
+        List<File> files = chooseCsvFiles("Select data files (students, classrooms, courses, attendance)");
+        if (files == null || files.isEmpty()) {
+            return;
+        }
+
+        Map<DataFileType, File> detected = new EnumMap<>(DataFileType.class);
+        ArrayList<String> unknown = new ArrayList<>();
+        ArrayList<String> duplicates = new ArrayList<>();
+
+        for (File file : files) {
+            DataFileType type = detectFileType(file);
+            if (type == DataFileType.UNKNOWN) {
+                unknown.add(file.getName());
+                continue;
+            }
+            if (detected.containsKey(type)) {
+                duplicates.add(file.getName());
+                continue;
+            }
+            detected.put(type, file);
+        }
+
+        ArrayList<String> loaded = new ArrayList<>();
+
+        if (detected.containsKey(DataFileType.STUDENTS)) {
+            importStudents(detected.get(DataFileType.STUDENTS));
+            loaded.add("students");
+        }
+        if (detected.containsKey(DataFileType.CLASSROOMS)) {
+            importClassrooms(detected.get(DataFileType.CLASSROOMS));
+            loaded.add("classrooms");
+        }
+        if (detected.containsKey(DataFileType.COURSES)) {
+            importCourses(detected.get(DataFileType.COURSES));
+            loaded.add("courses");
+        }
+        if (detected.containsKey(DataFileType.ATTENDANCE)) {
+            importAttendance(detected.get(DataFileType.ATTENDANCE));
+            loaded.add("attendance");
+        }
+
+        DataFileType[] requiredTypes = new DataFileType[] {
+                DataFileType.STUDENTS,
+                DataFileType.CLASSROOMS,
+                DataFileType.COURSES,
+                DataFileType.ATTENDANCE };
+        String[] requiredLabels = new String[] {
+                "students",
+                "classrooms",
+                "courses",
+                "attendance" };
+
+        ArrayList<String> missing = new ArrayList<>();
+        for (int i = 0; i < requiredTypes.length; i++) {
+            if (!detected.containsKey(requiredTypes[i])) {
+                missing.add(requiredLabels[i]);
+            }
+        }
+
+        StringBuilder summary = new StringBuilder();
+        if (!loaded.isEmpty()) {
+            summary.append("Auto-imported ").append(String.join(", ", loaded)).append(".");
+        } else {
+            summary.append("No known data files selected.");
+        }
+        if (!missing.isEmpty()) {
+            summary.append(" Missing: ").append(String.join(", ", missing)).append(".");
+        }
+        if (!unknown.isEmpty()) {
+            summary.append(" Unrecognized: ").append(String.join(", ", unknown)).append(".");
+        }
+        if (!duplicates.isEmpty()) {
+            summary.append(" Skipped duplicates: ").append(String.join(", ", duplicates)).append(".");
+        }
+
+        statusLabel.setText(summary.toString());
+    }
+
     private void importStudents() {
-        File file = chooseCsvFile("Import students");
+        importStudents(chooseCsvFile("Import students"));
+    }
+
+    private void importStudents(File file) {
         if (file == null)
             return;
         try {
@@ -543,12 +702,15 @@ public class GUI extends Application {
             showStudents();
             statusLabel.setText("Imported students from " + file.getName());
         } catch (Exception e) {
-            statusLabel.setText("Import failed: ");
+            statusLabel.setText("Import failed: " + e.getMessage());
         }
     }
 
     private void importClassrooms() {
-        File file = chooseCsvFile("Import classrooms");
+        importClassrooms(chooseCsvFile("Import classrooms"));
+    }
+
+    private void importClassrooms(File file) {
         if (file == null)
             return;
         try {
@@ -556,12 +718,15 @@ public class GUI extends Application {
             showClassrooms();
             statusLabel.setText("Imported classrooms from " + file.getName());
         } catch (Exception e) {
-            statusLabel.setText("Import failed: ");
+            statusLabel.setText("Import failed: " + e.getMessage());
         }
     }
 
     private void importCourses() {
-        File file = chooseCsvFile("Import courses");
+        importCourses(chooseCsvFile("Import courses"));
+    }
+
+    private void importCourses(File file) {
         if (file == null)
             return;
         try {
@@ -570,12 +735,15 @@ public class GUI extends Application {
             showCourses();
             statusLabel.setText("Imported courses from " + file.getName());
         } catch (Exception e) {
-            statusLabel.setText("Import failed: ");
+            statusLabel.setText("Import failed: " + e.getMessage());
         }
     }
 
     private void importAttendance() {
-        File file = chooseCsvFile("Import attendance");
+        importAttendance(chooseCsvFile("Import attendance"));
+    }
+
+    private void importAttendance(File file) {
         if (file == null)
             return;
         try {
@@ -586,7 +754,7 @@ public class GUI extends Application {
             statusLabel.setText("Imported attendance from " + file.getName());
 
         } catch (Exception e) {
-            statusLabel.setText("Import failed: ");
+            statusLabel.setText("Import failed: " + e.getMessage());
         }
     }
 
