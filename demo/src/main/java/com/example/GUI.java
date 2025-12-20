@@ -660,12 +660,20 @@ rescheduleButton.setMaxWidth(Double.MAX_VALUE);
         Label coursesLabel = new Label("Courses");
         Button courseScheduleButton = new Button("Exam schedule");
         Button courseExportButton = new Button("Export");
+
         courseExportButton.setOnAction(e -> {
-    File file = chooseSaveFile("Export Updated Courses");
-    if (file != null) {
-        FileManager.exportCourses(new ArrayList<>(courses), file.getAbsolutePath());
-        statusLabel.setText("Courses exported to: " + file.getName());
+            Course selected = coursesTable.getSelectionModel().getSelectedItem();
+    if (selected != null) {
+        File file = chooseSaveFile("Export_Schedule_Course_" + selected.getCode());
+        if (file != null) {
+            FileManager.exportCourseExamSchedule(selected, file.getAbsolutePath());
+            statusLabel.setText("Exam schedule for course " + selected.getCode() + " exported.");
+        }
+    } else {
+        // Seçim yoksa eski genel export çalışsın :/
+        exportCoursesAction();
     }
+  
 });
         courseScheduleButton.setOnAction(e -> {
             Course selected = coursesTable.getSelectionModel().getSelectedItem();
@@ -675,6 +683,8 @@ rescheduleButton.setMaxWidth(Double.MAX_VALUE);
                 showAllCoursesSchedule();
             }
         });
+
+
         HBox coursesHeader = new HBox(8, coursesLabel, courseScheduleButton,courseExportButton);
         coursesTable = buildCoursesTable();
         VBox coursesBox = new VBox(6, coursesHeader, coursesTable);
@@ -688,10 +698,17 @@ rescheduleButton.setMaxWidth(Double.MAX_VALUE);
 
 
 classroomExportButton.setOnAction(e -> {
-    File file = chooseSaveFile("Export Updated Classrooms");
-    if (file != null) {
-        FileManager.exportClassrooms(new ArrayList<>(classrooms), file.getAbsolutePath());
-        statusLabel.setText("Classrooms exported to: " + file.getName());
+   Classroom selected = classroomsTable.getSelectionModel().getSelectedItem();
+    if (selected != null) {
+        ArrayList<Course> relatedCourses = courses.stream()
+            .filter(c -> c.getExamClass() != null && c.getExamClass().stream().anyMatch(r -> r.getName() == selected.getName()))
+            .collect(Collectors.toCollection(ArrayList::new));
+        File file = chooseSaveFile("Export_Schedule_Room_" + selected.getName());
+        if (file != null) {
+            FileManager.exportClassroomExamSchedule(selected, relatedCourses, file.getAbsolutePath());
+        }
+    } else {
+        exportClassroomsAction();
     }
 });
 
@@ -715,11 +732,19 @@ classroomExportButton.setOnAction(e -> {
         Button studentExportButton = new Button("Export");
 
         studentExportButton.setOnAction(e -> {
-    File file = chooseSaveFile("Export Updated Students");
-    if (file != null) {
-        FileManager.exportStudents(new ArrayList<>(students), file.getAbsolutePath());
-        statusLabel.setText("Students exported to: " + file.getName());
+     Student selected = studentsTable.getSelectionModel().getSelectedItem();
+    if (selected != null) {
+        ArrayList<Course> relatedCourses = courses.stream()
+            .filter(c -> c.getAttendees() != null && Arrays.stream(c.getAttendees()).anyMatch(s -> s.getID() == selected.getID()))
+            .collect(Collectors.toCollection(ArrayList::new));
+        File file = chooseSaveFile("Export_Schedule_Student_" + selected.getID());
+        if (file != null) {
+            FileManager.exportStudentExamSchedule(selected, relatedCourses, file.getAbsolutePath());
+        }
+    } else {
+        exportStudentsAction();
     }
+   
 });
         studentScheduleButton.setOnAction(e -> {
             Student selected = studentsTable.getSelectionModel().getSelectedItem();
