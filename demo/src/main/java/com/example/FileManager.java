@@ -8,8 +8,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.*;
+import java.util.stream.Collectors;
 
 public class FileManager {
 
@@ -532,6 +534,34 @@ public static void exportCourses(ArrayList<Course> courses, String filePath) {
         e.printStackTrace();
     }
 }
+
+
+
+
+
+
+
+
+
+
+// deneme
+// GUIdeki  tekli exam schedule exportlanmasi
+
+
+public static void exportCourseExamSchedule(Course course, String filePath) {
+    if (course == null || filePath == null) return;
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+        bw.write("Course,Classroom,Capacity,Day,Time,Students");
+        bw.newLine();
+        String rooms = course.getExamClass() == null ? "-" : course.getExamClass().stream().map(r -> String.valueOf(r.getName())).collect(Collectors.joining("; "));
+        String time = course.getTimeOfExam() == null ? "-" : course.getTimeOfExam() + " - " + course.getEndOfExam();
+        String studentList = (course.getAttendees() == null) ? "-" : Arrays.stream(course.getAttendees()).map(s -> String.valueOf(s.getID())).collect(Collectors.joining("; "));
+        
+        bw.write(course.getCode() + "," + rooms + "," + (course.getExamClass() != null ? course.getExamClass().get(0).getCapacity() : 0) + "," + course.getExamDay() + "," + time + ",\"" + studentList + "\"");
+    } catch (IOException e) { e.printStackTrace(); }
+}
+
+
 
 
 
