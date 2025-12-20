@@ -566,6 +566,14 @@ public class GUI extends Application {
     private VBox buildContentArea() {
         Label coursesLabel = new Label("Courses");
         Button courseScheduleButton = new Button("Exam schedule");
+        Button courseExportButton = new Button("Export");
+        courseExportButton.setOnAction(e -> {
+    File file = chooseSaveFile("Export Updated Courses");
+    if (file != null) {
+        FileManager.exportCourses(new ArrayList<>(courses), file.getAbsolutePath());
+        statusLabel.setText("Courses exported to: " + file.getName());
+    }
+});
         courseScheduleButton.setOnAction(e -> {
             Course selected = coursesTable.getSelectionModel().getSelectedItem();
             if (selected != null) {
@@ -574,7 +582,7 @@ public class GUI extends Application {
                 showAllCoursesSchedule();
             }
         });
-        HBox coursesHeader = new HBox(8, coursesLabel, courseScheduleButton);
+        HBox coursesHeader = new HBox(8, coursesLabel, courseScheduleButton,courseExportButton);
         coursesTable = buildCoursesTable();
         VBox coursesBox = new VBox(6, coursesHeader, coursesTable);
         VBox.setVgrow(coursesTable, Priority.ALWAYS);
@@ -582,6 +590,18 @@ public class GUI extends Application {
 
         Label classroomsLabel = new Label("Classrooms");
         Button classroomScheduleButton = new Button("Exam schedule");
+        // classroom için export buttonları eklenme yeri
+        Button classroomExportButton = new Button("Export");
+
+
+classroomExportButton.setOnAction(e -> {
+    File file = chooseSaveFile("Export Updated Classrooms");
+    if (file != null) {
+        FileManager.exportClassrooms(new ArrayList<>(classrooms), file.getAbsolutePath());
+        statusLabel.setText("Classrooms exported to: " + file.getName());
+    }
+});
+
         classroomScheduleButton.setOnAction(e -> {
             Classroom selected = classroomsTable.getSelectionModel().getSelectedItem();
             if (selected != null) {
@@ -590,7 +610,7 @@ public class GUI extends Application {
                 showAllClassroomSchedules();
             }
         });
-        HBox classroomsHeader = new HBox(8, classroomsLabel, classroomScheduleButton);
+        HBox classroomsHeader = new HBox(8, classroomsLabel, classroomScheduleButton,classroomExportButton);
         classroomsTable = buildClassroomsTable();
         VBox classroomsBox = new VBox(6, classroomsHeader, classroomsTable);
         VBox.setVgrow(classroomsTable, Priority.ALWAYS);
@@ -598,6 +618,7 @@ public class GUI extends Application {
 
         Label studentsLabel = new Label("Students");
         Button studentScheduleButton = new Button("Exam schedule");
+       
         studentScheduleButton.setOnAction(e -> {
             Student selected = studentsTable.getSelectionModel().getSelectedItem();
             if (selected != null) {
