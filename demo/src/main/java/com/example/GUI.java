@@ -142,6 +142,7 @@ public class GUI extends Application {
     MenuItem exportCourses = new MenuItem("Export courses");
     MenuItem exportClassrooms = new MenuItem("Export classrooms");
     MenuItem exportStudents = new MenuItem("Export students");
+MenuItem exportAttendance = new MenuItem("Export attendance");
 
         MenuItem exit = new MenuItem("Exit");
         exit.setOnAction(event -> Platform.exit());
@@ -155,6 +156,7 @@ public class GUI extends Application {
     exportCourses.setOnAction(event -> exportCoursesAction());
     exportClassrooms.setOnAction(event -> exportClassroomsAction());
     exportStudents.setOnAction(event -> exportStudentsAction());
+exportAttendance.setOnAction(event -> exportAttendanceAction());
 
         fileMenu.getItems().addAll(
                 importAll,
@@ -170,6 +172,7 @@ public class GUI extends Application {
             exportCourses,
             exportClassrooms,
             exportStudents,
+            exportAttendance,
             new SeparatorMenuItem(),
                 exit);
 
@@ -201,6 +204,7 @@ private void exportAllData() {
     exportCoursesAction();
     exportClassroomsAction();
     exportStudentsAction();
+    exportAttendanceAction();
 }
 
 private void exportCoursesAction() {
@@ -227,7 +231,14 @@ private void exportStudentsAction() {
     }
 }
 
-
+private void exportAttendanceAction() {
+    File file = chooseSaveFile("Export Attendance");
+    if (file != null) {
+        // Not: attendance listenizin adının 'attendances' veya benzeri olduğunu varsayıyorum
+        FileManager.exportAttendance(new ArrayList<>(attendances), file.getAbsolutePath());
+        statusLabel.setText("Attendance exported to: " + file.getName());
+    }
+}
 
 
 
