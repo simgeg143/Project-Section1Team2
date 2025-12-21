@@ -181,21 +181,12 @@ public class GUI extends Application {
                 new SeparatorMenuItem(),
                 exit);
 
-        Menu manageMenu = new Menu("Manage");
-        MenuItem editCourses = new MenuItem("Courses");
-        MenuItem editClassrooms = new MenuItem("Classrooms");
-        MenuItem editStudents = new MenuItem("Students");
-        editCourses.setOnAction(event -> showCourses());
-        editClassrooms.setOnAction(event -> showClassrooms());
-        editStudents.setOnAction(event -> showStudents());
-        manageMenu.getItems().addAll(editCourses, editClassrooms, editStudents);
-
         Menu helpMenu = new Menu("Help");
         MenuItem about = new MenuItem("About");
 
         helpMenu.getItems().add(about);
 
-        return new MenuBar(fileMenu, manageMenu, helpMenu);
+        return new MenuBar(fileMenu, helpMenu);
     }
 
     private void exportAllData() {
