@@ -105,7 +105,7 @@ public class GUI extends Application {
     @Override
     public void start(Stage stage) {
 
-        stage.setTitle("Exam Scheduler");
+        stage.setTitle("Exam Planner");
         this.primaryStage = stage;
         appIcon = loadAppIcon();
         applyAppIcon(stage);
@@ -1733,6 +1733,7 @@ public class GUI extends Application {
     // Kurs Seçim Listesi (ListView)
     Label coursesLabel = new Label("Enrolled Courses:");
     ListView<Course> coursesListView = new ListView<>(courses);
+    coursesListView.getStyleClass().add("dialog-list");
     coursesListView.setPrefHeight(200);
 
     // Checkbox durumlarını takip etmek için map
