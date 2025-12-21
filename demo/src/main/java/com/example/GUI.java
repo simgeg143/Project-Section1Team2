@@ -385,8 +385,8 @@ public class GUI extends Application {
         VBox root = buildScheduleWithSearch(
                 table,
                 rows,
-                r -> r == null ? "" : (r.day + " " + r.time),
-                "Search by day or time");
+                r -> r == null ? "" : String.valueOf(r.day),
+                "Search by day");
 
         dialog.setScene(buildStyledDialogScene(root, 900, 500));
         dialog.showAndWait();
