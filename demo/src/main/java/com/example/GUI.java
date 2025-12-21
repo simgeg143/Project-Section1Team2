@@ -137,13 +137,13 @@ public class GUI extends Application {
         MenuItem importClassrooms = new MenuItem("Import classrooms");
         MenuItem importCourses = new MenuItem("Import courses");
         MenuItem importAttendance = new MenuItem("Import attendance");
-        
-        //export butonları 
+
+        // export butonları
         MenuItem exportAll = new MenuItem("Export all");
-    MenuItem exportCourses = new MenuItem("Export courses");
-    MenuItem exportClassrooms = new MenuItem("Export classrooms");
-    MenuItem exportStudents = new MenuItem("Export students");
-MenuItem exportAttendance = new MenuItem("Export attendance");
+        MenuItem exportCourses = new MenuItem("Export courses");
+        MenuItem exportClassrooms = new MenuItem("Export classrooms");
+        MenuItem exportStudents = new MenuItem("Export students");
+        MenuItem exportAttendance = new MenuItem("Export attendance");
 
         MenuItem exit = new MenuItem("Exit");
         exit.setOnAction(event -> Platform.exit());
@@ -154,10 +154,10 @@ MenuItem exportAttendance = new MenuItem("Export attendance");
         importAttendance.setOnAction(event -> importAttendance());
 
         exportAll.setOnAction(event -> exportAllData());
-    exportCourses.setOnAction(event -> exportCoursesAction());
-    exportClassrooms.setOnAction(event -> exportClassroomsAction());
-    exportStudents.setOnAction(event -> exportStudentsAction());
-exportAttendance.setOnAction(event -> exportAttendanceAction());
+        exportCourses.setOnAction(event -> exportCoursesAction());
+        exportClassrooms.setOnAction(event -> exportClassroomsAction());
+        exportStudents.setOnAction(event -> exportStudentsAction());
+        exportAttendance.setOnAction(event -> exportAttendanceAction());
 
         fileMenu.getItems().addAll(
                 importAll,
@@ -166,22 +166,16 @@ exportAttendance.setOnAction(event -> exportAttendanceAction());
                 importClassrooms,
                 importCourses,
                 importAttendance,
-                
+
                 new SeparatorMenuItem(),
-             // export için
+                // export için
                 exportAll,
-            exportCourses,
-            exportClassrooms,
-            exportStudents,
-            exportAttendance,
-            new SeparatorMenuItem(),
+                exportCourses,
+                exportClassrooms,
+                exportStudents,
+                exportAttendance,
+                new SeparatorMenuItem(),
                 exit);
-
-
-
-
-
-
 
         Menu manageMenu = new Menu("Manage");
         MenuItem editCourses = new MenuItem("Courses");
@@ -200,79 +194,77 @@ exportAttendance.setOnAction(event -> exportAttendanceAction());
         return new MenuBar(fileMenu, manageMenu, helpMenu);
     }
 
+    private void exportAllData() {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("Select Directory to Save Files");
+        File selectedDirectory = directoryChooser.showDialog(primaryStage);
 
-private void exportAllData() {
-   DirectoryChooser directoryChooser = new DirectoryChooser();
-    directoryChooser.setTitle("Select Directory to Save Files");
-    File selectedDirectory = directoryChooser.showDialog(primaryStage);
+        if (selectedDirectory != null) {
+            String path = selectedDirectory.getAbsolutePath();
 
-    if (selectedDirectory != null) {
-        String path = selectedDirectory.getAbsolutePath();
-        
-        try {
-            // Saves all files to the selected directory with updated names
-            FileManager.exportCourses(new ArrayList<>(courses), path + "/updated_courses.csv");
-            FileManager.exportClassrooms(new ArrayList<>(classrooms), path + "/updated_classrooms.csv");
-            FileManager.exportStudents(new ArrayList<>(students), path + "/updated_students.csv");
-            FileManager.exportAttendance(new ArrayList<>(courses), path + "/updated_attendance.csv");
+            try {
+                // Saves all files to the selected directory with updated names
+                FileManager.exportCourses(new ArrayList<>(courses), path + "/updated_courses.csv");
+                FileManager.exportClassrooms(new ArrayList<>(classrooms), path + "/updated_classrooms.csv");
+                FileManager.exportStudents(new ArrayList<>(students), path + "/updated_students.csv");
+                FileManager.exportAttendance(new ArrayList<>(courses), path + "/updated_attendance.csv");
 
-            statusLabel.setText("All files successfully saved to the selected directory.");
-        } catch (Exception e) {
-            statusLabel.setText("An error occurred during export: " + e.getMessage());
+                statusLabel.setText("All files successfully saved to the selected directory.");
+            } catch (Exception e) {
+                statusLabel.setText("An error occurred during export: " + e.getMessage());
+            }
         }
     }
-}
 
-private void exportCoursesAction() {
-    File file = chooseSaveFile("Export Courses");
-    if (file != null) {
-        FileManager.exportCourses(new ArrayList<>(courses), file.getAbsolutePath());
-        statusLabel.setText("Courses exported to: " + file.getName());
+    private void exportCoursesAction() {
+        File file = chooseSaveFile("Export Courses");
+        if (file != null) {
+            FileManager.exportCourses(new ArrayList<>(courses), file.getAbsolutePath());
+            statusLabel.setText("Courses exported to: " + file.getName());
+        }
     }
-}
 
-private void exportClassroomsAction() {
-    File file = chooseSaveFile("Export Classrooms");
-    if (file != null) {
-        FileManager.exportClassrooms(new ArrayList<>(classrooms), file.getAbsolutePath());
-        statusLabel.setText("Classrooms exported to: " + file.getName());
+    private void exportClassroomsAction() {
+        File file = chooseSaveFile("Export Classrooms");
+        if (file != null) {
+            FileManager.exportClassrooms(new ArrayList<>(classrooms), file.getAbsolutePath());
+            statusLabel.setText("Classrooms exported to: " + file.getName());
+        }
     }
-}
 
-private void exportStudentsAction() {
-    File file = chooseSaveFile("Export Students");
-    if (file != null) {
-        FileManager.exportStudents(new ArrayList<>(students), file.getAbsolutePath());
-        statusLabel.setText("Students exported to: " + file.getName());
+    private void exportStudentsAction() {
+        File file = chooseSaveFile("Export Students");
+        if (file != null) {
+            FileManager.exportStudents(new ArrayList<>(students), file.getAbsolutePath());
+            statusLabel.setText("Students exported to: " + file.getName());
+        }
     }
-}
 
-private void exportAttendanceAction() {
-    File file = chooseSaveFile("Export Attendance");
-    if (file != null) {
-        // Not: attendance listenizin adının 'attendances' veya benzeri olduğunu varsayıyorum
-        FileManager.exportAttendance(new ArrayList<>(courses), file.getAbsolutePath());
-        statusLabel.setText("Attendance exported to: " + file.getName());
+    private void exportAttendanceAction() {
+        File file = chooseSaveFile("Export Attendance");
+        if (file != null) {
+            // Not: attendance listenizin adının 'attendances' veya benzeri olduğunu
+            // varsayıyorum
+            FileManager.exportAttendance(new ArrayList<>(courses), file.getAbsolutePath());
+            statusLabel.setText("Attendance exported to: " + file.getName());
+        }
     }
-}
-
-
 
     private VBox buildNavigationPanel() {
         Label navTitle = new Label("Actions");
         Button editButton = new Button("Edit");
         Button deleteButton = new Button("Delete");
         Button rescheduleButton = new Button("Reschedule Exams");
-rescheduleButton.setMaxWidth(Double.MAX_VALUE);
+        rescheduleButton.setMaxWidth(Double.MAX_VALUE);
         rescheduleButton.setOnAction(e -> rescheduleAll());
 
-        Label searchLabel = new Label("Search");
+        Label searchLabel = new Label("Exam Search");
         searchField = new TextField();
         Button dayTimeButton = new Button("Day – Time Schedule");
         dayTimeButton.setMaxWidth(Double.MAX_VALUE);
         dayTimeButton.setOnAction(e -> showDayTimeSchedule());
 
-        searchField.setPromptText("Type to filter");
+        searchField.setPromptText("Type to search exams...");
         searchField.setMaxWidth(Double.MAX_VALUE);
         searchField.textProperty().addListener((obs, oldText, newText) -> applySearchFilter(newText));
 
@@ -282,7 +274,8 @@ rescheduleButton.setMaxWidth(Double.MAX_VALUE);
         editButton.setOnAction(event -> openEditDialog());
         deleteButton.setOnAction(event -> deleteSelectedItem());
 
-        VBox navigation = new VBox(10, navTitle, editButton, deleteButton,rescheduleButton, searchLabel, searchField, dayTimeButton);
+        VBox navigation = new VBox(10, navTitle, editButton, deleteButton, rescheduleButton, dayTimeButton, searchLabel,
+                searchField);
 
         navigation.setPadding(new Insets(12));
         navigation.setPrefWidth(180);
@@ -663,18 +656,18 @@ rescheduleButton.setMaxWidth(Double.MAX_VALUE);
 
         courseExportButton.setOnAction(e -> {
             Course selected = coursesTable.getSelectionModel().getSelectedItem();
-    if (selected != null) {
-        File file = chooseSaveFile("Export_Schedule_Course_" + selected.getCode());
-        if (file != null) {
-            FileManager.exportCourseExamSchedule(selected, file.getAbsolutePath());
-            statusLabel.setText("Exam schedule for course " + selected.getCode() + " exported.");
-        }
-    } else {
-        // Seçim yoksa eski genel export çalışsın :/
-        exportCoursesAction();
-    }
-  
-});
+            if (selected != null) {
+                File file = chooseSaveFile("Export_Schedule_Course_" + selected.getCode());
+                if (file != null) {
+                    FileManager.exportCourseExamSchedule(selected, file.getAbsolutePath());
+                    statusLabel.setText("Exam schedule for course " + selected.getCode() + " exported.");
+                }
+            } else {
+                // Seçim yoksa eski genel export çalışsın :/
+                exportCoursesAction();
+            }
+
+        });
         courseScheduleButton.setOnAction(e -> {
             Course selected = coursesTable.getSelectionModel().getSelectedItem();
             if (selected != null) {
@@ -684,8 +677,7 @@ rescheduleButton.setMaxWidth(Double.MAX_VALUE);
             }
         });
 
-
-        HBox coursesHeader = new HBox(8, coursesLabel, courseScheduleButton,courseExportButton);
+        HBox coursesHeader = new HBox(8, coursesLabel, courseScheduleButton, courseExportButton);
         coursesTable = buildCoursesTable();
         VBox coursesBox = new VBox(6, coursesHeader, coursesTable);
         VBox.setVgrow(coursesTable, Priority.ALWAYS);
@@ -696,21 +688,21 @@ rescheduleButton.setMaxWidth(Double.MAX_VALUE);
         // classroom için export buttonları eklenme yeri
         Button classroomExportButton = new Button("Export");
 
-
-classroomExportButton.setOnAction(e -> {
-   Classroom selected = classroomsTable.getSelectionModel().getSelectedItem();
-    if (selected != null) {
-        ArrayList<Course> relatedCourses = courses.stream()
-            .filter(c -> c.getExamClass() != null && c.getExamClass().stream().anyMatch(r -> r.getName() == selected.getName()))
-            .collect(Collectors.toCollection(ArrayList::new));
-        File file = chooseSaveFile("Export_Schedule_Room_" + selected.getName());
-        if (file != null) {
-            FileManager.exportClassroomExamSchedule(selected, relatedCourses, file.getAbsolutePath());
-        }
-    } else {
-        exportClassroomsAction();
-    }
-});
+        classroomExportButton.setOnAction(e -> {
+            Classroom selected = classroomsTable.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                ArrayList<Course> relatedCourses = courses.stream()
+                        .filter(c -> c.getExamClass() != null
+                                && c.getExamClass().stream().anyMatch(r -> r.getName() == selected.getName()))
+                        .collect(Collectors.toCollection(ArrayList::new));
+                File file = chooseSaveFile("Export_Schedule_Room_" + selected.getName());
+                if (file != null) {
+                    FileManager.exportClassroomExamSchedule(selected, relatedCourses, file.getAbsolutePath());
+                }
+            } else {
+                exportClassroomsAction();
+            }
+        });
 
         classroomScheduleButton.setOnAction(e -> {
             Classroom selected = classroomsTable.getSelectionModel().getSelectedItem();
@@ -720,7 +712,7 @@ classroomExportButton.setOnAction(e -> {
                 showAllClassroomSchedules();
             }
         });
-        HBox classroomsHeader = new HBox(8, classroomsLabel, classroomScheduleButton,classroomExportButton);
+        HBox classroomsHeader = new HBox(8, classroomsLabel, classroomScheduleButton, classroomExportButton);
         classroomsTable = buildClassroomsTable();
         VBox classroomsBox = new VBox(6, classroomsHeader, classroomsTable);
         VBox.setVgrow(classroomsTable, Priority.ALWAYS);
@@ -728,24 +720,25 @@ classroomExportButton.setOnAction(e -> {
 
         Label studentsLabel = new Label("Students");
         Button studentScheduleButton = new Button("Exam schedule");
-        //export button for student
+        // export button for student
         Button studentExportButton = new Button("Export");
 
         studentExportButton.setOnAction(e -> {
-     Student selected = studentsTable.getSelectionModel().getSelectedItem();
-    if (selected != null) {
-        ArrayList<Course> relatedCourses = courses.stream()
-            .filter(c -> c.getAttendees() != null && Arrays.stream(c.getAttendees()).anyMatch(s -> s.getID() == selected.getID()))
-            .collect(Collectors.toCollection(ArrayList::new));
-        File file = chooseSaveFile("Export_Schedule_Student_" + selected.getID());
-        if (file != null) {
-            FileManager.exportStudentExamSchedule(selected, relatedCourses, file.getAbsolutePath());
-        }
-    } else {
-        exportStudentsAction();
-    }
-   
-});
+            Student selected = studentsTable.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                ArrayList<Course> relatedCourses = courses.stream()
+                        .filter(c -> c.getAttendees() != null
+                                && Arrays.stream(c.getAttendees()).anyMatch(s -> s.getID() == selected.getID()))
+                        .collect(Collectors.toCollection(ArrayList::new));
+                File file = chooseSaveFile("Export_Schedule_Student_" + selected.getID());
+                if (file != null) {
+                    FileManager.exportStudentExamSchedule(selected, relatedCourses, file.getAbsolutePath());
+                }
+            } else {
+                exportStudentsAction();
+            }
+
+        });
         studentScheduleButton.setOnAction(e -> {
             Student selected = studentsTable.getSelectionModel().getSelectedItem();
             if (selected != null) {
@@ -756,7 +749,7 @@ classroomExportButton.setOnAction(e -> {
 
         });
 
-        HBox studentsHeader = new HBox(8, studentsLabel, studentScheduleButton,studentExportButton);
+        HBox studentsHeader = new HBox(8, studentsLabel, studentScheduleButton, studentExportButton);
         studentsTable = buildStudentsTable();
         VBox studentsBox = new VBox(6, studentsHeader, studentsTable);
         VBox.setVgrow(studentsTable, Priority.ALWAYS);
@@ -1297,6 +1290,7 @@ classroomExportButton.setOnAction(e -> {
         filteredStudents.setPredicate(student -> matchesStudent(student, query));
 
         updateStatusWithCounts(rawQuery);
+        Platform.runLater(() -> tryAutoOpenSchedule(rawQuery));
     }
 
     private void updateStatusWithCounts(String query) {
@@ -1351,6 +1345,26 @@ classroomExportButton.setOnAction(e -> {
                     return true;
                 }
             }
+        }
+        // --- TIME SLOT SEARCH ---
+        if (course.getExamDay() != 0) {
+            String dayText = "day " + course.getExamDay();
+            if (dayText.toLowerCase().contains(query)) {
+                return true;
+            }
+            if (String.valueOf(course.getExamDay()).contains(query)) {
+                return true;
+            }
+        }
+
+        if (course.getTimeOfExam() != null &&
+                course.getTimeOfExam().toLowerCase().contains(query)) {
+            return true;
+        }
+
+        if (course.getEndOfExam() != null &&
+                course.getEndOfExam().toLowerCase().contains(query)) {
+            return true;
         }
 
         return false;
@@ -1776,6 +1790,81 @@ classroomExportButton.setOnAction(e -> {
         delay.play();
     }
 
+    private void tryAutoOpenSchedule(String query) {
+        if (query == null || query.isBlank())
+            return;
+
+        String lower = query.toLowerCase();
+
+        // Query içindeki sayıları çek
+        var numbers = Arrays.stream(query.split("\\D+"))
+                .filter(s -> !s.isBlank())
+                .map(Integer::parseInt)
+                .toList();
+
+        if (numbers.isEmpty())
+            return;
+
+        // --- STUDENT ---
+        if (lower.contains("student")) {
+            int id = numbers.get(0);
+
+            students.stream()
+                    .filter(s -> s.getID() == id)
+                    .findFirst()
+                    .ifPresent(this::showStudentSchedule);
+
+            return;
+        }
+
+        // --- COURSE ---
+        if (lower.contains("course")) {
+            int code = numbers.get(0);
+
+            courses.stream()
+                    .filter(c -> c.getCode() == code)
+                    .findFirst()
+                    .ifPresent(this::showCourseSchedule);
+
+            return;
+        }
+
+        // --- CLASSROOM ---
+        if (lower.contains("classroom") ||
+                lower.contains("room") ||
+                lower.contains("class")) {
+
+            int roomNo = numbers.get(0);
+
+            classrooms.stream()
+                    .filter(r -> r.getName() == roomNo)
+                    .findFirst()
+                    .ifPresent(this::showClassroomSchedule);
+
+            return;
+        }
+
+        // Eğer keyword yok → tek sayı yazılmış olabilir
+        if (numbers.size() == 1) {
+            int val = numbers.get(0);
+
+            students.stream()
+                    .filter(s -> s.getID() == val)
+                    .findFirst()
+                    .ifPresent(this::showStudentSchedule);
+
+            courses.stream()
+                    .filter(c -> c.getCode() == val)
+                    .findFirst()
+                    .ifPresent(this::showCourseSchedule);
+
+            classrooms.stream()
+                    .filter(r -> r.getName() == val)
+                    .findFirst()
+                    .ifPresent(this::showClassroomSchedule);
+        }
+    }
+
     private Scene buildStyledDialogScene(Parent root, double width, double height) {
         if (root != null) {
             if (!root.getStyleClass().contains("dialog")) {
@@ -2059,12 +2148,12 @@ classroomExportButton.setOnAction(e -> {
         dialog.setScene(buildStyledDialogScene(root, 650, 400));
         dialog.showAndWait();
     }
+
     private void rescheduleAll() {
         if (courses.isEmpty() || classrooms.isEmpty() || students.isEmpty()) {
             statusLabel.setText("Please import students, classrooms, courses and attendance first.");
             return;
         }
-
 
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Reschedule Exams");
@@ -2077,21 +2166,18 @@ classroomExportButton.setOnAction(e -> {
         }
 
         Main.resetSchedule(
-            new ArrayList<>(classrooms),
-            new ArrayList<>(courses),
-            new ArrayList<>(students)
-        );
+                new ArrayList<>(classrooms),
+                new ArrayList<>(courses),
+                new ArrayList<>(students));
 
         Main.calculate(
-            new ArrayList<>(classrooms),
-            new ArrayList<>(courses),
-            new ArrayList<>(students)
-        );
+                new ArrayList<>(classrooms),
+                new ArrayList<>(courses),
+                new ArrayList<>(students));
 
         refreshAllTables();
         statusLabel.setText("Exam schedule rebuilt successfully.");
     }
-
 
     private File chooseSaveFile(String title) {
         Stage stage = (Stage) statusLabel.getScene().getWindow();
