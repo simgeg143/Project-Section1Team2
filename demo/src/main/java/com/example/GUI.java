@@ -258,13 +258,13 @@ public class GUI extends Application {
         rescheduleButton.setMaxWidth(Double.MAX_VALUE);
         rescheduleButton.setOnAction(e -> rescheduleAll());
 
-        Label searchLabel = new Label("Exam Search");
+        Label searchLabel = new Label("Search");
         searchField = new TextField();
         Button dayTimeButton = new Button("Day – Time Schedule");
         dayTimeButton.setMaxWidth(Double.MAX_VALUE);
         dayTimeButton.setOnAction(e -> showDayTimeSchedule());
 
-        searchField.setPromptText("Type to search exams...");
+        searchField.setPromptText("Type to filter");
         searchField.setMaxWidth(Double.MAX_VALUE);
         searchField.textProperty().addListener((obs, oldText, newText) -> applySearchFilter(newText));
 
@@ -1290,7 +1290,6 @@ public class GUI extends Application {
         filteredStudents.setPredicate(student -> matchesStudent(student, query));
 
         updateStatusWithCounts(rawQuery);
-        Platform.runLater(() -> tryAutoOpenSchedule(rawQuery));
     }
 
     private void updateStatusWithCounts(String query) {
@@ -1346,27 +1345,6 @@ public class GUI extends Application {
                 }
             }
         }
-        // --- TIME SLOT SEARCH ---
-        if (course.getExamDay() != 0) {
-            String dayText = "day " + course.getExamDay();
-            if (dayText.toLowerCase().contains(query)) {
-                return true;
-            }
-            if (String.valueOf(course.getExamDay()).contains(query)) {
-                return true;
-            }
-        }
-
-        if (course.getTimeOfExam() != null &&
-                course.getTimeOfExam().toLowerCase().contains(query)) {
-            return true;
-        }
-
-        if (course.getEndOfExam() != null &&
-                course.getEndOfExam().toLowerCase().contains(query)) {
-            return true;
-        }
-
         return false;
     }
 
@@ -1788,81 +1766,6 @@ public class GUI extends Application {
             fade.play();
         });
         delay.play();
-    }
-
-    private void tryAutoOpenSchedule(String query) {
-        if (query == null || query.isBlank())
-            return;
-
-        String lower = query.toLowerCase();
-
-        // Query içindeki sayıları çek
-        var numbers = Arrays.stream(query.split("\\D+"))
-                .filter(s -> !s.isBlank())
-                .map(Integer::parseInt)
-                .toList();
-
-        if (numbers.isEmpty())
-            return;
-
-        // --- STUDENT ---
-        if (lower.contains("student")) {
-            int id = numbers.get(0);
-
-            students.stream()
-                    .filter(s -> s.getID() == id)
-                    .findFirst()
-                    .ifPresent(this::showStudentSchedule);
-
-            return;
-        }
-
-        // --- COURSE ---
-        if (lower.contains("course")) {
-            int code = numbers.get(0);
-
-            courses.stream()
-                    .filter(c -> c.getCode() == code)
-                    .findFirst()
-                    .ifPresent(this::showCourseSchedule);
-
-            return;
-        }
-
-        // --- CLASSROOM ---
-        if (lower.contains("classroom") ||
-                lower.contains("room") ||
-                lower.contains("class")) {
-
-            int roomNo = numbers.get(0);
-
-            classrooms.stream()
-                    .filter(r -> r.getName() == roomNo)
-                    .findFirst()
-                    .ifPresent(this::showClassroomSchedule);
-
-            return;
-        }
-
-        // Eğer keyword yok → tek sayı yazılmış olabilir
-        if (numbers.size() == 1) {
-            int val = numbers.get(0);
-
-            students.stream()
-                    .filter(s -> s.getID() == val)
-                    .findFirst()
-                    .ifPresent(this::showStudentSchedule);
-
-            courses.stream()
-                    .filter(c -> c.getCode() == val)
-                    .findFirst()
-                    .ifPresent(this::showCourseSchedule);
-
-            classrooms.stream()
-                    .filter(r -> r.getName() == val)
-                    .findFirst()
-                    .ifPresent(this::showClassroomSchedule);
-        }
     }
 
     private Scene buildStyledDialogScene(Parent root, double width, double height) {
