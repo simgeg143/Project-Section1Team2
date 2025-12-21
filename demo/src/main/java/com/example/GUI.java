@@ -24,6 +24,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.ListView;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableRow;
@@ -36,6 +37,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -1192,7 +1194,11 @@ public class GUI extends Application {
 
     private void deleteSelectedItem() {
         if (!hasAnySelection()) {
-            clearAllImportedData();
+            if (confirmClearAllData()) {
+                clearAllImportedData();
+            } else {
+                statusLabel.setText("Delete cancelled.");
+            }
             return;
         }
 
@@ -1231,6 +1237,30 @@ public class GUI extends Application {
         return (coursesTable != null && coursesTable.getSelectionModel().getSelectedItem() != null)
                 || (classroomsTable != null && classroomsTable.getSelectionModel().getSelectedItem() != null)
                 || (studentsTable != null && studentsTable.getSelectionModel().getSelectedItem() != null);
+    }
+
+    private boolean confirmClearAllData() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.initOwner(primaryStage);
+        alert.setTitle("Delete all data?");
+        alert.setHeaderText(null);
+        alert.setContentText("This will remove all imported courses, classrooms, and students. Continue?");
+        alert.getDialogPane().setGraphic(null);
+        styleDialog(alert.getDialogPane());
+
+        Optional<ButtonType> result = alert.showAndWait();
+        return result.isPresent() && result.get() == ButtonType.OK;
+    }
+
+    private void styleDialog(DialogPane pane) {
+        if (pane == null) {
+            return;
+        }
+        pane.setStyle("-fx-background-color: #0c1224; -fx-control-inner-background: #0c1224; -fx-text-fill: #e0e7ff;");
+        var content = pane.lookup(".content");
+        if (content instanceof Label label) {
+            label.setTextFill(Color.web("#e0e7ff"));
+        }
     }
 
     private void clearAllImportedData() {
