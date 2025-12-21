@@ -1710,40 +1710,93 @@ public class GUI extends Application {
     }
 
     private void showEditStudentDialog(Student student) {
-        Stage dialog = createDialog("Edit student");
+    Stage dialog = createDialog("Edit student");
 
-        GridPane form = new GridPane();
-        form.setPadding(new Insets(12));
-        form.setHgap(8);
-        form.setVgap(8);
+    GridPane form = new GridPane();
+    form.setPadding(new Insets(12));
+    form.setHgap(8);
+    form.setVgap(8);
 
-        Label idLabel = new Label("Student ID:");
-        TextField idField = new TextField(String.valueOf(student.getID()));
-        form.addRow(0, idLabel, idField);
+    // ID Alanı
+    Label idLabel = new Label("Student ID:");
+    TextField idField = new TextField(String.valueOf(student.getID()));
+    form.addRow(0, idLabel, idField);
 
-        Label feedback = new Label();
-        Button save = new Button("Save changes");
+    // Kurs Seçim Listesi (ListView)
+    Label coursesLabel = new Label("Enrolled Courses:");
+    ListView<Course> coursesListView = new ListView<>(courses);
+    coursesListView.setPrefHeight(200);
 
-        save.setOnAction(event -> {
-            try {
-                int id = Integer.parseInt(idField.getText().trim());
-                student.setID(id);
-                FileManager.exportStudents(
-                        new ArrayList<>(students),
-                        "data/sampleData_AllStudents.csv");
-                dialog.close();
-                refreshCurrentView();
-                statusLabel.setText("Student updated.");
-            } catch (NumberFormatException ex) {
-                feedback.setText("Enter a valid numeric ID.");
+    // Checkbox durumlarını takip etmek için map
+    Map<Course, BooleanProperty> selectedCourses = new LinkedHashMap<>();
+
+    coursesListView.setCellFactory(CheckBoxListCell.forListView(course -> {
+        final boolean isEnrolled = (course.getAttendees() != null) && 
+            Arrays.stream(course.getAttendees())
+                  .anyMatch(s -> s != null && s.getID() == student.getID());
+        
+        // Bu sayede lambda içinde güvenle kullanılabilir
+        BooleanProperty prop = selectedCourses.computeIfAbsent(course, 
+            c -> new SimpleBooleanProperty(isEnrolled));
+        return prop;
+    }, new StringConverter<Course>() {
+        @Override public String toString(Course c) { return "Course: " + c.getCode(); }
+        @Override public Course fromString(String s) { return null; }
+    }));
+
+    form.addRow(1, coursesLabel, coursesListView);
+
+    Label feedback = new Label();
+    Button save = new Button("Save changes");
+
+    save.setOnAction(event -> {
+        try {
+            int newId = Integer.parseInt(idField.getText().trim());
+            
+            // Öğrencinin ID'sini güncelle
+            student.setID(newId);
+
+            // Kurs katılım listelerini güncelle
+            for (Course course : courses) {
+                BooleanProperty isSelected = selectedCourses.get(course);
+                if (isSelected == null) continue;
+
+                // Mevcut katılımcıları listeye al
+                List<Student> attendeesList = new ArrayList<>(Arrays.asList(
+                    course.getAttendees() != null ? course.getAttendees() : new Student[0]
+                ));
+
+                boolean currentlyIn = attendeesList.stream()
+                        .anyMatch(s -> s != null && s.getID() == student.getID());
+
+                if (isSelected.get() && !currentlyIn) {
+                    // Checkbox işaretli ama listede yoksa ekle
+                    attendeesList.add(student);
+                    course.setAttendees(attendeesList.toArray(new Student[0]));
+                } else if (!isSelected.get() && currentlyIn) {
+                    // Checkbox işareti kalkmış ama listede varsa çıkar
+                    attendeesList.removeIf(s -> s != null && s.getID() == student.getID());
+                    course.setAttendees(attendeesList.toArray(new Student[0]));
+                }
             }
-        });
 
-        VBox layout = new VBox(10, form, save, feedback);
-        layout.setPadding(new Insets(12));
-        dialog.setScene(buildStyledDialogScene(layout));
-        dialog.showAndWait();
-    }
+            FileManager.exportStudents(new ArrayList<>(students), "data/sampleData_AllStudents.csv");
+            FileManager.exportAttendance(new ArrayList<>(courses), "data/sampleData_AllAttendanceLists.csv");
+
+            dialog.close();
+            refreshCurrentView();
+            statusLabel.setText("Student ID and courses updated.");
+            
+        } catch (NumberFormatException ex) {
+            feedback.setText("Enter a valid numeric ID.");
+        }
+    });
+
+    VBox layout = new VBox(10, form, save, feedback);
+    layout.setPadding(new Insets(12));
+    dialog.setScene(buildStyledDialogScene(layout, 450, 500));
+    dialog.showAndWait();
+}
 
     private void showAddClassroomDialog() {
         Stage dialog = createDialog("Add classroom");
