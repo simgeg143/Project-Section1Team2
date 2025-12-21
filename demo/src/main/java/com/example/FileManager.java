@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.*;
 import java.util.stream.Collectors;
 
@@ -300,90 +301,92 @@ public class FileManager {
 
         FileWriter(filePath, data);
     } // CVC DEKİ HER SATIRI UPTADELEYEBİLMEK İÇİN
+
     public static void exportAttendance(
-        ArrayList<Course> courses,
-        String filePath) {
+            ArrayList<Course> courses,
+            String filePath) {
 
-    if (courses == null || filePath == null) {
-        return;
-    }
+        if (courses == null || filePath == null) {
+            return;
+        }
 
-    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
 
-        for (Course c : courses) {
+            for (Course c : courses) {
 
-            bw.write("CourseCode_" + c.getCode());
-            bw.newLine();
+                bw.write("CourseCode_" + c.getCode());
+                bw.newLine();
 
-            Student[] attendees = c.getAttendees();
+                Student[] attendees = c.getAttendees();
 
-            if (attendees == null || attendees.length == 0) {
-                bw.write("[]");
-            } else {
-                bw.write("[");
-                for (int i = 0; i < attendees.length; i++) {
-                    bw.write(String.valueOf(attendees[i].getID()));
-                    if (i < attendees.length - 1) {
-                        bw.write(", ");
+                if (attendees == null || attendees.length == 0) {
+                    bw.write("[]");
+                } else {
+                    bw.write("[");
+                    for (int i = 0; i < attendees.length; i++) {
+                        bw.write(String.valueOf(attendees[i].getID()));
+                        if (i < attendees.length - 1) {
+                            bw.write(", ");
+                        }
                     }
+                    bw.write("]");
                 }
-                bw.write("]");
+
+                bw.newLine();
             }
 
-            bw.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void exportStudents(
+            ArrayList<Student> students,
+            String filePath) {
+
+        if (students == null || filePath == null) {
+            return;
         }
 
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
-}
-public static void exportStudents(
-        ArrayList<Student> students,
-        String filePath) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
 
-    if (students == null || filePath == null) {
-        return;
-    }
-
-    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
-
-        // header
-        bw.write("StudentID");
-        bw.newLine();
-
-        for (Student s : students) {
-            if (s == null) continue;
-            bw.write(String.valueOf(s.getID()));
+            // header
+            bw.write("StudentID");
             bw.newLine();
+
+            for (Student s : students) {
+                if (s == null)
+                    continue;
+                bw.write(String.valueOf(s.getID()));
+                bw.newLine();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-    } catch (IOException e) {
-        e.printStackTrace();
     }
-}
-public static void exportClassrooms(ArrayList<Classroom> classrooms, String filePath) {
 
-    if (classrooms == null || filePath == null) return;
+    public static void exportClassrooms(ArrayList<Classroom> classrooms, String filePath) {
 
-    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+        if (classrooms == null || filePath == null)
+            return;
 
-        
-        bw.write("Room;Capacity");
-        bw.newLine();
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
 
-        for (Classroom c : classrooms) {
-            if (c == null) continue;
-            bw.write(c.getName() + ";" + c.getCapacity());
+            bw.write("Room;Capacity");
             bw.newLine();
+
+            for (Classroom c : classrooms) {
+                if (c == null)
+                    continue;
+                bw.write(c.getName() + ";" + c.getCapacity());
+                bw.newLine();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-    } catch (IOException e) {
-        e.printStackTrace();
     }
-}
-
-
-
 
     public static void editStudent(
             String filePath,
@@ -438,158 +441,369 @@ public static void exportClassrooms(ArrayList<Classroom> classrooms, String file
 
         FileWriter(filePath, data);
     }
-    
 
+    public static void editAttendanceStudent(String filePath, int courseCode, Student oldStudent, Student newStudent) {
+        List<String> lines = new ArrayList<>();
 
-
-
-  
-
-public static void editAttendanceStudent(String filePath, int courseCode, Student oldStudent, Student newStudent) {
-    List<String> lines = new ArrayList<>();
-    
-    
-    try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-        String line;
-        while ((line = br.readLine()) != null) {
-            lines.add(line);
-        }
-    } catch (IOException e) {
-        e.printStackTrace();
-        return;
-    }
-
-    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
-        boolean insideTargetCourse = false;
-        
-        Pattern pattern = Pattern.compile("Std_ID_(\\d+)");
-
-        for (int i = 0; i < lines.size(); i++) {
-            String currentLine = lines.get(i).trim();
-
-            if (currentLine.startsWith("CourseCode_")) {
-                int foundCode = Integer.parseInt(currentLine.replaceAll("\\D+", ""));
-                insideTargetCourse = (foundCode == courseCode);
-                bw.write(lines.get(i));
-            } 
-            else if (insideTargetCourse && currentLine.startsWith("[")) {
-                Matcher matcher = pattern.matcher(currentLine);
-                StringBuilder sb = new StringBuilder();
-                int lastEnd = 0;
-
-                while (matcher.find()) {
-                   
-                    int foundId = Integer.parseInt(matcher.group(1));
-                    
-                    
-                    sb.append(currentLine, lastEnd, matcher.start());
-                    
-                    if (foundId == oldStudent.getID()) {
-                        
-                        sb.append("Std_ID_").append(newStudent.getID());
-                    } else {
-                       
-                        sb.append(matcher.group());
-                    }
-                    lastEnd = matcher.end();
-                }
-                sb.append(currentLine.substring(lastEnd));
-                bw.write(sb.toString());
-                insideTargetCourse = false;
-            } 
-            else {
-                bw.write(lines.get(i));
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                lines.add(line);
             }
-            bw.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
         }
-    } catch (IOException e) {
-        e.printStackTrace();
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+            boolean insideTargetCourse = false;
+
+            Pattern pattern = Pattern.compile("Std_ID_(\\d+)");
+
+            for (int i = 0; i < lines.size(); i++) {
+                String currentLine = lines.get(i).trim();
+
+                if (currentLine.startsWith("CourseCode_")) {
+                    int foundCode = Integer.parseInt(currentLine.replaceAll("\\D+", ""));
+                    insideTargetCourse = (foundCode == courseCode);
+                    bw.write(lines.get(i));
+                } else if (insideTargetCourse && currentLine.startsWith("[")) {
+                    Matcher matcher = pattern.matcher(currentLine);
+                    StringBuilder sb = new StringBuilder();
+                    int lastEnd = 0;
+
+                    while (matcher.find()) {
+
+                        int foundId = Integer.parseInt(matcher.group(1));
+
+                        sb.append(currentLine, lastEnd, matcher.start());
+
+                        if (foundId == oldStudent.getID()) {
+
+                            sb.append("Std_ID_").append(newStudent.getID());
+                        } else {
+
+                            sb.append(matcher.group());
+                        }
+                        lastEnd = matcher.end();
+                    }
+                    sb.append(currentLine.substring(lastEnd));
+                    bw.write(sb.toString());
+                    insideTargetCourse = false;
+                } else {
+                    bw.write(lines.get(i));
+                }
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // düzenlendi ve test edildi
     }
 
-    // düzenlendi  ve test edildi
-}
+    public static void exportCourses(ArrayList<Course> courses, String filePath) {
+        if (courses == null || filePath == null) {
+            return;
+        }
 
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
 
+            bw.write("CourseCode,ExamDuration");
+            bw.newLine();
 
-public static void exportCourses(ArrayList<Course> courses, String filePath) {
-    if (courses == null || filePath == null) {
-        return;
+            for (Course c : courses) {
+                if (c == null)
+                    continue;
+
+                bw.write(c.getCode() + "," + c.getExamDuration());
+                bw.newLine();
+            }
+
+        } catch (IOException e) {
+            System.out.println("Course export error: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
-    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
-        
-        bw.write("CourseCode,ExamDuration");
-        bw.newLine();
-
-        for (Course c : courses) {
-            if (c == null) continue;
-            
-           
-            bw.write(c.getCode() + "," + c.getExamDuration());
+    public static void exportCourseExamSchedule(Course course, String filePath) {
+        if (course == null || filePath == null)
+            return;
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+            bw.write("Course,Classroom,Capacity,Day,Time,Students");
             bw.newLine();
-        }
+            String rooms = course.getExamClass() == null ? "-"
+                    : course.getExamClass().stream().map(r -> String.valueOf(r.getName()))
+                            .collect(Collectors.joining("; "));
+            String time = course.getTimeOfExam() == null ? "-" : course.getTimeOfExam() + " - " + course.getEndOfExam();
+            String studentList = (course.getAttendees() == null) ? "-"
+                    : Arrays.stream(course.getAttendees()).map(s -> String.valueOf(s.getID()))
+                            .collect(Collectors.joining("; "));
 
-    } catch (IOException e) {
-        System.out.println("Course export error: " + e.getMessage());
-        e.printStackTrace();
+            bw.write(course.getCode() + "," + rooms + ","
+                    + (course.getExamClass() != null ? course.getExamClass().get(0).getCapacity() : 0) + ","
+                    + course.getExamDay() + "," + time + ",\"" + studentList + "\"");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-}
 
-
-
-
-
-
-
-
-
-
-
-
-
-public static void exportCourseExamSchedule(Course course, String filePath) {
-    if (course == null || filePath == null) return;
-    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
-        bw.write("Course,Classroom,Capacity,Day,Time,Students");
-        bw.newLine();
-        String rooms = course.getExamClass() == null ? "-" : course.getExamClass().stream().map(r -> String.valueOf(r.getName())).collect(Collectors.joining("; "));
-        String time = course.getTimeOfExam() == null ? "-" : course.getTimeOfExam() + " - " + course.getEndOfExam();
-        String studentList = (course.getAttendees() == null) ? "-" : Arrays.stream(course.getAttendees()).map(s -> String.valueOf(s.getID())).collect(Collectors.joining("; "));
-        
-        bw.write(course.getCode() + "," + rooms + "," + (course.getExamClass() != null ? course.getExamClass().get(0).getCapacity() : 0) + "," + course.getExamDay() + "," + time + ",\"" + studentList + "\"");
-    } catch (IOException e) { e.printStackTrace(); }
-}
-
-
-public static void exportClassroomExamSchedule(Classroom classroom, ArrayList<Course> classroomCourses, String filePath) {
-    if (classroom == null || filePath == null) return;
-    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
-        bw.write("Classroom,Capacity,Course,Day,Time,Students");
-        bw.newLine();
-        for (Course c : classroomCourses) {
-            String time = (c.getTimeOfExam() == null) ? "-" : c.getTimeOfExam() + " - " + c.getEndOfExam();
-            String studentList = (c.getAttendees() == null) ? "-" : Arrays.stream(c.getAttendees()).map(s -> String.valueOf(s.getID())).collect(Collectors.joining("; "));
-            bw.write(classroom.getName() + "," + classroom.getCapacity() + "," + c.getCode() + "," + c.getExamDay() + "," + time + ",\"" + studentList + "\"");
+    public static void exportClassroomExamSchedule(Classroom classroom, ArrayList<Course> classroomCourses,
+            String filePath) {
+        if (classroom == null || filePath == null)
+            return;
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+            bw.write("Classroom,Capacity,Course,Day,Time,Students");
             bw.newLine();
+            for (Course c : classroomCourses) {
+                String time = (c.getTimeOfExam() == null) ? "-" : c.getTimeOfExam() + " - " + c.getEndOfExam();
+                String studentList = (c.getAttendees() == null) ? "-"
+                        : Arrays.stream(c.getAttendees()).map(s -> String.valueOf(s.getID()))
+                                .collect(Collectors.joining("; "));
+                bw.write(classroom.getName() + "," + classroom.getCapacity() + "," + c.getCode() + "," + c.getExamDay()
+                        + "," + time + ",\"" + studentList + "\"");
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-    } catch (IOException e) { e.printStackTrace(); }
-}
+    }
 
-
-public static void exportStudentExamSchedule(Student student, ArrayList<Course> studentCourses, String filePath) {
-    if (student == null || filePath == null) return;
-    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
-        bw.write("Student,Course,Classroom,Day,Time");
-        bw.newLine();
-        for (Course c : studentCourses) {
-            String rooms = c.getExamClass() == null ? "-" : c.getExamClass().stream().map(r -> String.valueOf(r.getName())).collect(Collectors.joining("; "));
-            String time = (c.getTimeOfExam() == null) ? "-" : c.getTimeOfExam() + " - " + c.getEndOfExam();
-            bw.write(student.getID() + "," + c.getCode() + "," + rooms + "," + c.getExamDay() + "," + time);
+    public static void exportStudentExamSchedule(Student student, ArrayList<Course> studentCourses, String filePath) {
+        if (student == null || filePath == null)
+            return;
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+            bw.write("Student,Course,Classroom,Day,Time");
             bw.newLine();
+            for (Course c : studentCourses) {
+                String rooms = c.getExamClass() == null ? "-"
+                        : c.getExamClass().stream().map(r -> String.valueOf(r.getName()))
+                                .collect(Collectors.joining("; "));
+                String time = (c.getTimeOfExam() == null) ? "-" : c.getTimeOfExam() + " - " + c.getEndOfExam();
+                bw.write(student.getID() + "," + c.getCode() + "," + rooms + "," + c.getExamDay() + "," + time);
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-    } catch (IOException e) { e.printStackTrace(); }
-}
+    }
 
+    public static void exportAllCourseExamSchedules(
+            ArrayList<Course> courses,
+            String filePath) {
 
+        if (courses == null || filePath == null)
+            return;
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+            bw.write("Course,Classroom,Capacity,Day,Time,Students");
+            bw.newLine();
+
+            for (Course c : courses) {
+                if (c == null)
+                    continue;
+
+                String time = (c.getTimeOfExam() == null)
+                        ? "-"
+                        : c.getTimeOfExam() + " - " + c.getEndOfExam();
+
+                String students = (c.getAttendees() == null)
+                        ? "-"
+                        : Arrays.stream(c.getAttendees())
+                                .filter(Objects::nonNull)
+                                .map(s -> String.valueOf(s.getID()))
+                                .collect(Collectors.joining("; "));
+
+                if (c.getExamClass() != null && !c.getExamClass().isEmpty()) {
+                    for (Classroom r : c.getExamClass()) {
+                        if (r == null)
+                            continue;
+
+                        bw.write(c.getCode() + "," +
+                                r.getName() + "," +
+                                r.getCapacity() + "," +
+                                c.getExamDay() + "," +
+                                time + ",\"" + students + "\"");
+                        bw.newLine();
+                    }
+                } else {
+                    bw.write(c.getCode() + ",-,0," +
+                            c.getExamDay() + "," +
+                            time + ",\"" + students + "\"");
+                    bw.newLine();
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void exportAllClassroomExamSchedules(
+            ArrayList<Classroom> classrooms,
+            ArrayList<Course> courses,
+            String filePath) {
+
+        if (classrooms == null || courses == null || filePath == null)
+            return;
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+            bw.write("Classroom,Capacity,Course,Day,Time,Students");
+            bw.newLine();
+
+            for (Classroom room : classrooms) {
+                if (room == null)
+                    continue;
+
+                for (Course c : courses) {
+                    if (c == null || c.getExamClass() == null)
+                        continue;
+
+                    boolean uses = c.getExamClass().stream()
+                            .anyMatch(r -> r != null && r.getName() == room.getName());
+
+                    if (!uses)
+                        continue;
+
+                    String time = (c.getTimeOfExam() == null)
+                            ? "-"
+                            : c.getTimeOfExam() + " - " + c.getEndOfExam();
+
+                    String students = (c.getAttendees() == null)
+                            ? "-"
+                            : Arrays.stream(c.getAttendees())
+                                    .filter(Objects::nonNull)
+                                    .map(s -> String.valueOf(s.getID()))
+                                    .collect(Collectors.joining("; "));
+
+                    bw.write(room.getName() + "," +
+                            room.getCapacity() + "," +
+                            c.getCode() + "," +
+                            c.getExamDay() + "," +
+                            time + ",\"" + students + "\"");
+                    bw.newLine();
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void exportAllStudentExamSchedules(
+            ArrayList<Student> students,
+            ArrayList<Course> courses,
+            String filePath) {
+
+        if (students == null || courses == null || filePath == null)
+            return;
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+            bw.write("Student,Course,Classroom,Day,Time");
+            bw.newLine();
+
+            for (Student s : students) {
+                if (s == null)
+                    continue;
+
+                for (Course c : courses) {
+                    if (c == null || c.getAttendees() == null)
+                        continue;
+
+                    boolean attends = Arrays.stream(c.getAttendees())
+                            .filter(Objects::nonNull)
+                            .anyMatch(st -> st.getID() == s.getID());
+
+                    if (!attends)
+                        continue;
+
+                    String rooms = (c.getExamClass() == null || c.getExamClass().isEmpty())
+                            ? "-"
+                            : c.getExamClass().stream()
+                                    .map(r -> String.valueOf(r.getName()))
+                                    .collect(Collectors.joining("; "));
+
+                    String time = (c.getTimeOfExam() == null)
+                            ? "-"
+                            : c.getTimeOfExam() + " - " + c.getEndOfExam();
+
+                    bw.write(s.getID() + "," +
+                            c.getCode() + "," +
+                            rooms + "," +
+                            c.getExamDay() + "," +
+                            time);
+                    bw.newLine();
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void exportDayTimeSchedule(ArrayList<Course> courses, String filePath) {
+        if (courses == null || filePath == null)
+            return;
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+            // CSV header
+            bw.write("Day,Time,Classroom,Course,Students");
+            bw.newLine();
+
+            courses.sort((a, b) -> {
+                int dayCompare = Integer.compare(a.getExamDay(), b.getExamDay());
+                if (dayCompare != 0)
+                    return dayCompare;
+
+                try {
+                    if (a.getTimeOfExam() == null || b.getTimeOfExam() == null)
+                        return 0;
+
+                    String t1 = a.getTimeOfExam().split("-")[0].trim();
+                    String t2 = b.getTimeOfExam().split("-")[0].trim();
+
+                    java.time.LocalTime time1 = java.time.LocalTime.parse(t1);
+                    java.time.LocalTime time2 = java.time.LocalTime.parse(t2);
+
+                    return time1.compareTo(time2);
+                } catch (Exception e) {
+                    return 0;
+                }
+            });
+
+            for (Course c : courses) {
+                if (c == null)
+                    continue;
+
+                String timeText = (c.getTimeOfExam() == null)
+                        ? "-"
+                        : c.getTimeOfExam() + " - " + c.getEndOfExam();
+
+                String studentList = (c.getAttendees() == null)
+                        ? "-"
+                        : Arrays.stream(c.getAttendees())
+                                .filter(Objects::nonNull)
+                                .map(s -> String.valueOf(s.getID()))
+                                .collect(Collectors.joining("; "));
+
+                if (c.getExamClass() != null && !c.getExamClass().isEmpty()) {
+                    for (Classroom r : c.getExamClass()) {
+                        if (r == null)
+                            continue;
+
+                        bw.write(
+                                c.getExamDay() + "," +
+                                        timeText + "," +
+                                        r.getName() + "," +
+                                        c.getCode() + ",\"" +
+                                        studentList + "\"");
+                        bw.newLine();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

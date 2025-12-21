@@ -262,9 +262,24 @@ public class GUI extends Application {
 
         Label searchLabel = new Label("Search");
         searchField = new TextField();
-        Button dayTimeButton = new Button("Day – Time Schedule");
+        Button dayTimeButton = new Button("Day – Time Exam Schedule");
         dayTimeButton.setMaxWidth(Double.MAX_VALUE);
         dayTimeButton.setOnAction(e -> showDayTimeSchedule());
+
+        Button dayTimeExportButton = new Button("Export Day-Time Schedule");
+        dayTimeExportButton.setMaxWidth(Double.MAX_VALUE);
+        dayTimeExportButton.setOnAction(e -> {
+            if (courses.isEmpty()) {
+                statusLabel.setText("No exams to export.");
+                return;
+            }
+
+            File file = chooseSaveFile("Export Day – Time Schedule");
+            if (file != null) {
+                FileManager.exportDayTimeSchedule(new ArrayList<>(courses), file.getAbsolutePath());
+                statusLabel.setText("Day–Time schedule exported to: " + file.getName());
+            }
+        });
 
         searchField.setPromptText("Type to filter");
         searchField.setMaxWidth(Double.MAX_VALUE);
@@ -276,7 +291,8 @@ public class GUI extends Application {
         editButton.setOnAction(event -> openEditDialog());
         deleteButton.setOnAction(event -> deleteSelectedItem());
 
-        VBox navigation = new VBox(10, navTitle, editButton, deleteButton, rescheduleButton, dayTimeButton, searchLabel,
+        VBox navigation = new VBox(10, navTitle, editButton, deleteButton, rescheduleButton, dayTimeButton,
+                dayTimeExportButton, searchLabel,
                 searchField);
 
         navigation.setPadding(new Insets(12));
@@ -347,8 +363,25 @@ public class GUI extends Application {
             }
         }
 
-        // Day'e göre sırala
-        rows.sort((a, b) -> Integer.compare(a.day, b.day));
+        rows.sort((a, b) -> {
+            // önce güne göre sırala
+            int dayCompare = Integer.compare(a.day, b.day);
+            if (dayCompare != 0)
+                return dayCompare;
+
+            // sonra saatine göre sırala
+            try {
+                String startA = a.time.split("-")[0].trim();
+                String startB = b.time.split("-")[0].trim();
+
+                java.time.LocalTime t1 = java.time.LocalTime.parse(startA);
+                java.time.LocalTime t2 = java.time.LocalTime.parse(startB);
+
+                return t1.compareTo(t2);
+            } catch (Exception e) {
+                return 0;
+            }
+        });
 
         table.getItems().setAll(rows);
 
@@ -654,20 +687,24 @@ public class GUI extends Application {
     private VBox buildContentArea() {
         Label coursesLabel = new Label("Courses");
         Button courseScheduleButton = new Button("Exam schedule");
-        Button courseExportButton = new Button("Export");
+        Button courseExportButton = new Button("Exam Schedule Export");
 
         courseExportButton.setOnAction(e -> {
             Course selected = coursesTable.getSelectionModel().getSelectedItem();
+            File file = chooseSaveFile("Export Course Exam Schedule");
+
+            if (file == null)
+                return;
+
             if (selected != null) {
-                File file = chooseSaveFile("Export_Schedule_Course_" + selected.getCode());
-                if (file != null) {
-                    FileManager.exportCourseExamSchedule(selected, file.getAbsolutePath());
-                    statusLabel.setText("Exam schedule for course " + selected.getCode() + " exported.");
-                }
+                FileManager.exportCourseExamSchedule(selected, file.getAbsolutePath());
             } else {
-                // Seçim yoksa eski genel export çalışsın :/
-                exportCoursesAction();
+                FileManager.exportAllCourseExamSchedules(
+                        new ArrayList<>(courses),
+                        file.getAbsolutePath());
             }
+
+            statusLabel.setText("Course schedule exported.");
 
         });
         courseScheduleButton.setOnAction(e -> {
@@ -688,7 +725,7 @@ public class GUI extends Application {
         Label classroomsLabel = new Label("Classrooms");
         Button classroomScheduleButton = new Button("Exam schedule");
         // classroom için export buttonları eklenme yeri
-        Button classroomExportButton = new Button("Export");
+        Button classroomExportButton = new Button("Exam schedule Export");
 
         classroomExportButton.setOnAction(e -> {
             Classroom selected = classroomsTable.getSelectionModel().getSelectedItem();
@@ -702,7 +739,13 @@ public class GUI extends Application {
                     FileManager.exportClassroomExamSchedule(selected, relatedCourses, file.getAbsolutePath());
                 }
             } else {
-                exportClassroomsAction();
+                File file = chooseSaveFile("Export All Classroom Exam Schedules");
+                if (file != null) {
+                    FileManager.exportAllClassroomExamSchedules(
+                            new ArrayList<>(classrooms),
+                            new ArrayList<>(courses),
+                            file.getAbsolutePath());
+                }
             }
         });
 
@@ -723,7 +766,7 @@ public class GUI extends Application {
         Label studentsLabel = new Label("Students");
         Button studentScheduleButton = new Button("Exam schedule");
         // export button for student
-        Button studentExportButton = new Button("Export");
+        Button studentExportButton = new Button("Exam schedule Export");
 
         studentExportButton.setOnAction(e -> {
             Student selected = studentsTable.getSelectionModel().getSelectedItem();
@@ -737,7 +780,13 @@ public class GUI extends Application {
                     FileManager.exportStudentExamSchedule(selected, relatedCourses, file.getAbsolutePath());
                 }
             } else {
-                exportStudentsAction();
+                File file = chooseSaveFile("Export All Student Exam Schedules");
+                if (file != null) {
+                    FileManager.exportAllStudentExamSchedules(
+                            new ArrayList<>(students),
+                            new ArrayList<>(courses),
+                            file.getAbsolutePath());
+                }
             }
 
         });
