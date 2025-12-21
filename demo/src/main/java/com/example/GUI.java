@@ -375,13 +375,10 @@ public class GUI extends Application {
             }
         });
 
-        table.getItems().setAll(rows);
-
-        VBox root = new VBox(10, table);
-        root.setPadding(new Insets(10));
-        root.setFillWidth(true);
-        table.setMaxHeight(Double.MAX_VALUE);
-        VBox.setVgrow(table, Priority.ALWAYS);
+        VBox root = buildScheduleWithSearch(
+                table,
+                rows,
+                r -> r.day + " " + r.time + " " + r.room + " " + r.course + " " + r.students);
 
         dialog.setScene(buildStyledDialogScene(root, 900, 500));
         dialog.showAndWait();
@@ -475,12 +472,10 @@ public class GUI extends Application {
             }
         }
 
-        table.getItems().setAll(rows);
-
-        BorderPane root = new BorderPane();
-        root.setPadding(new Insets(10));
-        root.setCenter(table);
-        BorderPane.setMargin(table, Insets.EMPTY);
+        VBox root = buildScheduleWithSearch(
+                table,
+                rows,
+                r -> r.courseCode + " " + r.room + " " + r.capacity + " " + r.day + " " + r.time + " " + r.students);
 
         dialog.setScene(buildStyledDialogScene(root, 900, 600));
         dialog.showAndWait();
@@ -571,10 +566,10 @@ public class GUI extends Application {
             }
         }
 
-        table.getItems().setAll(rows);
-
-        VBox root = new VBox(10, table);
-        root.setPadding(new Insets(10));
+        VBox root = buildScheduleWithSearch(
+                table,
+                rows,
+                r -> r.room + " " + r.capacity + " " + r.courseCode + " " + r.day + " " + r.time + " " + r.students);
 
         dialog.setScene(buildStyledDialogScene(root, 900, 500));
         dialog.showAndWait();
@@ -655,10 +650,10 @@ public class GUI extends Application {
         }
         rows.sort((a, b) -> Integer.compare(a.studentId, b.studentId));
 
-        table.getItems().setAll(rows);
-
-        VBox root = new VBox(10, table);
-        root.setPadding(new Insets(10));
+        VBox root = buildScheduleWithSearch(
+                table,
+                rows,
+                r -> r.studentId + " " + r.courseCode + " " + r.room + " " + r.day + " " + r.time);
 
         dialog.setScene(buildStyledDialogScene(root, 800, 500));
         dialog.showAndWait();
@@ -1239,6 +1234,40 @@ public class GUI extends Application {
             }
         });
         return col;
+    }
+
+    private <T> VBox buildScheduleWithSearch(TableView<T> table, List<T> rows, Function<T, String> searchMapper) {
+        ObservableList<T> data = FXCollections.observableArrayList(rows);
+        FilteredList<T> filtered = new FilteredList<>(data, r -> true);
+
+        TextField searchBox = new TextField();
+        searchBox.setPromptText("Search schedule");
+        searchBox.setMaxWidth(Double.MAX_VALUE);
+        searchBox.textProperty().addListener((obs, oldText, newText) -> {
+            String query = newText == null ? "" : newText.trim().toLowerCase();
+            filtered.setPredicate(item -> {
+                if (item == null) {
+                    return false;
+                }
+                if (query.isEmpty()) {
+                    return true;
+                }
+                String content = searchMapper.apply(item);
+                if (content == null) {
+                    content = "";
+                }
+                return content.toLowerCase().contains(query);
+            });
+        });
+
+        table.setItems(filtered);
+
+        VBox layout = new VBox(10, searchBox, table);
+        layout.setPadding(new Insets(10));
+        layout.setFillWidth(true);
+        table.setMaxHeight(Double.MAX_VALUE);
+        VBox.setVgrow(table, Priority.ALWAYS);
+        return layout;
     }
 
     private void seedSampleData() { // we will use this method to get the data into the tables in the furute when
@@ -2084,10 +2113,10 @@ public class GUI extends Application {
                     timeText));
         }
 
-        table.setItems(FXCollections.observableArrayList(rows));
-
-        VBox root = new VBox(10, table);
-        root.setPadding(new Insets(10));
+        VBox root = buildScheduleWithSearch(
+                table,
+                rows,
+                r -> r.studentId + " " + r.courseCode + " " + r.room + " " + r.day + " " + r.time);
 
         dialog.setScene(buildStyledDialogScene(root, 900, 500));
         dialog.showAndWait();
@@ -2170,10 +2199,10 @@ public class GUI extends Application {
                         studentList));
             }
         }
-        table.setItems(FXCollections.observableArrayList(rows));
-
-        VBox root = new VBox(10, table);
-        root.setPadding(new Insets(10));
+        VBox root = buildScheduleWithSearch(
+                table,
+                rows,
+                r -> r.courseCode + " " + r.room + " " + r.capacity + " " + r.day + " " + r.time + " " + r.students);
 
         dialog.setScene(buildStyledDialogScene(root, 900, 500));
         dialog.showAndWait();
@@ -2247,10 +2276,10 @@ public class GUI extends Application {
                     studentList));
         }
 
-        table.setItems(FXCollections.observableArrayList(rows));
-
-        VBox root = new VBox(10, table);
-        root.setPadding(new Insets(10));
+        VBox root = buildScheduleWithSearch(
+                table,
+                rows,
+                r -> r.room + " " + r.capacity + " " + r.courseCode + " " + r.day + " " + r.time + " " + r.students);
 
         dialog.setScene(buildStyledDialogScene(root, 900, 500));
         dialog.showAndWait();
