@@ -339,20 +339,27 @@ public class GUI extends Application {
                             .map(s -> String.valueOf(s.getID()))
                             .collect(Collectors.joining(", "));
 
-            // Eğer course birden fazla classroom kullanıyorsa hepsi ayrı satır
-            if (c.getExamClass() != null && !c.getExamClass().isEmpty()) {
-                for (Classroom r : c.getExamClass()) {
-                    if (r == null)
-                        continue;
+            List<Classroom> examRooms = c.getExamClass() == null
+                    ? new ArrayList<>()
+                    : c.getExamClass().stream()
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toList());
 
-                    rows.add(new DayTimeRow(
-                            c.getExamDay(),
-                            timeText,
-                            String.valueOf(r.getName()),
-                            c.getCode(),
-                            studentList));
-                }
-            }
+            if (examRooms.isEmpty())
+                continue;
+
+            String roomNames = examRooms.isEmpty()
+                    ? "-"
+                    : examRooms.stream()
+                            .map(r -> String.valueOf(r.getName()))
+                            .collect(Collectors.joining(", "));
+
+            rows.add(new DayTimeRow(
+                    c.getExamDay(),
+                    timeText,
+                    roomNames,
+                    c.getCode(),
+                    studentList));
         }
 
         rows.sort((a, b) -> {
@@ -449,28 +456,29 @@ public class GUI extends Application {
                             .map(s -> String.valueOf(s.getID()))
                             .collect(Collectors.joining(", "));
 
-            if (c.getExamClass() != null && !c.getExamClass().isEmpty()) {
-                for (Classroom r : c.getExamClass()) {
-                    if (r == null)
-                        continue;
+            List<Classroom> examRooms = c.getExamClass() == null
+                    ? new ArrayList<>()
+                    : c.getExamClass().stream()
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toList());
 
-                    rows.add(new CourseRow(
-                            c.getCode(),
-                            String.valueOf(r.getName()),
-                            r.getCapacity(),
-                            c.getExamDay(),
-                            timeText,
-                            studentList));
-                }
-            } else {
-                rows.add(new CourseRow(
-                        c.getCode(),
-                        "-",
-                        0,
-                        c.getExamDay(),
-                        timeText,
-                        studentList));
-            }
+            String roomNames = examRooms.isEmpty()
+                    ? "-"
+                    : examRooms.stream()
+                            .map(r -> String.valueOf(r.getName()))
+                            .collect(Collectors.joining(", "));
+
+            int totalCapacity = examRooms.stream()
+                    .mapToInt(Classroom::getCapacity)
+                    .sum();
+
+            rows.add(new CourseRow(
+                    c.getCode(),
+                    roomNames,
+                    totalCapacity,
+                    c.getExamDay(),
+                    timeText,
+                    studentList));
         }
 
         VBox root = buildScheduleWithSearch(
@@ -2278,28 +2286,29 @@ public class GUI extends Application {
                             .map(s -> String.valueOf(s.getID()))
                             .collect(Collectors.joining(", "));
 
-            if (c.getExamClass() != null && !c.getExamClass().isEmpty()) {
-                for (Classroom r : c.getExamClass()) {
-                    if (r == null)
-                        continue;
+            List<Classroom> examRooms = c.getExamClass() == null
+                    ? new ArrayList<>()
+                    : c.getExamClass().stream()
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toList());
 
-                    rows.add(new CourseRow(
-                            c.getCode(),
-                            String.valueOf(r.getName()),
-                            r.getCapacity(),
-                            c.getExamDay(),
-                            timeText,
-                            studentList));
-                }
-            } else {
-                rows.add(new CourseRow(
-                        c.getCode(),
-                        "-",
-                        0,
-                        c.getExamDay(),
-                        timeText,
-                        studentList));
-            }
+            String roomNames = examRooms.isEmpty()
+                    ? "-"
+                    : examRooms.stream()
+                            .map(r -> String.valueOf(r.getName()))
+                            .collect(Collectors.joining(", "));
+
+            int totalCapacity = examRooms.stream()
+                    .mapToInt(Classroom::getCapacity)
+                    .sum();
+
+            rows.add(new CourseRow(
+                    c.getCode(),
+                    roomNames,
+                    totalCapacity,
+                    c.getExamDay(),
+                    timeText,
+                    studentList));
         }
         VBox root = buildScheduleWithSearch(
                 table,
