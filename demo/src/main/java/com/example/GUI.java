@@ -1322,29 +1322,39 @@ public class GUI extends Application {
         if (query == null || query.isEmpty()) {
             return true;
         }
-        if (String.valueOf(course.getCode()).toLowerCase().contains(query)) {
+        String normalized = query.toLowerCase();
+        if (String.valueOf(course.getCode()).toLowerCase().contains(normalized)) {
             return true;
         }
-        if (String.valueOf(course.getExamDuration()).toLowerCase().contains(query)) {
+        if (String.valueOf(course.getExamDuration()).toLowerCase().contains(normalized)) {
             return true;
-        }
-
-        Student[] attendees = course.getAttendees();
-        if (attendees != null) {
-            for (Student student : attendees) {
-                if (student != null && String.valueOf(student.getID()).toLowerCase().contains(query)) {
-                    return true;
-                }
-            }
         }
 
         if (course.getExamClass() != null) {
             for (Classroom room : course.getExamClass()) {
-                if (room != null && String.valueOf(room.getName()).toLowerCase().contains(query)) {
+                if (room != null && String.valueOf(room.getName()).toLowerCase().contains(normalized)) {
                     return true;
                 }
             }
         }
+
+        // Only match attendees when the query is numeric and equals the student ID
+        if (normalized.chars().allMatch(Character::isDigit)) {
+            try {
+                int targetId = Integer.parseInt(normalized);
+                Student[] attendees = course.getAttendees();
+                if (attendees != null) {
+                    for (Student student : attendees) {
+                        if (student != null && student.getID() == targetId) {
+                            return true;
+                        }
+                    }
+                }
+            } catch (NumberFormatException ignored) {
+                // non-numeric attendee queries are ignored
+            }
+        }
+
         return false;
     }
 
