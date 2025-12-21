@@ -378,7 +378,8 @@ public class GUI extends Application {
         VBox root = buildScheduleWithSearch(
                 table,
                 rows,
-                r -> r.day + " " + r.time + " " + r.room + " " + r.course + " " + r.students);
+                r -> r == null ? "" : (r.day + " " + r.time),
+                "Search by day or time");
 
         dialog.setScene(buildStyledDialogScene(root, 900, 500));
         dialog.showAndWait();
@@ -475,7 +476,8 @@ public class GUI extends Application {
         VBox root = buildScheduleWithSearch(
                 table,
                 rows,
-                r -> r.courseCode + " " + r.room + " " + r.capacity + " " + r.day + " " + r.time + " " + r.students);
+                r -> r == null ? "" : String.valueOf(r.courseCode),
+                "Search by course code");
 
         dialog.setScene(buildStyledDialogScene(root, 900, 600));
         dialog.showAndWait();
@@ -569,7 +571,8 @@ public class GUI extends Application {
         VBox root = buildScheduleWithSearch(
                 table,
                 rows,
-                r -> r.room + " " + r.capacity + " " + r.courseCode + " " + r.day + " " + r.time + " " + r.students);
+                r -> r == null ? "" : r.room,
+                "Search by classroom");
 
         dialog.setScene(buildStyledDialogScene(root, 900, 500));
         dialog.showAndWait();
@@ -653,7 +656,8 @@ public class GUI extends Application {
         VBox root = buildScheduleWithSearch(
                 table,
                 rows,
-                r -> r.studentId + " " + r.courseCode + " " + r.room + " " + r.day + " " + r.time);
+                r -> r == null ? "" : String.valueOf(r.studentId),
+                "Search by student ID");
 
         dialog.setScene(buildStyledDialogScene(root, 800, 500));
         dialog.showAndWait();
@@ -1237,11 +1241,16 @@ public class GUI extends Application {
     }
 
     private <T> VBox buildScheduleWithSearch(TableView<T> table, List<T> rows, Function<T, String> searchMapper) {
+        return buildScheduleWithSearch(table, rows, searchMapper, "Search schedule");
+    }
+
+    private <T> VBox buildScheduleWithSearch(TableView<T> table, List<T> rows, Function<T, String> searchMapper,
+            String placeholder) {
         ObservableList<T> data = FXCollections.observableArrayList(rows);
         FilteredList<T> filtered = new FilteredList<>(data, r -> true);
 
         TextField searchBox = new TextField();
-        searchBox.setPromptText("Search schedule");
+        searchBox.setPromptText(placeholder);
         searchBox.setMaxWidth(Double.MAX_VALUE);
         searchBox.textProperty().addListener((obs, oldText, newText) -> {
             String query = newText == null ? "" : newText.trim().toLowerCase();
@@ -1372,11 +1381,50 @@ public class GUI extends Application {
         if (pane == null) {
             return;
         }
-        pane.setStyle("-fx-background-color: #0c1224; -fx-control-inner-background: #0c1224; -fx-text-fill: #e0e7ff;");
-        var content = pane.lookup(".content");
-        if (content instanceof Label label) {
-            label.setTextFill(Color.web("#e0e7ff"));
-        }
+        final String bg = "#0c1224";
+        final String fg = "#e0e7ff";
+
+        Runnable apply = () -> {
+            pane.setStyle("-fx-background-color: " + bg + "; -fx-control-inner-background: " + bg + "; -fx-text-fill: "
+                    + fg + ";");
+
+            var scene = pane.getScene();
+            if (scene != null) {
+                scene.setFill(Color.web(bg));
+            }
+
+            var header = pane.lookup(".header-panel");
+            if (header != null) {
+                header.setStyle("-fx-background-color: " + bg + ";");
+            }
+            var headerLabel = pane.lookup(".header-panel .label");
+            if (headerLabel instanceof Label label) {
+                label.setTextFill(Color.web(fg));
+            }
+
+            var content = pane.lookup(".content");
+            if (content != null) {
+                content.setStyle("-fx-background-color: " + bg + ";");
+            }
+            var contentLabel = pane.lookup(".content.label");
+            if (contentLabel instanceof Label label) {
+                label.setTextFill(Color.web(fg));
+            } else if (content instanceof Label label) {
+                label.setTextFill(Color.web(fg));
+            }
+
+            var buttonBar = pane.lookup(".button-bar");
+            if (buttonBar != null) {
+                buttonBar.setStyle("-fx-background-color: " + bg + ";");
+            }
+        };
+
+        apply.run();
+        pane.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                Platform.runLater(apply);
+            }
+        });
     }
 
     private void clearAllImportedData() {
@@ -2116,7 +2164,8 @@ public class GUI extends Application {
         VBox root = buildScheduleWithSearch(
                 table,
                 rows,
-                r -> r.studentId + " " + r.courseCode + " " + r.room + " " + r.day + " " + r.time);
+                r -> r == null ? "" : String.valueOf(r.courseCode),
+                "Search by course code");
 
         dialog.setScene(buildStyledDialogScene(root, 900, 500));
         dialog.showAndWait();
@@ -2202,7 +2251,8 @@ public class GUI extends Application {
         VBox root = buildScheduleWithSearch(
                 table,
                 rows,
-                r -> r.courseCode + " " + r.room + " " + r.capacity + " " + r.day + " " + r.time + " " + r.students);
+                r -> r == null ? "" : String.valueOf(r.courseCode),
+                "Search by course code");
 
         dialog.setScene(buildStyledDialogScene(root, 900, 500));
         dialog.showAndWait();
@@ -2279,7 +2329,8 @@ public class GUI extends Application {
         VBox root = buildScheduleWithSearch(
                 table,
                 rows,
-                r -> r.room + " " + r.capacity + " " + r.courseCode + " " + r.day + " " + r.time + " " + r.students);
+                r -> r == null ? "" : r.room,
+                "Search by classroom");
 
         dialog.setScene(buildStyledDialogScene(root, 900, 500));
         dialog.showAndWait();
@@ -2292,9 +2343,13 @@ public class GUI extends Application {
         }
 
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.initOwner(primaryStage);
         alert.setTitle("Reschedule Exams");
         alert.setHeaderText("This will rebuild the entire exam schedule.");
         alert.setContentText("Are you sure you want to continue?");
+        styleDialog(alert.getDialogPane());
+        alert.setGraphic(null);
+        Platform.runLater(() -> applyAppIcon((Stage) alert.getDialogPane().getScene().getWindow()));
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isEmpty() || result.get() != ButtonType.OK) {
