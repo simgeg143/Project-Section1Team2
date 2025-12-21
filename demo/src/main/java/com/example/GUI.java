@@ -388,6 +388,9 @@ public class GUI extends Application {
 
         VBox root = new VBox(10, table);
         root.setPadding(new Insets(10));
+        root.setFillWidth(true);
+        table.setMaxHeight(Double.MAX_VALUE);
+        VBox.setVgrow(table, Priority.ALWAYS);
 
         dialog.setScene(buildStyledDialogScene(root, 900, 500));
         dialog.showAndWait();
@@ -438,6 +441,7 @@ public class GUI extends Application {
         TableColumn<CourseRow, String> colStudents = scrollableColumn("Students", r -> r.students);
 
         table.getColumns().addAll(colCourse, colRoom, colCap, colDay, colTime, colStudents);
+        table.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
         ArrayList<CourseRow> rows = new ArrayList<>();
 
@@ -482,10 +486,12 @@ public class GUI extends Application {
 
         table.getItems().setAll(rows);
 
-        VBox root = new VBox(10, table);
+        BorderPane root = new BorderPane();
         root.setPadding(new Insets(10));
+        root.setCenter(table);
+        BorderPane.setMargin(table, Insets.EMPTY);
 
-        dialog.setScene(buildStyledDialogScene(root, 900, 500));
+        dialog.setScene(buildStyledDialogScene(root, 900, 600));
         dialog.showAndWait();
     }
 
