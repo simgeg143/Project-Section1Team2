@@ -1933,79 +1933,80 @@ public class GUI extends Application {
     }
 
     public void showStudentSchedule(Student student) {
-        System.out.println("POPUP ÇAĞRILDI (STUDENT)");
         if (student == null) {
             statusLabel.setText("No student selected.");
             return;
-        }
-
-        // Öğrencinin girdiği sınavları bul
-        ArrayList<Course> studentCourses = new ArrayList<>();
-        for (Course c : courses) {
-            if (c.getAttendees() != null) {
-                for (Student s : c.getAttendees()) {
-                    if (s != null && s.getID() == student.getID()) {
-                        studentCourses.add(c);
-                        break;
-                    }
-                }
-            }
         }
 
         Stage dialog = new Stage();
         dialog.initOwner(primaryStage);
         dialog.initModality(Modality.APPLICATION_MODAL);
         applyAppIcon(dialog);
-        dialog.setTitle("Exam Schedule for Student " + student.getID());
+        dialog.setTitle("Schedule for Student " + student.getID());
 
-        TableView<Course> tableView = new TableView<>();
-        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        TableView<CourseStudentRow> table = new TableView<>();
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setPlaceholder(new Label("No scheduled exams found for this student."));
 
-        tableView.setPlaceholder(new Label("No scheduled exams found for this student."));
+        TableColumn<CourseStudentRow, String> colStudent = new TableColumn<>("Student");
+        colStudent.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().studentId)));
 
-        TableColumn<Course, String> colStudent = new TableColumn<>("Student");
-        colStudent.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(student.getID())));
+        TableColumn<CourseStudentRow, String> colCourse = new TableColumn<>("Course");
+        colCourse.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().courseCode)));
 
-        TableColumn<Course, String> colCourse = new TableColumn<>("Course");
-        colCourse.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().getCode())));
+        TableColumn<CourseStudentRow, String> colRoom = new TableColumn<>("Classroom");
+        colRoom.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().room));
 
-        TableColumn<Course, String> colClassroom = new TableColumn<>("Classroom");
-        colClassroom.setCellValueFactory(c -> {
-            if (c.getValue().getExamClass() == null || c.getValue().getExamClass().isEmpty())
-                return new SimpleStringProperty("-");
-            String rooms = c.getValue().getExamClass()
-                    .stream()
-                    .map(r -> String.valueOf(r.getName()))
-                    .collect(Collectors.joining(", "));
-            return new SimpleStringProperty(rooms);
-        });
+        TableColumn<CourseStudentRow, String> colDay = new TableColumn<>("Day");
+        colDay.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().day)));
 
-        TableColumn<Course, String> colTime = new TableColumn<>("Time");
-        colTime.setCellValueFactory(c -> {
-            Course course = c.getValue();
-            String text = "Day " + course.getExamDay()
-                    + " | " + course.getTimeOfExam()
-                    + " - " + course.getEndOfExam();
-            return new SimpleStringProperty(text);
-        });
+        TableColumn<CourseStudentRow, String> colTime = new TableColumn<>("Time");
+        colTime.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().time));
 
-        TableColumn<Course, String> colDuration = new TableColumn<>("Duration (min)");
-        colDuration.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().getExamDuration())));
+        table.getColumns().addAll(colStudent, colCourse, colRoom, colDay, colTime);
 
-        tableView.getColumns().addAll(
-                colStudent, colCourse, colClassroom, colTime, colDuration);
+        ArrayList<CourseStudentRow> rows = new ArrayList<>();
 
-        tableView.getItems().addAll(studentCourses);
+        for (Course c : courses) {
+            if (c == null || c.getAttendees() == null)
+                continue;
 
-        VBox root = new VBox(10, tableView);
+            boolean attends = Arrays.stream(c.getAttendees())
+                    .filter(Objects::nonNull)
+                    .anyMatch(s -> s.getID() == student.getID());
+
+            if (!attends)
+                continue;
+
+            String timeText = (c.getTimeOfExam() == null)
+                    ? "-"
+                    : c.getTimeOfExam() + " - " + c.getEndOfExam();
+
+            String roomName = "-";
+            if (c.getExamClass() != null && !c.getExamClass().isEmpty()) {
+                Classroom r = c.getExamClass().get(0);
+                if (r != null)
+                    roomName = String.valueOf(r.getName());
+            }
+
+            rows.add(new CourseStudentRow(
+                    student.getID(),
+                    c.getCode(),
+                    roomName,
+                    c.getExamDay(),
+                    timeText));
+        }
+
+        table.setItems(FXCollections.observableArrayList(rows));
+
+        VBox root = new VBox(10, table);
         root.setPadding(new Insets(10));
 
-        dialog.setScene(buildStyledDialogScene(root, 650, 400));
+        dialog.setScene(buildStyledDialogScene(root, 900, 500));
         dialog.showAndWait();
     }
 
     public void showCourseSchedule(Course course) {
-        System.out.println("POPUP ÇAĞRILDI (COURSE)");
         if (course == null) {
             statusLabel.setText("No course selected.");
             return;
@@ -2015,44 +2016,85 @@ public class GUI extends Application {
         dialog.initOwner(primaryStage);
         dialog.initModality(Modality.APPLICATION_MODAL);
         applyAppIcon(dialog);
-        dialog.setTitle("Course Schedule - " + course.getCode());
+        dialog.setTitle("Exam Schedule - Course " + course.getCode());
 
-        TableView<Course> table = new TableView<>();
+        TableView<CourseRow> table = new TableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setPlaceholder(new Label("No exams to display."));
 
-        TableColumn<Course, String> c1 = new TableColumn<>("Course");
-        c1.setCellValueFactory(s -> new SimpleStringProperty(String.valueOf(course.getCode())));
+        TableColumn<CourseRow, String> colCourse = new TableColumn<>("Course");
+        colCourse.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().courseCode)));
 
-        TableColumn<Course, String> c2 = new TableColumn<>("Classroom");
-        c2.setCellValueFactory(s -> new SimpleStringProperty(
-                course.getExamClass() == null || course.getExamClass().isEmpty()
-                        ? "-"
-                        : course.getExamClass().stream()
-                                .map(r -> String.valueOf(r.getName()))
-                                .collect(Collectors.joining(", "))));
+        TableColumn<CourseRow, String> colRoom = new TableColumn<>("Classroom");
+        colRoom.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().room));
 
-        TableColumn<Course, String> c3 = new TableColumn<>("Time");
-        c3.setCellValueFactory(s -> new SimpleStringProperty(
-                course.getTimeOfExam() == null
-                        ? "-"
-                        : "Day " + course.getExamDay() + "|"
-                                + course.getTimeOfExam() + " - " + course.getEndOfExam()));
+        TableColumn<CourseRow, String> colCap = new TableColumn<>("Capacity");
+        colCap.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().capacity)));
 
-        TableColumn<Course, String> c4 = new TableColumn<>("Duration");
-        c4.setCellValueFactory(s -> new SimpleStringProperty(String.valueOf(course.getExamDuration())));
+        TableColumn<CourseRow, String> colDay = new TableColumn<>("Day");
+        colDay.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().day)));
 
-        table.getColumns().addAll(c1, c2, c3, c4);
-        table.getItems().add(course);
+        TableColumn<CourseRow, String> colTime = new TableColumn<>("Time");
+        colTime.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().time));
+
+        TableColumn<CourseRow, String> colStudents = new TableColumn<>("Students");
+        colStudents.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().students));
+
+        table.getColumns().addAll(colCourse, colRoom, colCap, colDay, colTime, colStudents);
+
+        ArrayList<CourseRow> rows = new ArrayList<>();
+
+        for (Course c : courses) {
+            if (c == null)
+                continue;
+            if (c.getCode() != course.getCode())
+                continue; // sadece seçilen ders
+
+            String timeText = (c.getTimeOfExam() == null)
+                    ? "-"
+                    : c.getTimeOfExam() + " - " + c.getEndOfExam();
+
+            String studentList = (c.getAttendees() == null)
+                    ? "-"
+                    : Arrays.stream(c.getAttendees())
+                            .filter(Objects::nonNull)
+                            .map(s -> String.valueOf(s.getID()))
+                            .collect(Collectors.joining(", "));
+
+            if (c.getExamClass() != null && !c.getExamClass().isEmpty()) {
+                for (Classroom r : c.getExamClass()) {
+                    if (r == null)
+                        continue;
+
+                    rows.add(new CourseRow(
+                            c.getCode(),
+                            String.valueOf(r.getName()),
+                            r.getCapacity(),
+                            c.getExamDay(),
+                            timeText,
+                            studentList));
+                }
+            } else {
+                rows.add(new CourseRow(
+                        c.getCode(),
+                        "-",
+                        0,
+                        c.getExamDay(),
+                        timeText,
+                        studentList));
+            }
+        }
+        table.setItems(FXCollections.observableArrayList(rows));
 
         VBox root = new VBox(10, table);
         root.setPadding(new Insets(10));
 
-        dialog.setScene(buildStyledDialogScene(root, 600, 350));
+        dialog.setScene(buildStyledDialogScene(root, 900, 500));
         dialog.showAndWait();
     }
 
     public void showClassroomSchedule(Classroom classroom) {
-        System.out.println("POPUP ÇAĞRILDI (CLASS)");
+        System.out.println("POPUP ÇAĞRILDI (CLASSROOM)");
         if (classroom == null) {
             statusLabel.setText("No classroom selected.");
             return;
@@ -2064,62 +2106,68 @@ public class GUI extends Application {
         applyAppIcon(dialog);
         dialog.setTitle("Schedule for Classroom " + classroom.getName());
 
-        TableView<Course> table = new TableView<>();
+        TableView<ClassroomRow> table = new TableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setPlaceholder(new Label("No scheduled exams found for this classroom."));
 
-        // Classroom column
-        TableColumn<Course, String> colRoom = new TableColumn<>("Classroom");
-        colRoom.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(classroom.getName())));
+        TableColumn<ClassroomRow, String> colRoom = new TableColumn<>("Classroom");
+        colRoom.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().room));
 
-        // Course column
-        TableColumn<Course, String> colCourse = new TableColumn<>("Course");
-        colCourse.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().getCode())));
+        TableColumn<ClassroomRow, String> colCap = new TableColumn<>("Capacity");
+        colCap.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().capacity)));
 
-        // Time column
-        TableColumn<Course, String> colTime = new TableColumn<>("Time");
-        colTime.setCellValueFactory(c -> {
-            Course course = c.getValue();
-            if (course.getTimeOfExam() == null)
-                return new SimpleStringProperty("-");
+        TableColumn<ClassroomRow, String> colCourse = new TableColumn<>("Course");
+        colCourse.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().courseCode)));
 
-            String text = "Day " + course.getExamDay()
-                    + " | " + course.getTimeOfExam()
-                    + " - " + course.getEndOfExam();
-            return new SimpleStringProperty(text);
-        });
+        TableColumn<ClassroomRow, String> colDay = new TableColumn<>("Day");
+        colDay.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().day)));
 
-        // Duration column
-        TableColumn<Course, String> colDuration = new TableColumn<>("Duration (min)");
-        colDuration.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().getExamDuration())));
+        TableColumn<ClassroomRow, String> colTime = new TableColumn<>("Time");
+        colTime.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().time));
 
-        // Students count column
-        TableColumn<Course, String> colStudents = new TableColumn<>("Students");
-        colStudents.setCellValueFactory(c -> new SimpleStringProperty(
-                c.getValue().getAttendees() == null ? "0" : String.valueOf(c.getValue().getAttendees().length)));
+        TableColumn<ClassroomRow, String> colStudents = new TableColumn<>("Students");
+        colStudents.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().students));
 
-        table.getColumns().addAll(colRoom, colCourse, colTime, colDuration, colStudents);
+        table.getColumns().addAll(colRoom, colCap, colCourse, colDay, colTime, colStudents);
 
-        // ---- ŞİMDİ BU CLASSROOM'DA OLAN SINAVLARI BUL ----
-        ArrayList<Course> classroomCourses = new ArrayList<>();
+        ArrayList<ClassroomRow> rows = new ArrayList<>();
 
         for (Course c : courses) {
-            if (c.getExamClass() != null) {
-                for (Classroom r : c.getExamClass()) {
-                    if (r != null && r.getName() == classroom.getName()) {
-                        classroomCourses.add(c);
-                        break;
-                    }
-                }
-            }
+            if (c == null || c.getExamClass() == null)
+                continue;
+
+            boolean usesRoom = c.getExamClass().stream()
+                    .anyMatch(r -> r != null && r.getName() == classroom.getName());
+
+            if (!usesRoom)
+                continue;
+
+            String timeText = (c.getTimeOfExam() == null)
+                    ? "-"
+                    : c.getTimeOfExam() + " - " + c.getEndOfExam();
+
+            String studentList = (c.getAttendees() == null)
+                    ? "-"
+                    : Arrays.stream(c.getAttendees())
+                            .filter(Objects::nonNull)
+                            .map(s -> String.valueOf(s.getID()))
+                            .collect(Collectors.joining(", "));
+
+            rows.add(new ClassroomRow(
+                    String.valueOf(classroom.getName()),
+                    classroom.getCapacity(),
+                    c.getCode(),
+                    c.getExamDay(),
+                    timeText,
+                    studentList));
         }
 
-        table.getItems().addAll(classroomCourses);
+        table.setItems(FXCollections.observableArrayList(rows));
 
         VBox root = new VBox(10, table);
         root.setPadding(new Insets(10));
 
-        dialog.setScene(buildStyledDialogScene(root, 650, 400));
+        dialog.setScene(buildStyledDialogScene(root, 900, 500));
         dialog.showAndWait();
     }
 
