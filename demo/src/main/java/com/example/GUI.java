@@ -878,10 +878,7 @@ public class GUI extends Application {
 
         table.getColumns().setAll(
                 tableColumn("Room", value -> String.valueOf(value.getName())),
-                tableColumn("Capacity", value -> String.valueOf(value.getCapacity())),
-                tableColumn("Booked", value -> String.valueOf(Arrays.stream(value.getBlocks())
-                        .filter(Objects::nonNull)
-                        .count())));
+                tableColumn("Capacity", value -> String.valueOf(value.getCapacity())));
 
         table.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.DELETE) {
