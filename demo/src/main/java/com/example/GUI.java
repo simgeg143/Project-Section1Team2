@@ -1191,6 +1191,11 @@ public class GUI extends Application {
     }
 
     private void deleteSelectedItem() {
+        if (!hasAnySelection()) {
+            clearAllImportedData();
+            return;
+        }
+
         Object selected = getSelectionFor(currentView);
         if (selected == null) {
             statusLabel.setText("Select a row to delete.");
@@ -1220,6 +1225,32 @@ public class GUI extends Application {
         } else {
             statusLabel.setText("Could not delete the selected entry.");
         }
+    }
+
+    private boolean hasAnySelection() {
+        return (coursesTable != null && coursesTable.getSelectionModel().getSelectedItem() != null)
+                || (classroomsTable != null && classroomsTable.getSelectionModel().getSelectedItem() != null)
+                || (studentsTable != null && studentsTable.getSelectionModel().getSelectedItem() != null);
+    }
+
+    private void clearAllImportedData() {
+        courses.clear();
+        classrooms.clear();
+        students.clear();
+        Main.setResults(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+
+        if (coursesTable != null) {
+            coursesTable.getSelectionModel().clearSelection();
+        }
+        if (classroomsTable != null) {
+            classroomsTable.getSelectionModel().clearSelection();
+        }
+        if (studentsTable != null) {
+            studentsTable.getSelectionModel().clearSelection();
+        }
+
+        refreshAllTables();
+        statusLabel.setText("All imported data deleted.");
     }
 
     private Object getSelectionFor(View view) {
