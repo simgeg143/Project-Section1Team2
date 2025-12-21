@@ -25,9 +25,11 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.ListView;
 import javafx.scene.control.DialogPane;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableRow;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
@@ -325,8 +327,7 @@ public class GUI extends Application {
         TableColumn<DayTimeRow, String> colCourse = new TableColumn<>("Course");
         colCourse.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().course)));
 
-        TableColumn<DayTimeRow, String> colStudents = new TableColumn<>("Students");
-        colStudents.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().students));
+        TableColumn<DayTimeRow, String> colStudents = scrollableColumn("Students", r -> r.students);
 
         table.getColumns().addAll(colDay, colTime, colRoom, colCourse, colStudents);
 
@@ -434,8 +435,7 @@ public class GUI extends Application {
         TableColumn<CourseRow, String> colTime = new TableColumn<>("Time");
         colTime.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().time));
 
-        TableColumn<CourseRow, String> colStudents = new TableColumn<>("Students");
-        colStudents.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().students));
+        TableColumn<CourseRow, String> colStudents = scrollableColumn("Students", r -> r.students);
 
         table.getColumns().addAll(colCourse, colRoom, colCap, colDay, colTime, colStudents);
 
@@ -533,8 +533,7 @@ public class GUI extends Application {
         TableColumn<ClassroomRow, String> colTime = new TableColumn<>("Time");
         colTime.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().time));
 
-        TableColumn<ClassroomRow, String> colStudents = new TableColumn<>("Students");
-        colStudents.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().students));
+        TableColumn<ClassroomRow, String> colStudents = scrollableColumn("Students", r -> r.students);
 
         table.getColumns().addAll(colRoom, colCap, colCourse, colDay, colTime, colStudents);
 
@@ -837,7 +836,7 @@ public class GUI extends Application {
                     int d = value.getExamDuration();
                     return d == 0 ? "-" : String.valueOf(d);
                 }),
-                tableColumn("Students", value -> {
+                scrollableColumn("Students", value -> {
                     Student[] arr = value.getAttendees();
                     if (arr == null || arr.length == 0)
                         return "-";
@@ -1200,6 +1199,48 @@ public class GUI extends Application {
     private <T> TableColumn<T, String> tableColumn(String title, Function<T, String> mapper) {
         TableColumn<T, String> col = new TableColumn<>(title);
         col.setCellValueFactory(cell -> new SimpleStringProperty(mapper.apply(cell.getValue())));
+        return col;
+    }
+
+    // Renders long text inside a scrollable cell so large student lists don't stretch the table
+    private <T> TableColumn<T, String> scrollableColumn(String title, Function<T, String> mapper) {
+        TableColumn<T, String> col = new TableColumn<>(title);
+        col.setPrefWidth(220);
+        col.setCellValueFactory(cell -> {
+            T value = cell.getValue();
+            String mapped = value == null ? "" : mapper.apply(value);
+            return new SimpleStringProperty(mapped == null ? "" : mapped);
+        });
+        col.setCellFactory(column -> new TableCell<>() {
+            private final Label label = new Label();
+            private final ScrollPane scroller = new ScrollPane(label);
+
+            {
+                label.setWrapText(true);
+                label.setMaxWidth(Double.MAX_VALUE);
+                scroller.setFitToWidth(true);
+                scroller.getStyleClass().add("students-scroll");
+                scroller.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+                scroller.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+                scroller.setPannable(true);
+                scroller.setPrefViewportHeight(48);
+                scroller.setMinHeight(48);
+                scroller.setMaxHeight(96);
+                scroller.setPadding(new Insets(2, 0, 2, 0));
+            }
+
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null || item.isBlank()) {
+                    setGraphic(null);
+                } else {
+                    label.setText(item);
+                    setGraphic(scroller);
+                }
+                setText(null);
+            }
+        });
         return col;
     }
 
@@ -2086,8 +2127,7 @@ public class GUI extends Application {
         TableColumn<CourseRow, String> colTime = new TableColumn<>("Time");
         colTime.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().time));
 
-        TableColumn<CourseRow, String> colStudents = new TableColumn<>("Students");
-        colStudents.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().students));
+        TableColumn<CourseRow, String> colStudents = scrollableColumn("Students", r -> r.students);
 
         table.getColumns().addAll(colCourse, colRoom, colCap, colDay, colTime, colStudents);
 
@@ -2174,8 +2214,7 @@ public class GUI extends Application {
         TableColumn<ClassroomRow, String> colTime = new TableColumn<>("Time");
         colTime.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().time));
 
-        TableColumn<ClassroomRow, String> colStudents = new TableColumn<>("Students");
-        colStudents.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().students));
+        TableColumn<ClassroomRow, String> colStudents = scrollableColumn("Students", r -> r.students);
 
         table.getColumns().addAll(colRoom, colCap, colCourse, colDay, colTime, colStudents);
 

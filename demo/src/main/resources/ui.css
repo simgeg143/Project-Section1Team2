@@ -282,6 +282,20 @@
     -fx-fill: #e6ecf8;
 }
 
+.students-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.students-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.students-scroll .scroll-bar {
+    -fx-background-color: transparent;
+}
+
 /* Scrollbar styling for tables */
 .scroll-bar:horizontal, .scroll-bar:vertical {
     -fx-background-color: transparent;
