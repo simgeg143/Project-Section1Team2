@@ -13,6 +13,8 @@ import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -36,6 +38,7 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -44,12 +47,14 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Popup;
+import javafx.stage.Screen;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
@@ -58,8 +63,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -69,6 +79,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GUI extends Application {
 
@@ -182,11 +194,216 @@ public class GUI extends Application {
                 exit);
 
         Menu helpMenu = new Menu("Help");
-        MenuItem about = new MenuItem("About");
+        MenuItem userGuide = new MenuItem("User Guide");
+        userGuide.setOnAction(event -> showHelpGuide());
 
-        helpMenu.getItems().add(about);
+        helpMenu.getItems().add(userGuide);
 
         return new MenuBar(fileMenu, helpMenu);
+    }
+
+    private void showHelpGuide() {
+        List<Image> helpImages;
+        try {
+            helpImages = loadHelpImages();
+        } catch (Exception ex) {
+            statusLabel.setText("Unable to load help images: " + ex.getMessage());
+            ex.printStackTrace();
+            return;
+        }
+        if (helpImages.isEmpty()) {
+            statusLabel.setText("Help images not found.");
+            return;
+        }
+
+        Stage dialog = new Stage();
+        dialog.initOwner(primaryStage);
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setTitle("Help & User Guide");
+        applyAppIcon(dialog);
+
+        ImageView imageView = new ImageView();
+        imageView.setPreserveRatio(true);
+        imageView.setSmooth(true);
+
+        StackPane imageHolder = new StackPane(imageView);
+        imageHolder.setAlignment(Pos.CENTER);
+        imageHolder.setStyle("-fx-background-color: #0c1224;");
+
+        ScrollPane scroller = new ScrollPane(imageHolder);
+        scroller.setFitToWidth(false);
+        scroller.setFitToHeight(false);
+        scroller.setPannable(true);
+        scroller.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scroller.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scroller.setPadding(Insets.EMPTY);
+        scroller.setStyle("-fx-background-color: #0c1224; -fx-padding: 0;");
+
+        Label pageLabel = new Label();
+        pageLabel.setMinWidth(140);
+        Button prev = new Button("\u2190 Previous");
+        Button next = new Button("Next \u2192");
+
+        HBox controls = new HBox(12, prev, pageLabel, next);
+        controls.setAlignment(Pos.CENTER);
+
+        final int[] index = { 0 };
+        Runnable updateFit = () -> {
+            if (dialog.getScene() == null) {
+                return;
+            }
+            double availW = Math.max(0, dialog.getScene().getWidth() - 24);
+            double availH = Math.max(0, dialog.getScene().getHeight() - controls.getHeight() - 24);
+            Image img = imageView.getImage();
+            if (img != null) {
+                double fitW = img.getWidth() > availW ? availW : 0;
+                double fitH = img.getHeight() > availH ? availH : 0;
+                // 0 means use intrinsic size in that dimension
+                imageView.setFitWidth(fitW);
+                imageView.setFitHeight(fitH);
+            }
+        };
+
+        Runnable render = () -> {
+            imageView.setImage(helpImages.get(index[0]));
+            pageLabel.setText("Page " + (index[0] + 1) + " of " + helpImages.size());
+            prev.setDisable(index[0] == 0);
+            next.setDisable(index[0] >= helpImages.size() - 1);
+            updateFit.run();
+        };
+        render.run();
+
+        prev.setOnAction(e -> {
+            if (index[0] > 0) {
+                index[0]--;
+                render.run();
+            }
+        });
+        next.setOnAction(e -> {
+            if (index[0] < helpImages.size() - 1) {
+                index[0]++;
+                render.run();
+            }
+        });
+
+        BorderPane root = new BorderPane(scroller);
+        root.setPadding(new Insets(0, 0, 10, 0));
+        root.setBottom(controls);
+        BorderPane.setMargin(controls, new Insets(8, 0, 0, 0));
+        BorderPane.setAlignment(controls, Pos.CENTER);
+
+        root.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.RIGHT) {
+                next.fire();
+            } else if (e.getCode() == KeyCode.LEFT) {
+                prev.fire();
+            }
+        });
+
+        double rawWidth = helpImages.get(0).getWidth() + 24;
+        double rawHeight = helpImages.get(0).getHeight() + 120;
+        Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
+        double maxWidth = Math.max(400, bounds.getWidth() * 0.75);
+        double maxHeight = Math.max(500, bounds.getHeight() * 0.85);
+        double targetWidth = Math.min(rawWidth, maxWidth);
+        double desiredHeight = Math.max(rawHeight, targetWidth * 1.1 + 120);
+        double targetHeight = Math.min(desiredHeight, maxHeight);
+
+        dialog.setScene(buildStyledDialogScene(root, targetWidth, targetHeight));
+        dialog.getScene().setOnKeyPressed(root.getOnKeyPressed());
+        dialog.getScene().widthProperty().addListener((obs, o, n) -> updateFit.run());
+        dialog.getScene().heightProperty().addListener((obs, o, n) -> updateFit.run());
+        dialog.setOnShown(e -> root.requestFocus());
+        dialog.showAndWait();
+    }
+
+    private List<Image> loadHelpImages() {
+        List<String> folders = List.of(
+                "Exam Scheduler \u2013 Help & User Guide",
+                "Exam Scheduler - Help & User Guide");
+        LinkedHashMap<Integer, Image> collected = new LinkedHashMap<>();
+
+        // Load from file system (IDE/dev) and keep highest priority first
+        for (String folder : folders) {
+            addImagesFromPaths(loadHelpImagesFromFileSystem(folder), collected);
+        }
+
+        // Fallback: load from classpath
+        String[] filePatterns = {
+                "Exam Scheduler \u2013 Help & User Guide (2)-%d.png",
+                "Exam Scheduler - Help & User Guide (2)-%d.png",
+                "%d.png" };
+        for (int i = 1; i <= 30; i++) { // scan a generous range
+            for (String folder : folders) {
+                for (String pattern : filePatterns) {
+                    String fileName = String.format(pattern, i);
+                    String resourcePath = "/" + folder + "/" + fileName;
+                    try (InputStream stream = GUI.class.getResourceAsStream(resourcePath)) {
+                        if (stream != null) {
+                            collected.putIfAbsent(i, new Image(stream));
+                            break;
+                        }
+                    } catch (IOException ignored) {
+                    }
+                }
+                if (collected.containsKey(i)) {
+                    break;
+                }
+            }
+        }
+
+        return collected.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
+    }
+
+    private List<Path> loadHelpImagesFromFileSystem(String folder) {
+        Path dir = Paths.get("demo", "src", "main", "resources", folder);
+        if (!Files.isDirectory(dir)) {
+            return List.of();
+        }
+        try (var stream = Files.list(dir)) {
+            return stream
+                    .filter(p -> p.getFileName().toString().toLowerCase().endsWith(".png"))
+                    .sorted(Comparator.comparingInt(this::extractImageIndex))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            return List.of();
+        }
+    }
+
+    private void addImagesFromPaths(List<Path> paths, Map<Integer, Image> collector) {
+        for (Path p : paths) {
+            int idx = extractImageIndex(p);
+            if (idx == Integer.MAX_VALUE || collector.containsKey(idx)) {
+                continue;
+            }
+            Image img = imageFromPath(p);
+            if (img != null) {
+                collector.put(idx, img);
+            }
+        }
+    }
+
+    private Image imageFromPath(Path path) {
+        try (InputStream stream = Files.newInputStream(path)) {
+            return new Image(stream);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    private int extractImageIndex(Path path) {
+        String name = path.getFileName().toString();
+        Matcher m = Pattern.compile("(\\d+)(?:\\.png)$").matcher(name);
+        if (m.find()) {
+            try {
+                return Integer.parseInt(m.group(1));
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return Integer.MAX_VALUE;
     }
 
     private void exportAllData() {
@@ -245,6 +462,7 @@ public class GUI extends Application {
         }
     }
 
+
     private VBox buildNavigationPanel() {
         Label navTitle = new Label("Actions");
         Button editButton = new Button("Edit");
@@ -255,7 +473,7 @@ public class GUI extends Application {
 
         Label searchLabel = new Label("Search");
         searchField = new TextField();
-        Button dayTimeButton = new Button("Day – Time Exam Schedule");
+        Button dayTimeButton = new Button("Day - Time Exam Schedule");
         dayTimeButton.setMaxWidth(Double.MAX_VALUE);
         dayTimeButton.setOnAction(e -> showDayTimeSchedule());
 
@@ -267,10 +485,10 @@ public class GUI extends Application {
                 return;
             }
 
-            File file = chooseSaveFile("Export Day – Time Schedule");
+            File file = chooseSaveFile("Export Day - Time Schedule");
             if (file != null) {
                 FileManager.exportDayTimeSchedule(new ArrayList<>(courses), file.getAbsolutePath());
-                statusLabel.setText("Day–Time schedule exported to: " + file.getName());
+                statusLabel.setText("Day-Time schedule exported to: " + file.getName());
             }
         });
 
